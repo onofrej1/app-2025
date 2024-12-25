@@ -1,0 +1,74 @@
+https://stackoverflow.com/questions/34546272/cannot-find-module-bcrypt
+
+
+{/*<FormMultiSelect
+              label={field.label}
+              name={name}
+              errors={errors}
+              value={value}
+              onChange={onChange}
+              textField={field.textField!}
+              options={field.options! as MultiSelectOption[]}
+              //ref={ref}
+            />*/}
+
+
+            export type State =
+  | {
+    status: "success";
+    message: string;
+    redirect?: string;    
+  }
+  | {
+    status: "error";
+    message: string;
+    errors?: Array<{
+      path: string;
+      message: string;
+    }>;
+  }
+  | null;
+
+export async function submitForm(
+  fields: FormField[],
+  formSchema: FormSchema,
+  action: (...args : any[]) => any,
+  actionParams: any,
+  prevState: State | null,
+  formData: FormData,
+): Promise<State> {
+  let response;
+  try {
+    const data: { [key: string]: any } = {};
+    fields.forEach((field) => {      
+        data[field.name] = field.type === 'm2m' ? formData.getAll(field.name) : formData.get(field.name);      
+    });
+    const validation = rules[formSchema];
+    const parsedData = validation ? validation.parse(data) : data;
+
+    response = await action(...actionParams, parsedData);
+  } catch (e) {
+    console.log('An error occured saving form data:', e);
+
+    if (e instanceof ZodError) {
+      return parseValidationError(e);
+    }
+    return {
+      status: "error",
+      message: "Something went wrong. Please try again.",
+    };
+  }
+
+  if (response) {
+    return {
+      status: "success",
+      message: "Done.",
+      redirect: response.redirect      
+    };
+  }
+
+  return {
+    status: "success",
+    message: "Done.",
+  };
+}
