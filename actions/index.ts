@@ -49,13 +49,10 @@ export async function updateResource(resource: Resource, parsedData: any) {
         where: { id: Number(id) }
       }
       await prismaQuery(resource.model, 'update', args);
-      console.log(data);
-      console.log(data[field.name]);
       const values = data[field.name].filter(Boolean).map((value: any) => ({ id: value }));
       if (values) {
         data[field.name] = { connect: values };
       }
-      console.log(data);
     }
   }
   const args: any = {
@@ -93,8 +90,8 @@ export async function registerUser(data: RegisterUserType) {
     },
   });
 
-  if (exist) {
-    throw new Error("Email already exists");
+  if (exist) {    
+    return { error: { path: "email", message: 'Email already exists' } };
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);

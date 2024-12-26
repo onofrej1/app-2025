@@ -7,7 +7,6 @@ import { z } from "zod";
 });*/
 
 const RegisterUser = z.object({
-  //id: z.string().optional(),
   name: z.string().trim().min(4),
   email: z.string().email(),
   password: z.string().min(1)
@@ -19,12 +18,12 @@ const LoginUser = z.object({
 });
 
 const CreateOrEditCategory = z.object({
-  id: z.string().optional(),
+  id: z.number().optional(),
   name: z.string().trim().min(4)
 });
 
 const CreateOrEditPost = z.object({
-  id: z.string().optional(),
+  id: z.number().optional(),
   title: z.string().trim().min(4),
   content: z.string().min(1),
   authorId: z.string().min(1, 'Author field is required'),

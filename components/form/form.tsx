@@ -1,8 +1,7 @@
 "use client";
-import { Controller, FieldPath, useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
-import { JSX, startTransition, useActionState, useRef } from "react";
+import { JSX } from "react";
 import { FormField, MultiSelectOption } from "@/resources/resources.types";
 import { FormSchema } from "@/validation";
 import rules from "@/validation";
@@ -13,7 +12,6 @@ import { MultiSelect } from "@/components/form/multi-select";
 import FormCheckbox from "@/components/form/checkbox";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { validateForm, ValidationResult } from "@/utils/validate";
 
 export interface DefaultFormData {
   [key: string]: any;
@@ -58,66 +56,40 @@ export default function Form({
   render,
 }: FormProps) {
   const { replace } = useRouter();
-
   const validationRules = rules[validation];
 
   const {
     register,
-    formState: { isValid, errors },
+    formState: { isValid, errors, isLoading },
     setError,
-    clearErrors,
     control,
-    handleSubmit
+    handleSubmit,
   } = useForm({
-    mode: "onSubmit",
+    //mode: "onSubmit",
     resolver: zodResolver(validationRules),
     defaultValues: data,
   });
 
-  const [error, submitAction, pending] = useActionState(
-    async (previousState: any, formData: FormData) => {
-      clearErrors();
-      console.log(formData);
-      const validationResult: ValidationResult = validateForm(
-        fields,
-        validation,
-        formData
-      );
-
-      if (validationResult.status && validationResult.status === "error") {
-        validationResult.errors?.forEach((error) => {
-          setError(error.path as FieldPath<FormValues>, {
-            message: error.message,
-          });
+  const submitForm = async (formData: unknown) => {
+    try {
+      const data: actionResult = await action(formData);
+      if (data.message) {
+        toast(data.message);
+      }
+      if (data.error) {
+        setError(data.error.path, {
+          message: data.error.message,
         });
+      }
+      if (data.redirect) {
+        replace(data.redirect);
         return;
       }
-      try {
-        const submitResult: actionResult = await action(validationResult.data);
-
-        if (submitResult.message) {
-          toast(submitResult.message);
-        }
-        if (submitResult.error) {
-          setError(submitResult.error.path, {
-            message: submitResult.error.message,
-          });
-        }
-        if (submitResult.redirect) {
-          replace(submitResult.redirect);
-          return;
-        }
-      } catch (e) {
-        console.log(e);
-        // todo parse, log error message
-        return "An error occured";
-      }
-    },
-    null
-  );
-  if (error) {
-    toast(error);
-  }
+    } catch (e) {
+      console.log(e);
+      return "An error occured";
+    }
+  };
 
   const renderField = (field: FormField) => (
     <>
@@ -185,22 +157,25 @@ export default function Form({
           control={control}
           name={field.name}
           render={({ field: { onChange, value, name } }) => {
-            console.log(value);
-            return <MultiSelect
-              name={name}
-              options={field.options! as MultiSelectOption[]}
-              onValueChange={(v) => {
-                console.log(v);
-                onChange(v);
-              }}
-              defaultValue={value}
-              placeholder="Select frameworks"
-              variant="inverted"
-              animation={2}
-              maxCount={3}
-            />
-            }
-          }
+            const selectValue =
+              value && value.length > 0
+                ? value.map((v: any) => (v.id ? v.id : v))
+                : [];
+            return (
+              <MultiSelect
+                name={name}
+                options={field.options! as MultiSelectOption[]}
+                onValueChange={(v) => {
+                  onChange(v);
+                }}
+                defaultValue={selectValue}
+                placeholder="Select frameworks"
+                variant="inverted"
+                animation={2}
+                maxCount={3}
+              />
+            );
+          }}
         />
       )}
     </>
@@ -214,7 +189,7 @@ export default function Form({
   if (render) {
     const renderContent = render({
       fields: fieldsToRender,
-      formState: { isValid, pending },
+      formState: { isValid, pending: isLoading },
     });
     return <>{renderContent}</>;
   }
@@ -223,22 +198,10 @@ export default function Form({
   const restMessages = Object.keys(errors).filter(
     (e) => !fieldNames.includes(e)
   );
-  const formRef = useRef<HTMLFormElement>(null);
-  
+
   return (
     <>
-      <form
-      //ref={formRef}
-      action={submitAction}
-      /*onSubmit={(evt) => {
-        evt.preventDefault();
-        handleSubmit(() => {
-          //startTransition(() => submitAction(new FormData(formRef.current!)));
-          console.log(new FormData(formRef.current!));
-          submitAction(new FormData(formRef.current!));
-        })(evt);
-      }}*/
-      >
+      <form onSubmit={handleSubmit(submitForm)}>
         {fields.map((field) => (
           <div className="mb-3" key={field.name}>
             {renderField(field)}
@@ -254,13 +217,13 @@ export default function Form({
         {buttons?.length ? (
           <div className="flex space-x-2">
             {buttons.map((Button, index) => (
-              <Button key={index} isValid={isValid} pending={pending} />
+              <Button key={index} isValid={isValid} pending={isLoading} />
             ))}
           </div>
         ) : (
-          <Button type="submit" className="mt-3">
+          <button type="submit" className="mt-3">
             Submit
-          </Button>
+          </button>
         )}
       </form>
     </>
