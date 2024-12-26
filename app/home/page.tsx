@@ -1,14 +1,18 @@
-//"use client"
+"use client"
 //import { useSession } from 'next-auth/react';
 import { auth } from '@/auth';
+import FileUploader from '@/components/form/fileUpload';
 import React from 'react'
 
-export default async function Home() {
+export default function Home() {
   //const { data: session } = useSession();
-  const session = await auth();
-  console.log(session);
+  /*const session = await auth();
+  console.log(session);*/
   
   return (
-    <div>Home</div>
+    <div>Home
+
+      <FileUploader />
+    </div>
   )
 }

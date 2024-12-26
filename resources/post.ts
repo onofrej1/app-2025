@@ -47,7 +47,11 @@ const post: Resource = {
   list: [
     { name: 'id', header: 'Id'},
     { name: 'title', header: 'Title' },
-    { name: 'content', header: 'Content' },
+    { 
+      name: 'content', 
+      header: 'Content', 
+      renderRow: 'contentRow',
+    },
   ],
 };
 export { post };

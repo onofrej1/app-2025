@@ -1,4 +1,4 @@
-import Table, { TableAction, TableData } from "@/components/table/table";
+import Table from "@/components/table/table";
 import { resources } from "@/resources";
 import { redirect } from "next/navigation";
 import TableFilter from "@/components/table/table-filter";
@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { prismaQuery } from "@/db";
 import TablePagination from "@/components/table/table-pagination";
-import { revalidatePath } from "next/cache";
+import TableActions from "@/components/table/table-actions";
 
 interface ResourceProps {
   params: {
@@ -62,33 +62,6 @@ export default async function Resource({
   };
   const data = await prismaQuery(resource.model, "findMany", args);
 
-  const actions: TableAction[] = [
-    {
-      label: "Edit",
-      icon: "edit",
-      action: async (data: TableData) => {
-        "use server";
-        return { redirect: `${resourcePath}/${data.id}/edit` };
-      },
-    },
-    {
-      label: "Delete",
-      icon: "delete",
-      variant: "outline",
-      action: async (data: TableData) => {
-        "use server";
-        const args = {
-          where: {
-            id: Number(data.id),
-          },
-        };
-        await prismaQuery(resource.model, "delete", args);
-        revalidatePath(resourcePath);
-        return { message: "Item successfully deleted." };
-      },
-    },
-  ];
-
   const createResource = async () => {
     "use server";
     redirect(`${resourcePath}/add`);
@@ -108,7 +81,7 @@ export default async function Resource({
         <Table
           headers={resource.list}
           data={data}
-          actions={actions}
+          actions={<TableActions />}
           totalRows={totalRows}
         />
         <TablePagination totalRows={totalRows} />

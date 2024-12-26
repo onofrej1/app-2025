@@ -5,32 +5,37 @@ import { signIn } from "@/auth";
 import { RegisterUserType } from "@/validation";
 import { prismaQuery } from "@/db";
 import { Resource } from "@/resources/resources.types";
-import { redirect } from 'next/navigation'
- 
+import { redirect } from "next/navigation";
+import path from "node:path";
+import { writeFile } from "fs/promises";
+import { revalidatePath } from "next/cache";
+
 export async function navigate(path: string) {
   return redirect(path);
 }
 
-export async function addResource (resource: Resource, data: any) {
+export async function addResource(resource: Resource, data: any) {
   const form = resource.form;
-  form.forEach(field => {
-    if (field.type === 'fk') {
+  form.forEach((field) => {
+    if (field.type === "fk") {
       data[field.relation!] = { connect: { id: data[field.name] } };
       delete data[field.name!];
     }
 
-    if (field.type === 'm2m') {
-      const values = data[field.name].filter(Boolean).map((value: any) => ({ id: value }));
+    if (field.type === "m2m") {
+      const values = data[field.name]
+        .filter(Boolean)
+        .map((value: any) => ({ id: value }));
       if (values) {
         data[field.name] = { connect: values };
       }
     }
   });
   const args: any = {
-    data
+    data,
   };
 
-  await prismaQuery(resource.model, 'create', args);
+  await prismaQuery(resource.model, "create", args);
 
   return { redirect: `/resource/${resource.resource}` };
 }
@@ -39,17 +44,19 @@ export async function updateResource(resource: Resource, parsedData: any) {
   const { id, ...data } = parsedData;
   const form = resource.form;
   for (const field of form) {
-    if (field.type === 'fk') {
+    if (field.type === "fk") {
       data[field.relation!] = { connect: { id: data[field.name] } };
       delete data[field.name!];
     }
-    if (field.type === 'm2m') {
+    if (field.type === "m2m") {
       const args: any = {
         data: { [field.name]: { set: [] } },
-        where: { id: Number(id) }
-      }
-      await prismaQuery(resource.model, 'update', args);
-      const values = data[field.name].filter(Boolean).map((value: any) => ({ id: value }));
+        where: { id: Number(id) },
+      };
+      await prismaQuery(resource.model, "update", args);
+      const values = data[field.name]
+        .filter(Boolean)
+        .map((value: any) => ({ id: value }));
       if (values) {
         data[field.name] = { connect: values };
       }
@@ -57,11 +64,23 @@ export async function updateResource(resource: Resource, parsedData: any) {
   }
   const args: any = {
     data,
-    where: { id: Number(id) }
-  }
-  await prismaQuery(resource.model, 'update', args);
+    where: { id: Number(id) },
+  };
+  await prismaQuery(resource.model, "update", args);
 
   return { redirect: `/resource/${resource.resource}` };
+}
+
+export async function DeleteResource(resource: Resource, id: string) {
+  const args = {
+    where: {
+      id: Number(id),
+    },
+  };
+  await prismaQuery(resource.model, "delete", args);
+  const resourcePath = `resources/${resource.resource}`;
+  revalidatePath(resourcePath);
+  return { message: "Item successfully deleted." };
 }
 
 export async function SignInUser(credentials: {
@@ -90,12 +109,12 @@ export async function registerUser(data: RegisterUserType) {
     },
   });
 
-  if (exist) {    
-    return { error: { path: "email", message: 'Email already exists' } };
+  if (exist) {
+    return { error: { path: "email", message: "Email already exists" } };
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  
+
   try {
     await prisma.user.create({
       data: {
@@ -109,4 +128,23 @@ export async function registerUser(data: RegisterUserType) {
     console.log(e);
   }
   return { redirect: "/home" };
+}
+
+export async function uploadFile(formData: FormData, uploadDir = null) {
+  const file = formData.get("myFile") as File;
+  const dir = uploadDir ?? "public/assets/";
+  console.log(file);
+  if (!file) {
+    throw new Error("No files received");
+  }
+
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const filename = file.name.replaceAll(" ", "_");
+
+  try {
+    await writeFile(path.join(process.cwd(), dir + filename), buffer);
+  } catch (error) {
+    console.log("Error occured ", error);
+    throw error;
+  }
 }

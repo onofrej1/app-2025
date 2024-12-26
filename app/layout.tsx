@@ -5,6 +5,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { SessionProvider } from "next-auth/react";
+import Alert from "@/components/common/alert";
 
 /*const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,6 +37,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </main>
           </SidebarProvider>
           <Toaster />
+          <Alert />
         </body>
       </html>
     </SessionProvider>
