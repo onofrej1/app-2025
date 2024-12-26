@@ -34,6 +34,7 @@ export function validateForm(
 ): ValidationResult {
   try {
     const data: { [key: string]: any } = {};
+    console.log(formData);
     fields.forEach((field) => {
       data[field.name] =
         field.type === "m2m"

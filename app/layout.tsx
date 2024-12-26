@@ -28,9 +28,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <body>
           <SidebarProvider>
             <AppSidebar />
-            <main>
+            <main className="flex-1">
               <SidebarTrigger />
-              <div className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+              <div className="p-6">
                 {children}
               </div>
             </main>

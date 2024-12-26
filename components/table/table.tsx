@@ -30,7 +30,8 @@ export interface TableHeader {
 }
 
 interface TableActionResponse {
-  message: string;
+  message?: string;
+  redirect?: string;
 }
 
 export interface TableAction {
@@ -61,7 +62,7 @@ const getSortIcon = (direction: string | null) => {
 
 export default function TableComponent({ headers, data, actions }: TableProps) {
   const searchParams = useSearchParams();
-  const { replace } = useRouter();
+  const { replace, push } = useRouter();
   const pathname = usePathname();
 
   const sortTable = (column: string) => {
@@ -121,6 +122,9 @@ export default function TableComponent({ headers, data, actions }: TableProps) {
                         const response = await action.action(row);
                         if (response && response.message) {
                           toast(response.message);
+                        }
+                        if (response && response.redirect) {
+                          push(response.redirect);
                         }
                       }}
                       key={action.label} 

@@ -1,4 +1,11 @@
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react"
+import {
+  Calendar,
+  Home,
+  Inbox,
+  LucideIcon,
+  Search,
+  Settings,
+} from "lucide-react";
 
 import {
   Sidebar,
@@ -9,10 +16,16 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
+import { resources } from "@/resources";
 
-// Menu items.
-const items = [
+type MenuItem = {
+  title: string;
+  url: string;
+  icon?: LucideIcon;
+};
+
+const items: MenuItem[] = [
   {
     title: "Home",
     url: "#",
@@ -23,7 +36,7 @@ const items = [
     url: "#",
     icon: Inbox,
   },
-  {
+  /*{
     title: "Calendar",
     url: "#",
     icon: Calendar,
@@ -37,8 +50,16 @@ const items = [
     title: "Settings",
     url: "#",
     icon: Settings,
-  },
-]
+  },*/
+];
+resources.map((resource) => {
+  //const resource = resources[key];
+  items.push({
+    title: resource.name,
+    url: "/resource/" + resource.resource,
+    //icon: resource.menuIcon
+  });
+});
 
 export function AppSidebar() {
   return (
@@ -52,7 +73,7 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <a href={item.url}>
-                      <item.icon />
+                      {item.icon && <item.icon />}
                       <span>{item.title}</span>
                     </a>
                   </SidebarMenuButton>
@@ -63,5 +84,5 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
-  )
+  );
 }

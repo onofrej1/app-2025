@@ -2,7 +2,7 @@
 import { Controller, FieldPath, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { JSX, useActionState } from "react";
+import { JSX, startTransition, useActionState, useRef } from "react";
 import { FormField, MultiSelectOption } from "@/resources/resources.types";
 import { FormSchema } from "@/validation";
 import rules from "@/validation";
@@ -67,6 +67,7 @@ export default function Form({
     setError,
     clearErrors,
     control,
+    handleSubmit
   } = useForm({
     mode: "onSubmit",
     resolver: zodResolver(validationRules),
@@ -76,6 +77,7 @@ export default function Form({
   const [error, submitAction, pending] = useActionState(
     async (previousState: any, formData: FormData) => {
       clearErrors();
+      console.log(formData);
       const validationResult: ValidationResult = validateForm(
         fields,
         validation,
@@ -182,17 +184,23 @@ export default function Form({
         <Controller
           control={control}
           name={field.name}
-          render={({ field: { onChange, value, name, ref } }) => (
-            <MultiSelect
+          render={({ field: { onChange, value, name } }) => {
+            console.log(value);
+            return <MultiSelect
+              name={name}
               options={field.options! as MultiSelectOption[]}
-              onValueChange={onChange}
+              onValueChange={(v) => {
+                console.log(v);
+                onChange(v);
+              }}
               defaultValue={value}
               placeholder="Select frameworks"
               variant="inverted"
               animation={2}
               maxCount={3}
             />
-          )}
+            }
+          }
         />
       )}
     </>
@@ -215,10 +223,22 @@ export default function Form({
   const restMessages = Object.keys(errors).filter(
     (e) => !fieldNames.includes(e)
   );
-
+  const formRef = useRef<HTMLFormElement>(null);
+  
   return (
     <>
-      <form action={submitAction}>
+      <form
+      //ref={formRef}
+      action={submitAction}
+      /*onSubmit={(evt) => {
+        evt.preventDefault();
+        handleSubmit(() => {
+          //startTransition(() => submitAction(new FormData(formRef.current!)));
+          console.log(new FormData(formRef.current!));
+          submitAction(new FormData(formRef.current!));
+        })(evt);
+      }}*/
+      >
         {fields.map((field) => (
           <div className="mb-3" key={field.name}>
             {renderField(field)}
