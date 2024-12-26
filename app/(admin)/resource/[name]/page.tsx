@@ -1,7 +1,7 @@
 import Table, { TableAction, TableData } from "@/components/table/table";
 import { resources } from "@/resources";
 import { redirect } from "next/navigation";
-//import TableFilter from "@/components/table-filter";
+import TableFilter from "@/components/table/table-filter";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { prismaQuery } from "@/db";
@@ -97,7 +97,7 @@ export default async function Resource({
   return (
     <div className="w-full">
       <div className="flex flex-row items-end justify-between">
-        {/*<TableFilter />*/}
+        <TableFilter />
         <form action={createResource}>
           <Button variant="outline" type="submit">
             <Plus className="h-5 w-5" /> Add item

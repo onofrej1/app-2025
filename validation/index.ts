@@ -38,6 +38,7 @@ export type FormSchema =
  | 'RegisterUser'
  | 'CreateOrEditPost'
  | 'CreateOrEditCategory'
+ | 'FilterResource'
 
 const FilterResource = z.object({
   id: z.string().optional(),
