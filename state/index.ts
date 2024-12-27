@@ -5,7 +5,7 @@ type CallbackFunction = (...args: any[]) => void;
 
 interface DialogProps {
     isOpen: boolean;
-    onOpen: () => void;
+    open: () => void;
     onClose: () => void;
     title: string;
     description: string;
@@ -22,15 +22,15 @@ interface DialogProps {
 
 export const useDialog = create<DialogProps>((set) => ({
     isOpen: false,
-    onOpen: () => set({ isOpen: true }),
+    open: () => set({ isOpen: true }),
     onClose: () => set({ isOpen: false }),
     title: '',
     setTitle: (title) => set({ title }),
     description: '',
     setDescription: (description) => set({ description }),
-    cancelLabel: '',
+    cancelLabel: 'Cancel',
     setCancelLabel: (cancelLabel) => set({ cancelLabel }),
-    confirmLabel: '',
+    confirmLabel: 'Confirm',
     setConfirmLabel: (confirmLabel) => set({ confirmLabel }),
     action: () => {},
     setAction: (action: CallbackFunction) => set({ action }),

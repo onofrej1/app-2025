@@ -13,7 +13,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
   providers: [
-    Google,
+    Google({
+      profile(profile) {
+        //return { role: profile.role ?? "user" };
+        return { role: "user" };
+      }
+    }),
     Credentials({
       credentials: {
         email: {},
@@ -44,4 +49,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
+  callbacks: {
+    /*jwt({ token, user }) {
+      if(user) token.role = user.role
+      return token
+    },*/
+    session({ session, user }) {
+      session.user.role = user.role
+      return session
+    }
+  }
 });
+
+/*declare module "next-auth" {
+  interface Session {
+    accessToken?: string
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    accessToken?: string
+  }
+}*/

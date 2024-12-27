@@ -17,14 +17,13 @@ export const Icons: Record<IconNames, LucideIcon> = {
 };
 
 export default function TableActions({ row }: { row?: any }) {
-  const { onOpen, setTitle, setConfirmLabel, setCancelLabel, setAction } =
-    useDialog();
+  const { open: openDialog, setTitle, setAction } = useDialog();
   const { push } = useRouter();
   const params = useParams();
   const resource = resources.find((r) => r.resource === params.name);
   const deleteRow = DeleteResource.bind(null, resource, row.id);
 
-  const resourcePath = `resources/${resource.resource}`; //"categories";
+  const resourcePath = `/resource/${resource.resource}`;
 
   const actions: TableAction[] = [
     {
@@ -41,9 +40,7 @@ export default function TableActions({ row }: { row?: any }) {
       action: (data: TableData) => {
         setAction(deleteRow);
         setTitle("Really delete row with id: " + data.id);
-        setCancelLabel("Cancel");
-        setConfirmLabel("Yes delete");
-        onOpen();
+        openDialog();
       },
     },
   ];

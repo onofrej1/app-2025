@@ -9,6 +9,31 @@ import { redirect } from "next/navigation";
 import path from "node:path";
 import { writeFile } from "fs/promises";
 import { revalidatePath } from "next/cache";
+const fs = require("fs").promises;
+
+export async function deleteFile(file: { path: string; name: string }) {
+  const f = await fs.readFile(file.path + "/" + file.name);
+  if (f) {
+    //fs.unlink(file.path + "/" + file.name);
+  }
+  return "done";
+}
+
+export async function readDirectory() {
+  const f = await fs.readdir("./public/assets", { withFileTypes: true });
+  const data = [];
+  for (const file of f) {
+    const f = await fs.readFile(file.path + "/" + file.name, {
+      encoding: "base64",
+    });
+    data.push({
+      src: f,
+      name: file.name,
+      path: file.path,
+    });
+  }
+  return data;
+}
 
 export async function navigate(path: string) {
   return redirect(path);
@@ -130,21 +155,24 @@ export async function registerUser(data: RegisterUserType) {
   return { redirect: "/home" };
 }
 
-export async function uploadFile(formData: FormData, uploadDir = null) {
-  const file = formData.get("myFile") as File;
+export async function uploadFiles(formData: FormData, uploadDir = null) {
+  const count = formData.get("count");
   const dir = uploadDir ?? "public/assets/";
-  console.log(file);
-  if (!file) {
-    throw new Error("No files received");
-  }
 
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const filename = file.name.replaceAll(" ", "_");
+  for (let i = 0; i < Number(count); i++) {
+    const file = formData.get("file-" + i) as File;
+    if (!file) {
+      throw new Error("An error occured");
+    }
 
-  try {
-    await writeFile(path.join(process.cwd(), dir + filename), buffer);
-  } catch (error) {
-    console.log("Error occured ", error);
-    throw error;
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const filename = file.name.replaceAll(" ", "_");
+
+    try {
+      await writeFile(path.join(process.cwd(), dir + filename), buffer);
+    } catch (error) {
+      console.log("Error occured ", error);
+      throw error;
+    }
   }
 }

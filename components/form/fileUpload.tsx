@@ -1,4 +1,4 @@
-import { uploadFile } from "@/actions";
+import { uploadFiles } from "@/actions";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/flowbite/button";
 
@@ -24,23 +24,23 @@ export default function FileUploader() {
   const onFileUpload = () => {
     const formData = new FormData();
     formData.append("myFile", file, file.name);
-    uploadFile(formData);
+    uploadFiles(formData);
   };
 
   return (
     <div>
       {file ? (
         <div>
-          <h2>File Details:</h2>
+          {/*<h2>File Details:</h2>
           <p>File Name: {file.name}</p>
           <p>File Type: {file.type}</p>
           <div>
             Last Modified:
-            {new Date(file.lastModified).toDateString()}
-            <div className="w-[80%] mx-auto">
-              <img src={URL.createObjectURL(file)} width={"100%"} />
-            </div>
+            {new Date(file.lastModified).toDateString()}*/}
+          <div className="grid grid-cols-3">
+            <img src={URL.createObjectURL(file)} width={"100%"} />
           </div>
+
           <Button onClick={onFileUpload}>Upload!</Button>
         </div>
       ) : (
