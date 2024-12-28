@@ -1,0 +1,16 @@
+.groups {
+  .group {    
+    min-height: 16rem;    
+
+    .title {
+      color: white;
+      padding: 0;
+      margin-top: 0;
+    }
+  }
+
+  .group-over {
+    /*background-color: red;*/
+    border: 2px dashed #ccc;
+  }
+}

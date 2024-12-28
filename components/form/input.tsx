@@ -10,13 +10,14 @@ import { renderError } from './utils';
 interface InputProps {
   label?: string,
   type: string,
-  name: string,
+  name: string,  
   onChange?: any,
   errors: FieldErrors<DefaultFormData>,
   register: UseFormRegister<DefaultFormData>,
 }
 
-export default function FormInput({ label, name, type, onChange, errors, register }: InputProps) {
+export default function FormInput(props: InputProps) {
+  const { label, name, type, onChange, errors, register } = props;
   if (type === 'hidden') {
     return <Input type='hidden' {...register(name)} placeholder={label} />;
   }

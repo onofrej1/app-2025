@@ -12,6 +12,8 @@ import { MultiSelect } from "@/components/form/multi-select";
 import FormCheckbox from "@/components/form/checkbox";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { DatePicker } from "./datepicker";
+import { Button } from "../ui/button";
 
 export interface DefaultFormData {
   [key: string]: any;
@@ -64,11 +66,14 @@ export default function Form({
     setError,
     control,
     handleSubmit,
+    getValues
   } = useForm({
     //mode: "onSubmit",
     resolver: zodResolver(validationRules),
     defaultValues: data,
   });
+  console.log(getValues());
+  console.log(errors);
 
   const submitForm = async (formData: unknown) => {
     try {
@@ -118,6 +123,30 @@ export default function Form({
                 errors={errors}
                 checked={!!value}
                 onChange={(value) => {
+                  onChange(value);
+                  if (field.onChange) {
+                    field.onChange(value);
+                  }
+                }}
+              />
+            )}
+          />
+        </>
+      )}
+
+      {field.type === "datepicker" && (
+        <>
+          <Controller
+            control={control}
+            name={field.name}
+            render={({ field: { onChange, value, name } }) => (
+              <DatePicker
+                label={field.label}
+                name={name}
+                value={value}
+                errors={errors}
+                onChange={(value) => {
+                  console.log(value);
                   onChange(value);
                   if (field.onChange) {
                     field.onChange(value);
@@ -221,9 +250,9 @@ export default function Form({
             ))}
           </div>
         ) : (
-          <button type="submit" className="mt-3">
+          <Button type="submit" className="mt-3">
             Submit
-          </button>
+          </Button>
         )}
       </form>
     </>

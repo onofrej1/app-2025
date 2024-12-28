@@ -9,6 +9,7 @@ import { redirect } from "next/navigation";
 import path from "node:path";
 import { writeFile } from "fs/promises";
 import { revalidatePath } from "next/cache";
+import { Prisma, Task } from "@prisma/client";
 const fs = require("fs").promises;
 
 export async function deleteFile(file: { path: string; name: string }) {
@@ -123,6 +124,21 @@ export async function SignInUser(credentials: {
       return { error: { path: "login", message: error.code } };
     }
   }
+}
+
+export async function getTasks() {
+  const tasks = await prisma.task.findMany();
+  return tasks;
+}
+
+export async function updateTask(task: Task) {
+  const tasks = await prisma.task.update({
+    where: {
+      id: task.id,
+    },
+    data: task,
+  });
+  return tasks;
 }
 
 export async function registerUser(data: RegisterUserType) {

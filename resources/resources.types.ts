@@ -83,6 +83,7 @@ type Resource = {
 type PrismaModel = 
 | "user"
 | "post"
-| "category";
+| "category"
+| "task";
 
 export type { Resource, FormField, PrismaModel };

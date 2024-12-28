@@ -33,11 +33,22 @@ const CreateOrEditPost = z.object({
     //.transform((val) => val ? val : []),
 });
 
+const CreateOrEditTask = z.object({
+  id: z.number().optional(),
+  title: z.string().trim().min(4),
+  description: z.string().min(1),
+  status: z.string().min(1),
+  order: z.coerce.number(),
+  deadline: z.date(), //(z.coerce.date()),
+  userId: z.string().min(1, 'User field is required'),  
+});
+
 export type FormSchema = 
  | 'LoginUser'
  | 'RegisterUser'
  | 'CreateOrEditPost'
  | 'CreateOrEditCategory'
+ | 'CreateOrEditTask'
  | 'FilterResource'
 
 const FilterResource = z.object({
@@ -49,7 +60,7 @@ const rules = {
   LoginUser,
   CreateOrEditPost,
   CreateOrEditCategory,
-
+  CreateOrEditTask,
   //UpdateUserProfile,
   FilterResource: z.any(),
 };

@@ -54,6 +54,20 @@ export default function FileUploader() {
     await fetchFiles();
   };
 
+  const handleDrop = (event) => {
+    console.log('drop');
+    event.preventDefault();
+    console.log(event);
+    //console.log(event.originalEvent.dataTransfer.files);
+    const droppedFiles = event.dataTransfer.files;
+    console.log(droppedFiles);
+    if (droppedFiles.length > 0) {
+      const newFiles = Array.from(droppedFiles);
+      handleUploadFiles(newFiles);
+      //setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+    }
+  };
+
   const fetchFiles = async () => {
     const data = await readDirectory();
     setFiles(data);
@@ -88,7 +102,8 @@ export default function FileUploader() {
       )}
       <>
         Choose a file...
-        <div className="flex items-center justify-center w-full">
+        <div className="flex items-center justify-center w-full"  onDrop={handleDrop}
+        onDragOver={(event) => event.preventDefault()}>
           <label
             htmlFor="dropzone-file"
             className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
