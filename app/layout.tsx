@@ -6,6 +6,7 @@ import { AppSidebar } from "@/components/layout/app-sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { SessionProvider } from "next-auth/react";
 import Alert from "@/components/common/alert";
+import { ReactQueryProvider } from "./react-query-provider";
 
 /*const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,23 +25,23 @@ export const metadata: Metadata = {
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <SessionProvider>
-      <html lang="en">
-        <body>
-          <SidebarProvider>
-            <AppSidebar />
-            <main className="flex-1">
-              <SidebarTrigger />
-              <div className="p-6">
-                {children}
-              </div>
-            </main>
-          </SidebarProvider>
-          <Toaster />
-          <Alert />
-        </body>
-      </html>
-    </SessionProvider>
+    <ReactQueryProvider>
+      <SessionProvider>
+        <html lang="en">
+          <body>
+            <SidebarProvider>
+              <AppSidebar />
+              <main className="flex-1">
+                <SidebarTrigger />
+                <div className="p-6">{children}</div>
+              </main>
+            </SidebarProvider>
+            <Toaster />
+            <Alert />
+          </body>
+        </html>
+      </SessionProvider>
+    </ReactQueryProvider>
   );
 }
 

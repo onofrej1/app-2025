@@ -31,7 +31,7 @@ export default function Login() {
     }
   ];
 
-  /*const render: FormRenderFunc = ({ fields }) => 
+  /*const render: FormRender = ({ fields }) => 
     <>
       {fields.name}
       {fields.password}

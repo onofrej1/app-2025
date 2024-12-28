@@ -1,7 +1,8 @@
 "use client";
+import { getEvents } from "@/actions";
 import {
   CalendarCurrentDate,
-  CalendarDayView,
+  CalendarDayView,  
   CalendarMonthView,
   CalendarNextTrigger,
   CalendarPrevTrigger,
@@ -11,39 +12,41 @@ import {
   CalendarYearView,
 } from "@/components/calendar";
 import { Calendar } from "@/components/calendar";
+import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import React from "react";
 
 export default function CalendarPage() {
+  const { data: events = [], isFetching } = useQuery({
+    queryKey: ['events'],
+    queryFn: getEvents,    
+    select: (data) => {
+      const items = data.map(e => ({
+        id: e.id.toString(),
+        start: e.startDate,
+        end: e.endDate,
+        title: e.name,
+        color: 'pink' as const
+      }))
+      return items;
+    }
+  });
+  if (isFetching) return null;
+
   return (
     <Calendar
       onClick={(e) => console.log(e)}
       onEventClick={(e) => console.log(e)}
-      events={[
-        {
-          id: "1",
-          start: new Date("2024-12-26T09:30:00Z"),
-          end: new Date("2024-12-26T14:30:00Z"),
-          title: "event A",
-          color: "pink",
-        },
-        {
-          id: "2",
-          start: new Date("2024-12-26T10:00:00Z"),
-          end: new Date("2024-12-26T10:30:00Z"),
-          title: "event B",
-          color: "blue",
-        },
-      ]}
+      events={events}
     >
       <div className="h-dvh py-6 flex flex-col">
         <div className="flex px-6 items-center gap-2 mb-6">
-          <CalendarViewTrigger
+          {/*<CalendarViewTrigger
             className="aria-[current=true]:bg-accent"
             view="day"
           >
             Day
-          </CalendarViewTrigger>
+          </CalendarViewTrigger>*/}
           <CalendarViewTrigger
             view="week"
             className="aria-[current=true]:bg-accent"
@@ -56,12 +59,12 @@ export default function CalendarPage() {
           >
             Month
           </CalendarViewTrigger>
-          <CalendarViewTrigger
+          {/*<CalendarViewTrigger
             view="year"
             className="aria-[current=true]:bg-accent"
           >
             Year
-          </CalendarViewTrigger>
+          </CalendarViewTrigger>*/}
 
           <span className="flex-1" />
 

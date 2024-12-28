@@ -1,0 +1,32 @@
+'use client'
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
+
+export default function MarkdownPage() {
+  const params = useParams();
+  const markdownText = `
+# React Markdown Example
+
+- Some **text**
+- Some other text
+
+## Subtitle
+
+### Additional info
+
+This is a [link](https://github.com/remarkjs/react-markdown)
+`;
+  console.log(params);
+  const filename = params.slug;
+  console.log(filename);
+  const [markdownContent, setMarkdownContent] = useState("");
+
+  useEffect(() => {
+    fetch(`./../../posts/${filename}.md`)
+      .then((response) => response.text())
+      .then((text) => setMarkdownContent(text));
+  }, [filename]);
+
+  return <ReactMarkdown>{markdownContent}</ReactMarkdown>;
+}

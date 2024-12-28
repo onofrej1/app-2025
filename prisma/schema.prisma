@@ -73,36 +73,45 @@ model Event {
   description   String?
   color         String?
   status        String?
-  venue         String?
-  maxAttendees  Int?      
+  maxAttendees  Int?
   startDate     DateTime
   endDate       DateTime
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
   createdBy     User            @relation(fields: [createdById], references: [id])
   createdById   String
+  venue         Venue           @relation(fields: [venueId], references: [id])
+  venueId       Int
   EventSchedule EventSchedule[]
   Attendee      Attendee[]
 }
 
+model Venue {
+  id       Int     @id @default(autoincrement())
+  locality String?
+  Event    Event[]
+}
+
 model Attendee {
-  id      Int    @id @default(autoincrement())
-  user    User   @relation(fields: [userId], references: [id])
-  userId  String
-  event   Event  @relation(fields: [eventId], references: [id])
-  eventId Int
+  id       Int     @id @default(autoincrement())
+  user     User    @relation(fields: [userId], references: [id])
+  userId   String
+  event    Event   @relation(fields: [eventId], references: [id])
+  eventId  Int
+  status   String?
+  attended Boolean
 }
 
 model EventSchedule {
-  id          Int      @id @default(autoincrement())
-  activity    String
-  location    String?
-  startTime   DateTime
-  endTime     DateTime
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  event       Event    @relation(fields: [eventId], references: [id])
-  eventId     Int
+  id        Int      @id @default(autoincrement())
+  activity  String
+  location  String?
+  startTime DateTime
+  endTime   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  event     Event    @relation(fields: [eventId], references: [id])
+  eventId   Int
 }
 
 model Category {

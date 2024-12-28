@@ -1,4 +1,4 @@
-import Table from "@/components/table/table";
+import Table from "@/components/resources/table";
 import { resources } from "@/resources";
 import { redirect } from "next/navigation";
 import TableFilter from "@/components/table/table-filter";
@@ -78,12 +78,7 @@ export default async function Resource({
         </form>
       </div>
       <div>
-        <Table
-          headers={resource.list}
-          data={data}
-          actions={<TableActions />}
-          totalRows={totalRows}
-        />
+        <Table resource={resource.resource} data={data} totalRows={totalRows} />
         <TablePagination totalRows={totalRows} />
       </div>
     </div>

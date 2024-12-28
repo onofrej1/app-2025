@@ -1,3 +1,4 @@
+import { TableData } from '@/components/table/table';
 import { Button } from '@/components/ui/button';
 import { Resource } from '@/resources/resources.types';
 
@@ -9,6 +10,7 @@ const event: Resource = {
   rules: 'CreateOrEditEvent',
   menuIcon: '',
   renderForm: ({ fields, formState }) => {
+    console.log(formState);
     return (
       <div className='flex flex-col gap-4'>
         {fields.name}
@@ -54,7 +56,7 @@ const event: Resource = {
     { name: 'id', header: 'Id'},
     { name: 'name', header: 'Name' },
     { name: 'description', header: 'Description' },
-    { name: 'status', header: 'Status' },
+    { name: 'status', header: 'Status', render: (row: TableData) => <span>{row.status}</span> },
   ],
 };
 export { event };

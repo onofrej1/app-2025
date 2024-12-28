@@ -1,4 +1,4 @@
-import { FormRenderFunc } from "@/components/form/form";
+import { FormRender } from "@/components/form/form";
 import { TableHeader } from "@/components/table/table";
 import { FormSchema } from "@/validation";
 import { JSX } from "react";
@@ -75,7 +75,7 @@ type Resource = {
     rules: FormSchema,
     menuIcon: string;
     form: FormField[];
-    renderForm?: FormRenderFunc;
+    renderForm?: FormRender;
     //renderForm: keyof typeof renderForm;
     list: TableHeader[];
     filter: DataFilter[];

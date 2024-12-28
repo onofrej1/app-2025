@@ -15,7 +15,6 @@ import {
   ArrowUpWideNarrow,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import render from "@/resources/render/tableRow";
 import { JSX } from "react";
 import React from "react";
 
@@ -28,8 +27,7 @@ export interface TableData {
 export interface TableHeader {
   name: string;
   header: string;
-  renderRow?: keyof typeof render;
-  //render?: (field: any) => JSX.Element
+  render?: (data: TableData) => JSX.Element;
 }
 
 interface TableActionResponse {
@@ -122,9 +120,7 @@ export default function TableComponent({
             <TableRow key={index}>
               {headers.map((header) => (
                 <TableCell key={header.name}>
-                  {header.renderRow
-                    ? render[header.renderRow](row)
-                    : row[header.name]}
+                  {header.render ? header.render(row) : row[header.name]}
                 </TableCell>
               ))}
               <TableCell className="py-0">

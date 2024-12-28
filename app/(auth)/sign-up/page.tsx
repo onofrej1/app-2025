@@ -19,7 +19,7 @@ export default function Register() {
     }
   ];
 
-  /*const render: FormRenderFunc = ({ fields }) => 
+  /*const render: FormRender = ({ fields }) => 
     <>
       {fields.name}
       {fields.password}

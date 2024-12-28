@@ -35,7 +35,7 @@ export type actionResult = {
   error?: { path: string; message: string };
 };
 
-export type FormRenderFunc = (props: {
+export type FormRender = (props: {
   fields: Record<string, JSX.Element>;
   formState: FormState;
 }) => JSX.Element;
@@ -46,7 +46,7 @@ interface FormProps {
   data?: DefaultFormData;
   action: (...args: any[]) => any;
   buttons?: ((props: FormState) => JSX.Element)[];
-  render?: FormRenderFunc;
+  render?: FormRender;
 }
 
 export default function Form({

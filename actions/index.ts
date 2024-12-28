@@ -127,8 +127,11 @@ export async function SignInUser(credentials: {
 }
 
 export async function getTasks() {
-  const tasks = await prisma.task.findMany();
-  return tasks;
+  return prisma.task.findMany();  
+}
+
+export async function getEvents() {
+  return prisma.event.findMany();  
 }
 
 export async function updateTask(task: Task) {
