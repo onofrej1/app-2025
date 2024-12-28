@@ -66,7 +66,7 @@ export default function Form({
     setError,
     control,
     handleSubmit,
-    getValues
+    getValues,
   } = useForm({
     //mode: "onSubmit",
     resolver: zodResolver(validationRules),
@@ -220,7 +220,11 @@ export default function Form({
       fields: fieldsToRender,
       formState: { isValid, pending: isLoading },
     });
-    return <>{renderContent}</>;
+    return (
+      <>
+        <form onSubmit={handleSubmit(submitForm)}>{renderContent}</form>
+      </>
+    );
   }
 
   const fieldNames = fields.map((f) => f.name);

@@ -15,8 +15,8 @@ import {
   ArrowUpWideNarrow,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import render from "@/resources/render";
-import { JSX, ReactNode } from "react";
+import render from "@/resources/render/tableRow";
+import { JSX } from "react";
 import React from "react";
 
 type IconNames = "edit" | "delete";

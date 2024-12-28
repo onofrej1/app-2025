@@ -1,3 +1,4 @@
+import { FormRenderFunc } from "@/components/form/form";
 import { TableHeader } from "@/components/table/table";
 import { FormSchema } from "@/validation";
 import { JSX } from "react";
@@ -28,12 +29,12 @@ interface FormField {
     textField?: string;
     className?: string;
     options?: SelectOption[] | MultiSelectOption[];
+    render?: any;
 
     /*value?: string;
     helperText?: string;
     rows?: number;    
     
-    render?: any;
     color?: string;
     inputType?: string;
     fullWidth?: boolean;
@@ -74,6 +75,8 @@ type Resource = {
     rules: FormSchema,
     menuIcon: string;
     form: FormField[];
+    renderForm?: FormRenderFunc;
+    //renderForm: keyof typeof renderForm;
     list: TableHeader[];
     filter: DataFilter[];
     canAddItem?: boolean;
@@ -84,6 +87,9 @@ type PrismaModel =
 | "user"
 | "post"
 | "category"
-| "task";
+| "task"
+| "event"
+| "attendee"
+| "eventSchedule";
 
 export type { Resource, FormField, PrismaModel };

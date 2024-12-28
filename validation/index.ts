@@ -43,12 +43,26 @@ const CreateOrEditTask = z.object({
   userId: z.string().min(1, 'User field is required'),  
 });
 
+const CreateOrEditEvent = z.object({
+  id: z.number().optional(),
+  name: z.string().trim().min(4),
+  description: z.string().min(1),
+  status: z.string().min(1),
+  color: z.string().min(1),
+  venue: z.string().min(1),
+  maxAttendees: z.coerce.number(),
+  startDate: z.date(),
+  endDate: z.date(),
+  createdById: z.string().min(1, 'User field is required'),  
+});
+
 export type FormSchema = 
  | 'LoginUser'
  | 'RegisterUser'
  | 'CreateOrEditPost'
  | 'CreateOrEditCategory'
  | 'CreateOrEditTask'
+ | 'CreateOrEditEvent'
  | 'FilterResource'
 
 const FilterResource = z.object({
@@ -61,6 +75,7 @@ const rules = {
   CreateOrEditPost,
   CreateOrEditCategory,
   CreateOrEditTask,
+  CreateOrEditEvent,
   //UpdateUserProfile,
   FilterResource: z.any(),
 };

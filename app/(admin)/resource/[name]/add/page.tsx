@@ -1,5 +1,4 @@
-import { addResource } from "@/actions";
-import Form from "@/components/form/form";
+import ResourceForm from "@/components/resources/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { prismaQuery } from '@/db'
 import { resources } from "@/resources";
@@ -27,8 +26,6 @@ export default async function CreateResource({ params }: ResourceProps) {
     }
   }
 
-  const action = addResource.bind(null, resource);
-
   return (
     <>
       <Card>
@@ -36,15 +33,9 @@ export default async function CreateResource({ params }: ResourceProps) {
           <CardTitle>Add new item</CardTitle>
         </CardHeader>
         <CardContent>
-          <Form
-            fields={resource.form}
-            validation={resource.rules}
-            data={{}}
-            action={action}
-          />
+          <ResourceForm resource={resource.resource} fields={form} />
         </CardContent>
       </Card>
-
     </>
   );
 }

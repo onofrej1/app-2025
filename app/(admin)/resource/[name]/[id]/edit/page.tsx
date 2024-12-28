@@ -1,5 +1,4 @@
-import { updateResource } from "@/actions";
-import Form from "@/components/form/form";
+import ResourceForm from "@/components/resources/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { prismaQuery } from "@/db";
 import { resources } from "@/resources";
@@ -33,7 +32,6 @@ export default async function EditResource({ params }: ResourceProps) {
 
   const args = { where: { id: Number(id) }, include };
   const data = await prismaQuery(resource.model, 'findUnique', args);
-  const action = updateResource.bind(null, resource);
 
   return (
     <>
@@ -42,12 +40,7 @@ export default async function EditResource({ params }: ResourceProps) {
           <CardTitle>Edit item</CardTitle>
         </CardHeader>
         <CardContent>
-          <Form
-            fields={form}
-            validation={resource.rules}
-            data={data}
-            action={action}
-          />
+          <ResourceForm resource={resource.resource} fields={form} data={data} />
         </CardContent>
       </Card>
     </>
