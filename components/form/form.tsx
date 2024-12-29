@@ -78,6 +78,9 @@ export default function Form({
   const submitForm = async (formData: unknown) => {
     try {
       const data: actionResult = await action(formData);
+      if (!data) {
+        return;
+      }
       if (data.message) {
         toast(data.message);
       }

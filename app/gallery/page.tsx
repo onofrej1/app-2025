@@ -1,5 +1,4 @@
 "use client";
-import { ImageGallery } from "react-image-grid-gallery";
 import "./gallery.css";
 
 function shuffleArray(array: any[]) {

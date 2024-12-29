@@ -43,6 +43,10 @@ const CreateOrEditTask = z.object({
   userId: z.string().min(1, 'User field is required'),  
 });
 
+const SendFriendRequest = z.object({  
+  email: z.string().email(),
+});
+
 const CreateOrEditEvent = z.object({
   id: z.number().optional(),
   name: z.string().trim().min(4),
@@ -64,6 +68,7 @@ export type FormSchema =
  | 'CreateOrEditTask'
  | 'CreateOrEditEvent'
  | 'FilterResource'
+ | 'SendFriendRequest'
 
 const FilterResource = z.object({
   id: z.string().optional(),
@@ -78,6 +83,7 @@ const rules = {
   CreateOrEditEvent,
   //UpdateUserProfile,
   FilterResource: z.any(),
+  SendFriendRequest
 };
 
 export default rules;

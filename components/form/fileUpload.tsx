@@ -6,7 +6,8 @@ export default function FileUploader() {
   const [file, setFile] = useState<File>();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file_ = event.target.files[0];
+    const file_ = event.target.files ? event.target.files[0] : null;
+    if (!file_) return;
 
     if (file_.type !== "image/png" && file_.type !== "image/jpeg") {
       alert("Please select a PNG or JPEG image file.");
@@ -23,8 +24,10 @@ export default function FileUploader() {
 
   const onFileUpload = () => {
     const formData = new FormData();
-    formData.append("myFile", file, file.name);
-    uploadFiles(formData);
+    if (file) {
+      formData.append("myFile", file, file.name);
+      uploadFiles(formData);
+    }
   };
 
   return (

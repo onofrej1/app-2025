@@ -32,18 +32,25 @@ model User {
   password      String?
   image         String?
   role          String? // new column
+  status        String? // new column
   accounts      Account[]
   sessions      Session[]
   // Optional for WebAuthn support
   Authenticator Authenticator[]
 
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  posts     Post[]
-  profile   Profile?
-  Task      Task[]
-  Event     Event[]
-  Attendee  Attendee[]
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+  posts                  Post[]
+  profile                Profile?
+  tasks                  Task[]
+  events                 Event[]
+  attendees              Attendee[]
+  user1contacts          Contact[]            @relation("user1")
+  user2contacts          Contact[]            @relation("user2")
+  conversationMembers    ConversationMember[]
+  messages               Message[]
+  friendRequestSenders   FriendRequest[]      @relation("sender")
+  friendRequestReceivers FriendRequest[]      @relation("receiver")
 }
 
 model Post {
@@ -68,28 +75,28 @@ model Task {
 }
 
 model Event {
-  id            Int             @id @default(autoincrement())
-  name          String
-  description   String?
-  color         String?
-  status        String?
-  maxAttendees  Int?
-  startDate     DateTime
-  endDate       DateTime
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  createdBy     User            @relation(fields: [createdById], references: [id])
-  createdById   String
-  venue         Venue           @relation(fields: [venueId], references: [id])
-  venueId       Int
-  EventSchedule EventSchedule[]
-  Attendee      Attendee[]
+  id             Int             @id @default(autoincrement())
+  name           String
+  description    String?
+  color          String?
+  status         String?
+  maxAttendees   Int?
+  startDate      DateTime
+  endDate        DateTime
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  createdBy      User            @relation(fields: [createdById], references: [id])
+  createdById    String
+  venue          Venue           @relation(fields: [venueId], references: [id])
+  venueId        Int
+  eventSchedules EventSchedule[]
+  attendees      Attendee[]
 }
 
 model Venue {
   id       Int     @id @default(autoincrement())
   locality String?
-  Event    Event[]
+  events   Event[]
 }
 
 model Attendee {
@@ -184,4 +191,55 @@ enum Status {
   TODO
   INPROGRESS
   DONE
+}
+
+model Contact {
+  id             Int          @id @default(autoincrement())
+  user1          User         @relation("user1", fields: [user1Id], references: [id])
+  user1Id        String
+  user2          User         @relation("user2", fields: [user2Id], references: [id])
+  user2Id        String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  conversationId Int
+}
+
+model Conversation {
+  id                  Int                  @id @default(autoincrement())
+  name                String
+  isGroup             Boolean
+  lastMessage         Message              @relation("lastMessage", fields: [lastMessageId], references: [id])
+  lastMessageId       Int
+  contacts            Contact[]
+  conversationMembers ConversationMember[]
+  messages            Message[]
+}
+
+model ConversationMember {
+  id                Int          @id @default(autoincrement())
+  user              User         @relation(fields: [userId], references: [id])
+  userId            String
+  conversation      Conversation @relation(fields: [conversationId], references: [id])
+  conversationId    Int
+  lastSeenMessage   Message      @relation(fields: [lastSeenMessageId], references: [id])
+  lastSeenMessageId Int
+}
+
+model Message {
+  id                  Int                  @id @default(autoincrement())
+  sender              User                 @relation(fields: [senderId], references: [id])
+  senderId            String
+  conversation        Conversation         @relation(fields: [conversationId], references: [id])
+  conversationId      Int
+  content             String
+  type                String
+  conversationMembers ConversationMember[]
+  lastConversations   Conversation[]       @relation("lastMessage")
+}
+
+model FriendRequest {
+  id         Int    @id @default(autoincrement())
+  sender     User   @relation("sender", fields: [senderId], references: [id])
+  senderId   String
+  receiver   User   @relation("receiver", fields: [receiverId], references: [id])
+  receiverId String
 }

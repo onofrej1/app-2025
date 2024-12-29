@@ -10,7 +10,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useDialog } from "@/state";
+import { useAlert } from "@/state";
 
 export default function Alert() {
   const {
@@ -22,7 +22,7 @@ export default function Alert() {
     cancelLabel,
     confirmLabel,
     action,
-  } = useDialog();
+  } = useAlert();
 
   const confirm = () => {
     action();

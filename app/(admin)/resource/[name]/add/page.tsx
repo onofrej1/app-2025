@@ -4,11 +4,11 @@ import { prismaQuery } from '@/db'
 import { resources } from "@/resources";
 
 interface ResourceProps {
-  params: {
+  params: Promise<{
     name: string;
     id: string;
-  },
-  searchParams: { [key: string]: string }
+  }>,
+  searchParams: Promise<{ [key: string]: string }>
 }
 
 export default async function CreateResource({ params }: ResourceProps) {

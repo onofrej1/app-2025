@@ -9,7 +9,9 @@ import { redirect } from "next/navigation";
 import path from "node:path";
 import { writeFile } from "fs/promises";
 import { revalidatePath } from "next/cache";
-import { Prisma, Task } from "@prisma/client";
+import { Task, User } from "@prisma/client";
+import { signOut } from "@/auth"
+
 const fs = require("fs").promises;
 
 export async function deleteFile(file: { path: string; name: string }) {
@@ -118,7 +120,7 @@ export async function SignInUser(credentials: {
       ...credentials,
       redirect: false,
     });
-    return { redirect: "/home" };
+    return { redirect: "/profile" };
   } catch (error: any) {
     if (error.code) {
       return { error: { path: "login", message: error.code } };
@@ -142,6 +144,25 @@ export async function updateTask(task: Task) {
     data: task,
   });
   return tasks;
+}
+
+export async function SignUserOut() {
+  signOut();
+}
+
+export async function sendFriendRequest(fromUser: User, email: string) {
+  const user = await prisma.user.findFirst({ where: { email }});
+  if (!user) {
+    return { message: 'User with this email not found'};
+  }
+  const result = await prisma.friendRequest.create({    
+    data: {
+      sender: { connect: { id: fromUser.id }},
+      receiver: { connect: { id: fromUser.id }},
+      //receiver: fromUser,
+    },
+  });
+  return result;
 }
 
 export async function registerUser(data: RegisterUserType) {
@@ -171,7 +192,7 @@ export async function registerUser(data: RegisterUserType) {
   } catch (e) {
     console.log(e);
   }
-  return { redirect: "/home" };
+  return { redirect: "/profile" };
 }
 
 export async function uploadFiles(formData: FormData, uploadDir = null) {

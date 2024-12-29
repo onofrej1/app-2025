@@ -6,11 +6,11 @@ import { XIcon } from "lucide-react";
 const MAX_COUNT = 5;
 
 export default function FileUploader() {
-  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [fileLimit, setFileLimit] = useState(false);
-  const [files, setFiles] = useState([]);
+  const [files, setFiles] = useState<{ src: string; name: string; path: string }[]>([]);
 
-  const handleUploadFiles = (files) => {
+  const handleUploadFiles = (files: File[]) => {
     const uploaded = [...uploadedFiles];
     let limitExceeded = false;
     files.some((file) => {
@@ -28,7 +28,7 @@ export default function FileUploader() {
     if (!limitExceeded) setUploadedFiles(uploaded);
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = (e: any) => {
     const chosenFiles = Array.prototype.slice.call(e.target.files);
     handleUploadFiles(chosenFiles);
   };
@@ -54,10 +54,10 @@ export default function FileUploader() {
     await fetchFiles();
   };
 
-  const handleDrop = (event) => {
-    console.log('drop');
+  const handleDrop = (event: any) => {
+    //console.log('drop');
     event.preventDefault();
-    console.log(event);
+    //console.log(event);
     //console.log(event.originalEvent.dataTransfer.files);
     const droppedFiles = event.dataTransfer.files;
     console.log(droppedFiles);

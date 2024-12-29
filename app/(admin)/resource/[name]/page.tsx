@@ -6,13 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { prismaQuery } from "@/db";
 import TablePagination from "@/components/table/table-pagination";
-import TableActions from "@/components/table/table-actions";
 
 interface ResourceProps {
-  params: {
+  params: Promise<{
     name: string;
-  };
-  searchParams: { [key: string]: string };
+  }>;
+  searchParams: Promise<{ [key: string]: string }>;
 }
 
 export default async function Resource({
