@@ -10,6 +10,7 @@ export default function Conversations() {
   const { data: conversations = [], isFetching } = useQuery({
     queryKey: ["conversations"],
     queryFn: getConversations,
+    refetchOnWindowFocus: false,
   });
   if (isFetching) return null;
   console.log(conversations);
@@ -20,10 +21,13 @@ export default function Conversations() {
         <div className="bg-slate-200 h-full p-3">
           {conversations.map((conversation) => {
             return (
-              <div key={conversation.id}>
-                <Button onClick={() => setConversationId(conversation.conversation.id)}>
+              <div key={conversation.id} className="mb-1">
+                <Button variant="ghost" onClick={() => setConversationId(conversation.conversation.id)}>
                   {conversation.user.name} - {conversation.user.email}
                 </Button>
+                <div className="pl-4">
+                  <small>{conversation.conversation.lastMessage?.content}</small>
+                </div>
               </div>
             );
           })}

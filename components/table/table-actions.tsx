@@ -6,7 +6,7 @@ import { useDialog } from "@/state";
 import { Button } from "../ui/button";
 import { LucideIcon, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { DeleteResource } from "@/actions";
+import { DeleteResource } from "@/actions/resources";
 import { resources } from "@/resources";
 
 type IconNames = "edit" | "delete";

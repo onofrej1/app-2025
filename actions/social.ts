@@ -133,7 +133,7 @@ export async function createMessage(conversationId: number, content: string, typ
   if (!loggedUser) {
     throw new Error("Unauthorized");
   }
-  return prisma.message.create({
+  const message = await prisma.message.create({
     data: {
       content,
       type,
@@ -153,6 +153,15 @@ export async function createMessage(conversationId: number, content: string, typ
       },
     },
   });
+  await prisma.conversation.update({
+    where: {
+      id: conversationId,
+    },
+    data: {
+      lastMessage: { connect: { id: message.id }}
+    }
+  })
+
 }
 
 export async function getConversations() {
@@ -191,8 +200,14 @@ export async function getConversations() {
           id: true,
           isGroup: true,
           name: true,
-          messages: {
+          lastMessage: {
             select: {
+              sender: true,
+              content: true,
+            }
+          },
+          messages: {
+            select: {              
               content: true,
               type: true,
               sender: {

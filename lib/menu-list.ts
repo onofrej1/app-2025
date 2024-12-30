@@ -83,6 +83,21 @@ export function getMenuList(pathname: string): Group[] {
       ]*/
     },
     {
+      groupLabel: "Contacts",
+      menus: [
+        {
+          href: "/conversations",
+          label: "Conversations",
+          icon: Users
+        },
+        {
+          href: "/account",
+          label: "Friend requests",
+          icon: Settings
+        }
+      ]
+    },
+    {
       groupLabel: "Settings",
       menus: [
         {

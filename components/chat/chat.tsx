@@ -2,13 +2,11 @@
 import { createMessage, getMessages } from "@/actions/social";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useEffect } from "react";
-import Form, { FormRender } from "../form/form";
-import { Button } from "../ui/button";
+import Form, { FormRender } from "@/components/form/form";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/utils";
 import { useSession } from "next-auth/react";
-import io from "socket.io-client";
-
-const socketIO = io("http://localhost:3000");
+import { socket } from "@/socket";
 
 interface ChatProps {
   conversationId: number;
@@ -21,39 +19,43 @@ export default function Chat(props: ChatProps) {
   const { data: messages = [], isFetching } = useQuery({
     queryKey: ["messages", conversationId],
     queryFn: () => getMessages(conversationId),
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
-    socketIO.on("connect", function () {
+    if (socket.connected) {
+      onConnect();
+    }
+
+    function onConnect() {
       console.log("Connected to WebSocket server");
-      socketIO.emit("join-conversation", conversationId);
-    });
+      socket.emit("join-chat", conversationId);
+    }
 
-    socketIO.on("message-received", (message) => {
-      // Handle incoming message
+    socket.on("connect", onConnect);
+
+    socket.on("message", (message) => {
       console.log("Received message:", message);
-      //queryClient.invalidateQueries({ queryKey: ["messages", conversationId]});
+      queryClient.invalidateQueries({ queryKey: ["messages", conversationId]});
     });
 
-    socketIO.on("disconnect", () => {
+    socket.on("disconnect", () => {
       console.log("Disconnected from WebSocket server");
     });
 
     return () => {
-      socketIO.off("connect");
-      socketIO.off("disconnect");
-      socketIO.off("message-received");
+      socket.off("connect");
+      socket.off("disconnect");
+      socket.off("message");
     };
   }, []);
 
   if (isFetching) return null;
-  console.log(session);
 
   const handleMessageSend = async (data: any) => {
-    console.log(data);
     await createMessage(conversationId, data.message);
-    socketIO.emit("message", conversationId);
     queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
+    socket.emit("message", conversationId);    
   };
 
   const renderForm: FormRender = ({ fields }) => {
@@ -65,14 +67,11 @@ export default function Chat(props: ChatProps) {
     );
   };
 
-  const fields = [{ name: "message", type: "text", label: "" }];
-
-  console.log("conversation id", conversationId);
-  console.log(messages);
+  const fields = [{ name: "message", type: "text", label: "" }];  
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 bg-red-200">
+      <div className="flex-1 bg-red-200 max-h-[600px] overflow-scroll">
         {messages.map((message) => {
           return (
             <div

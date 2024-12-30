@@ -6,9 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  //engineType = "library"
-  //engineType = "library"
-  //previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
@@ -189,7 +186,7 @@ model Authenticator {
 
 enum Status {
   TODO
-  INPROGRESS
+  IN_PROGRESS
   DONE
 }
 

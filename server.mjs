@@ -5,35 +5,30 @@ import { Server } from "socket.io";
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
 const port = 3000;
-// when using middleware `hostname` and `port` must be provided below
+
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
 
-const conversations = {};
-
 app.prepare().then(() => {
   const httpServer = createServer(handler);
-
   const io = new Server(httpServer);
 
   io.on("connection", (socket) => {
-    socket.on("join-conversation", (conversationId) => {
-      console.log("join-conversation:", conversationId);
-      socket.join('conversation_'+conversationId);
-      /*if (!conversations[conversationId]) {
-        console.log('add socket room');
-        conversations[conversationId] = conversationId;
-        socket.rooms.add('conversation:'+conversationId);
-      }*/
-      //socket.to('conversation:'+conversationId).emit('message-received');
+    console.log('server connected');
+
+    socket.on("join-chat", (chatId) => {
+      console.log("join-chat:", chatId);
+      socket.join('chat_'+chatId);      
     });
 
-    socket.on("message", (conversationId) => {
-      console.log("get message:", conversationId);
-
-      socket.to('conversation_'+conversationId).emit('message-received');
+    socket.on("disconnect", () => {
+      console.log('socket disconnect');
     });
-    // ...
+
+    socket.on("message", (chatId) => {
+      console.log("message:", chatId);
+      io.in('chat_'+chatId).emit('message');
+    });
   });
 
   httpServer
