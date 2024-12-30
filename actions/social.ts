@@ -2,6 +2,7 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/db/prisma";
+import { equal } from "assert";
 
 export async function sendFriendRequest(email: string) {
   const session = await auth();
@@ -33,33 +34,48 @@ export async function approveFriendRequest(id: number) {
     where: {
       id,
       receiver: {
-        id: loggedUser.id
-      }
+        id: loggedUser.id,
+      },
     },
     select: {
       receiver: true,
       sender: true,
-    }
+    },
   });
   if (!friendRequest) {
-    throw new Error('Unauthorized action');
+    throw new Error("Unauthorized action");
   }
   const conversation = await prisma.conversation.create({
     data: {
       isGroup: false,
     },
     select: {
-      id: true
-    }
-  })
+      id: true,
+    },
+  });
   await prisma.contact.create({
     data: {
-      user1: { connect: { id: friendRequest.sender.id }},
-      user2: { connect: { id: friendRequest.receiver.id }},
-      conversation: { connect: { id: conversation.id }}
-    }
+      user1: { connect: { id: friendRequest.sender.id } },
+      user2: { connect: { id: friendRequest.receiver.id } },
+      conversation: { connect: { id: conversation.id } },
+    },
   });
-  await prisma.friendRequest.delete({ where: { id }});
+
+  await prisma.conversationMember.create({
+    data: {
+      user: { connect: { id: friendRequest.sender.id } },
+      conversation: { connect: { id: conversation.id } },
+    },
+  });
+
+  await prisma.conversationMember.create({
+    data: {
+      user: { connect: { id: friendRequest.receiver.id } },
+      conversation: { connect: { id: conversation.id } },
+    },
+  });
+
+  await prisma.friendRequest.delete({ where: { id } });
 }
 
 export async function getFriendRequests() {
@@ -84,4 +100,91 @@ export async function getFriendRequests() {
       },
     },
   });
+}
+
+export async function getConversations() {
+  const session = await auth();
+  const loggedUser = session?.user;
+  if (!loggedUser) {
+    throw new Error("Unauthorized");
+  }
+  const loggedUserConversations = await prisma.conversationMember.findMany({
+    where: {
+      userId: loggedUser.id
+    },
+    select: {
+      conversationId: true,
+    }
+  });
+  return prisma.conversationMember.findMany({
+    where: {
+      conversationId: {
+        in: loggedUserConversations.map(c => c.conversationId),
+      },
+      userId: {
+        not: loggedUser.id,
+      }
+    },
+    select: {
+      id: true,
+      user: {
+        select: {
+          name: true,
+          email: true,
+        }
+      },
+      conversation: {
+        select: {
+          messages: {
+            select: {
+              content: true,
+              type: true,
+              sender: {
+                select: {
+                  name: true,
+                  email: true,
+                }
+              }
+            }
+          },
+        }
+      }
+    },
+  });
+  /*return prisma.contact.findMany({
+    where: {
+      OR: [
+        {
+          user1: {
+            id: loggedUser.id,
+          },
+          user2: {
+            id: loggedUser.id,
+          },
+        },
+      ],
+    },
+    include: {
+      conversation: {
+        select: {
+          id: true,
+          name: true,
+          isGroup: true,
+          lastMessage: {
+            select: {
+              id: true,
+              content: true,
+              type: true,
+              sender: {
+                select: {
+                  name: true,
+                  email: true,
+                }
+              }
+            },
+          },
+        },
+      },
+    },
+  });*/
 }
