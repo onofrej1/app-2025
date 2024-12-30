@@ -205,10 +205,10 @@ model Contact {
 
 model Conversation {
   id                  Int                  @id @default(autoincrement())
-  name                String
+  name                String?
   isGroup             Boolean
-  lastMessage         Message              @relation("lastMessage", fields: [lastMessageId], references: [id])
-  lastMessageId       Int
+  lastMessage         Message?              @relation("lastMessage", fields: [lastMessageId], references: [id])
+  lastMessageId       Int?
   contacts            Contact[]
   conversationMembers ConversationMember[]
   messages            Message[]

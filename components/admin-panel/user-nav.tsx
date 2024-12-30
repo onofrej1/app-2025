@@ -23,7 +23,7 @@ import {
 import { useDialog } from "@/state";
 import { FormField } from "@/resources/resources.types";
 import Form from "../form/form";
-import { getFriendRequests, sendFriendRequest } from "@/actions/social";
+import { approveFriendRequest, getFriendRequests, sendFriendRequest } from "@/actions/social";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 
@@ -40,6 +40,10 @@ export function UserNav() {
     sendFriendRequest(data.email);
     onClose();
     toast("Form request send");
+  };
+  
+  const handleApproveFriendRequest = async (id: number) => {
+    await approveFriendRequest(id);
   };
 
   const sendRequestForm = () => {
@@ -61,7 +65,14 @@ export function UserNav() {
     return (
       <div>
         {friendRequests.map((request) => {
-          return <div key={request.id}>{request.sender.name} - {request.sender.email}</div>;
+          return (
+            <div key={request.id}>
+              <div className="flex justify-between">
+                <div>{request.sender.name} - {request.sender.email}</div>
+                <span onClick={() => handleApproveFriendRequest(request.id)}>Approve</span>
+              </div>
+            </div>
+          );
         })}
       </div>
     );
