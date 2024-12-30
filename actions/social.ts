@@ -2,7 +2,6 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/db/prisma";
-import { equal } from "assert";
 
 export async function sendFriendRequest(email: string) {
   const session = await auth();
@@ -102,6 +101,60 @@ export async function getFriendRequests() {
   });
 }
 
+export async function getMessages(conversationId: number) {
+  const session = await auth();
+  const loggedUser = session?.user;
+  if (!loggedUser) {
+    throw new Error("Unauthorized");
+  }
+  return prisma.message.findMany({
+    where: {
+      conversationId,
+    },
+    select: {
+      id: true,
+      content: true,
+      type: true,
+      sender: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        },
+      },
+    },
+  });
+}
+
+export async function createMessage(conversationId: number, content: string, type: string = 'text') {
+  const session = await auth();
+  const loggedUser = session?.user;
+  if (!loggedUser) {
+    throw new Error("Unauthorized");
+  }
+  return prisma.message.create({
+    data: {
+      content,
+      type,
+      senderId: loggedUser.id,
+      conversationId,
+    },
+    select: {
+      id: true,
+      content: true,
+      type: true,
+      sender: {
+        select: {
+          name: true,
+          email: true,
+          image: true,
+        },
+      },
+    },
+  });
+}
+
 export async function getConversations() {
   const session = await auth();
   const loggedUser = session?.user;
@@ -110,20 +163,20 @@ export async function getConversations() {
   }
   const loggedUserConversations = await prisma.conversationMember.findMany({
     where: {
-      userId: loggedUser.id
+      userId: loggedUser.id,
     },
     select: {
       conversationId: true,
-    }
+    },
   });
   return prisma.conversationMember.findMany({
     where: {
       conversationId: {
-        in: loggedUserConversations.map(c => c.conversationId),
+        in: loggedUserConversations.map((c) => c.conversationId),
       },
       userId: {
         not: loggedUser.id,
-      }
+      },
     },
     select: {
       id: true,
@@ -131,10 +184,13 @@ export async function getConversations() {
         select: {
           name: true,
           email: true,
-        }
+        },
       },
       conversation: {
         select: {
+          id: true,
+          isGroup: true,
+          name: true,
           messages: {
             select: {
               content: true,
@@ -143,12 +199,12 @@ export async function getConversations() {
                 select: {
                   name: true,
                   email: true,
-                }
-              }
-            }
+                },
+              },
+            },
           },
-        }
-      }
+        },
+      },
     },
   });
   /*return prisma.contact.findMany({

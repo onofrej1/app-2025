@@ -47,6 +47,10 @@ const SendFriendRequest = z.object({
   email: z.string().email(),
 });
 
+const SendMessage = z.object({  
+  message: z.string().min(1),
+});
+
 const CreateOrEditEvent = z.object({
   id: z.number().optional(),
   name: z.string().trim().min(4),
@@ -69,6 +73,7 @@ export type FormSchema =
  | 'CreateOrEditEvent'
  | 'FilterResource'
  | 'SendFriendRequest'
+ | 'SendMessage'
 
 const FilterResource = z.object({
   id: z.string().optional(),
@@ -83,7 +88,8 @@ const rules = {
   CreateOrEditEvent,
   //UpdateUserProfile,
   FilterResource: z.any(),
-  SendFriendRequest
+  SendFriendRequest,
+  SendMessage
 };
 
 export default rules;

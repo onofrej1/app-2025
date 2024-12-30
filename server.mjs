@@ -9,18 +9,29 @@ const port = 3000;
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
 
+const conversations = {};
+
 app.prepare().then(() => {
   const httpServer = createServer(handler);
 
   const io = new Server(httpServer);
 
   io.on("connection", (socket) => {
-    console.log('test1');
+    socket.on("join-conversation", (conversationId) => {
+      console.log("join-conversation:", conversationId);
+      socket.join('conversation_'+conversationId);
+      /*if (!conversations[conversationId]) {
+        console.log('add socket room');
+        conversations[conversationId] = conversationId;
+        socket.rooms.add('conversation:'+conversationId);
+      }*/
+      //socket.to('conversation:'+conversationId).emit('message-received');
+    });
 
-    socket.on("input-change", (data) => {
-      console.log("Received message From Client:", data);
+    socket.on("message", (conversationId) => {
+      console.log("get message:", conversationId);
 
-      socket.emit("update-input", 'okk');
+      socket.to('conversation_'+conversationId).emit('message-received');
     });
     // ...
   });

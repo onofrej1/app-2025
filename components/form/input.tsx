@@ -26,7 +26,7 @@ export default function FormInput(props: InputProps) {
   if (onChange) {
     registerOptions['onChange'] = (e) => onChange(e.target.value);
   }
-  console.log('input');
+
   return (
     <div>
       {label && <Label>{label}</Label>}

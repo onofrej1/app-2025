@@ -72,8 +72,8 @@ export default function Form({
     resolver: zodResolver(validationRules),
     defaultValues: data,
   });
-  console.log(getValues());
-  console.log(errors);
+  /*console.log(getValues());
+  console.log(errors);*/
 
   const submitForm = async (formData: unknown) => {
     try {
