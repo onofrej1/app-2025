@@ -1,4 +1,4 @@
-import { uploadFiles } from "@/actions";
+import { uploadFiles } from "@/actions/files";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/flowbite/button";
 

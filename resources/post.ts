@@ -50,7 +50,6 @@ const post: Resource = {
     { 
       name: 'content', 
       header: 'Content', 
-      renderRow: 'contentRow',
     },
   ],
 };

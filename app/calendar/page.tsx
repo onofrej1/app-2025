@@ -1,5 +1,5 @@
 "use client";
-import { getEvents } from "@/actions";
+import { getEvents } from "@/actions/events";
 import {
   CalendarCurrentDate,
   CalendarDayView,  

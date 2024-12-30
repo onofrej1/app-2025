@@ -23,21 +23,46 @@ import {
 import { useDialog } from "@/state";
 import { FormField } from "@/resources/resources.types";
 import Form from "../form/form";
+import { getFriendRequests, sendFriendRequest } from "@/actions/social";
+import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 
 export function UserNav() {
-  const { open, setTitle, setContent } = useDialog();
+  const { open, setTitle, setContent, onClose } = useDialog();
+
+  const { data: friendRequests = [], isFetching } = useQuery({
+    queryKey: ["friendRequests"],
+    queryFn: getFriendRequests,
+  });
+  if (isFetching) return null;
+
+  const handleSendRequestForm = (data: { email: string }) => {
+    sendFriendRequest(data.email);
+    onClose();
+    toast("Form request send");
+  };
 
   const sendRequestForm = () => {
     const fields: FormField[] = [
-      { label: "email", type: "text", name: "email" },
+      { label: "Email", type: "text", name: "email" },
     ];
     return (
       <div>
         <Form
           fields={fields}
-          action={(data) => console.log(data)}
+          action={handleSendRequestForm}
           validation={"SendFriendRequest"}
         />
+      </div>
+    );
+  };
+
+  const friendRequestsList = () => {
+    return (
+      <div>
+        {friendRequests.map((request) => {
+          return <div key={request.id}>{request.sender.name} - {request.sender.email}</div>;
+        })}
       </div>
     );
   };
@@ -45,6 +70,12 @@ export function UserNav() {
   const openSendRequestModal = () => {
     setTitle("Send friend request");
     setContent(sendRequestForm());
+    open();
+  };
+
+  const openFriendRequestsModal = () => {
+    setTitle("Send friend request");
+    setContent(friendRequestsList());
     open();
   };
 
@@ -91,6 +122,16 @@ export function UserNav() {
               <User className="w-4 h-4 mr-3 text-muted-foreground" />
               Account
             </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem className="hover:cursor-pointer" asChild>
+            <Button
+              onClick={openFriendRequestsModal}
+              variant="ghost"
+              className="flex items-center"
+            >
+              <User className="w-4 h-4 mr-3 text-muted-foreground" />
+              Friend requests
+            </Button>
           </DropdownMenuItem>
           <DropdownMenuItem className="hover:cursor-pointer" asChild>
             <Button

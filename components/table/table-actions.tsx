@@ -21,6 +21,9 @@ export default function TableActions({ row }: { row?: any }) {
   const { push } = useRouter();
   const params = useParams();
   const resource = resources.find((r) => r.resource === params.name);
+  if (!resource) {
+    throw new Error('Resource not found');
+  }
   const deleteRow = DeleteResource.bind(null, resource, row.id);
 
   const resourcePath = `/resource/${resource.resource}`;

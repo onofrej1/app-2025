@@ -1,7 +1,7 @@
 'use client'
 import React from "react";
-import Form from "../form/form";
-import { addResource, updateResource } from "@/actions";
+import Form from "@/components/form/form";
+import { addResource, updateResource } from "@/actions/resources";
 import { resources } from "@/resources";
 import { FormField } from "@/resources/resources.types";
 
@@ -14,6 +14,9 @@ interface ResourceFormProps {
 export default function ResourceForm(props: ResourceFormProps) {
   const { resource: resourceName, fields, data = {} } = props;
   const resource = resources.find(r => r.resource === resourceName);
+  if (!resource) {
+    throw new Error('Resource not found');
+  }
   const action = data && data.id ? updateResource.bind(null, resource) : addResource.bind(null, resource);  
 
   return (

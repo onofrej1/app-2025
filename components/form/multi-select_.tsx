@@ -5,7 +5,7 @@ import { Label } from '../ui/label';
 import { DefaultFormData } from './form';
 import { FieldErrors } from 'react-hook-form';
 import { renderError } from './utils';
-import ReactSelect from 'react-select';
+//import ReactSelect from 'react-select';
 
 interface SelectOption {
   label: string,
@@ -41,7 +41,7 @@ export default function FormMultiSelect({
     <>
       <Label>{label}</Label>
       <div>
-        <ReactSelect
+        {/*<ReactSelect
           defaultValue={selectValue}
           value={selectValue}
           isMulti={true}
@@ -52,7 +52,7 @@ export default function FormMultiSelect({
           options={options}
           className="basic-multi-select"
           classNamePrefix="select"
-        />
+        />*/}
       </div>
       <ErrorMessage
         errors={errors}

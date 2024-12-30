@@ -15,7 +15,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Google({
       profile(profile) {
-        return { role: profile.role ?? "user" }
+        return { role: profile.role ?? "user", id: profile.id }
       },
     }),
     Credentials({
@@ -46,17 +46,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           throw new InvalidLoginError();
         }
         //user.role = "test";
+        console.log(user);
         return user;
       },
     }),
   ],
   callbacks: {
     jwt({ token, user }) {
-      if(user) token.role = user.role
+      if(user) {
+        token.role = user.role;
+      }
+      if(user && user.id) {
+        token.id = user.id;
+      } 
       return token
     },
     session({ session, token }) {
       session.user.role = token.role
+      session.user.id = token.id;
       return session
     }
   }
@@ -65,16 +72,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 declare module "next-auth" {
   interface Session {
     user: {
-      role?: string
+      id: string;
+      role?: string;
     } & DefaultSession["user"]
   }
   interface User {
+    id?: string;
     role?: string;
   }
 }
 
 declare module "@auth/core/adapters" {
   interface AdapterUser {
+    id: string;
     role?: string;
   }
 }
@@ -82,7 +92,7 @@ declare module "@auth/core/adapters" {
 declare module "next-auth/jwt" {
   /** Returned by the `jwt` callback and `auth`, when using JWT sessions */
   interface JWT {
-    /** OpenID ID Token */
+    id: string;
     role?: string
   }
 }

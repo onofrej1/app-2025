@@ -1,4 +1,4 @@
-import { deleteFile, readDirectory, uploadFiles } from "@/actions";
+import { deleteFile, readDirectory, uploadFiles } from "@/actions/files";
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/flowbite/button";
 import { XIcon } from "lucide-react";
@@ -59,7 +59,7 @@ export default function FileUploader() {
     event.preventDefault();
     //console.log(event);
     //console.log(event.originalEvent.dataTransfer.files);
-    const droppedFiles = event.dataTransfer.files;
+    const droppedFiles = event.dataTransfer.files as File[];
     console.log(droppedFiles);
     if (droppedFiles.length > 0) {
       const newFiles = Array.from(droppedFiles);

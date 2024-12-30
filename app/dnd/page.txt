@@ -9,6 +9,7 @@ export default function Dnd() {
   const groups = ["TODO", "INPROGRESS", "DONE"];
   const [items, setItems] = useState([]);
   const [activeItem, setActiveItem] = useState<HTMLDivElement>();
+  const [activeTask, setActiveTask] = useState();
 
   useEffect(() => {
     async function fetchTasks() {
@@ -35,6 +36,7 @@ export default function Dnd() {
     e.dataTransfer.setData("idText", (e.target as HTMLDivElement).id);
     e.dataTransfer.setData("groupText", group);
     setActiveItem(e.target as HTMLDivElement);
+    
   };
 
   const onDragEnd = (e: any, group: string) => {
@@ -61,27 +63,46 @@ export default function Dnd() {
     e.preventDefault();
     const el = e.target as HTMLDivElement;        
     el.classList.remove("group-over");
-  };   
+  };  
+  
+  function getRandomIntInclusive(min, max) {
+    const minCeiled = Math.ceil(min);
+    const maxFloored = Math.floor(max);
+    return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled); // The maximum is inclusive and the minimum is inclusive
+  }
+  
 
-  const onDragEnterItem = (e: any) => {
+  const onDragEnterItem = (e: any, group: string) => {
     e.preventDefault();
     const el = activeItem;        
     const parent = e.target.parentNode;
-    //const c = el.cloneNode();
+    const c = el.cloneNode();
     
     /*var para = document.createElement( "p" );
     para.classList.add(tempCls);
     para.innerHTML = el.innerHTML;*/
     //para.appendChild( document.createTextNode("paragraph"));
     //setActiveItem(para);
+    
+    const elParent = el.parentNode;
+
     el.classList.add(tempCls);
+    const t = items.find(i => i.id === Number(el.id));
+    const newId = getRandomIntInclusive(1, 100000);
+    /*const i = items.push({
+      id: newId,
+      group,
+      value: { ...t.value, id: newId },
+    });*/
+    console.log(items);
     if (isBefore(el, e.target)) {
       //el.classList.add(tempCls);
       parent.insertBefore(el, e.target);
     } else {
       //el.classList.add(tempCls);
       parent.insertBefore(el, e.target.nextSibling);
-    }          
+    }    
+    elParent.insertBefore(c, elParent.children[0]);      
   };
 
   const onDragLeaveItem = (e, group) => {            
@@ -144,7 +165,7 @@ export default function Dnd() {
                   onDragStart={(e) => onDragStart(e, group)}
                   onDragEnd={(e) => onDragEnd(e, group)}
                   //onDrop={(e) => handleDrop(e, group)}
-                  onDragEnter={(e) => onDragEnterItem(e)}
+                  onDragEnter={(e) => onDragEnterItem(e, group)}
                   onDragLeave={(e) => onDragLeaveItem(e, group)}
                 >
                   {thing.value.title} - {thing.value.id} - {thing.value.status}

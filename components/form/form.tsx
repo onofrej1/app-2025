@@ -148,7 +148,7 @@ export default function Form({
                 name={name}
                 value={value}
                 errors={errors}
-                onChange={(value) => {
+                onChange={(value: Date | undefined) => {
                   console.log(value);
                   onChange(value);
                   if (field.onChange) {

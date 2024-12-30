@@ -1,18 +1,7 @@
-/*import React from 'react'
-import SignIn from '@/components/sign-in'
-
-export default function SignInPage() {
-  return (
-    <div>
-        SignIn
-        <SignIn />
-    </div>
-  )
-}*/
 "use client";
 import Form, { FormState } from "@/components/form/form";
 import { Button } from "@/components/ui/button";
-import { SignInUser } from "@/actions";
+import { SignInUser } from "@/actions/auth";
 
 export default function Login() {
   //const { data: session, status } = useSession();

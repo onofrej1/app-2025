@@ -1,5 +1,5 @@
 "use client";
-import { registerUser } from "@/actions";
+import { registerUser } from "@/actions/auth";
 import Form, { FormState } from "@/components/form/form";
 import { Button } from "@/components/ui/button";
 

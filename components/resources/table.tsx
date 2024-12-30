@@ -2,7 +2,7 @@
 import React from "react";
 import Table, { TableData } from "../table/table";
 import { resources } from "@/resources";
-import TableActions from "../table/table-actions";
+import TableActions from "@/components/table/table-actions";
 
 interface TableProps {
   resource: string;
@@ -13,7 +13,9 @@ interface TableProps {
 export default function ResourceTable(props: TableProps) {
   const { resource: resourceName, data, totalRows } = props;
   const resource = resources.find(r => r.resource === resourceName);
-  
+  if (!resource) {
+    throw new Error('Resource not found');
+  }
   return (
     <div>
       <Table

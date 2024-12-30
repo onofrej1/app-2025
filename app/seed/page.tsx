@@ -13,6 +13,6 @@ export default async function Seed() {
 
       }
     };
-    await prismaQuery('post', 'create', args);
+    //await prismaQuery('post', 'create', args);
   }  
 }
