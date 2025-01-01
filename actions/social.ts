@@ -127,7 +127,11 @@ export async function getMessages(conversationId: number) {
   });
 }
 
-export async function createMessage(conversationId: number, content: string, type: string = 'text') {
+export async function createMessage(
+  conversationId: number,
+  content: string,
+  type: string = "text"
+) {
   const session = await auth();
   const loggedUser = session?.user;
   if (!loggedUser) {
@@ -158,10 +162,9 @@ export async function createMessage(conversationId: number, content: string, typ
       id: conversationId,
     },
     data: {
-      lastMessage: { connect: { id: message.id }}
-    }
-  })
-
+      lastMessage: { connect: { id: message.id } },
+    },
+  });
 }
 
 export async function getConversations() {
@@ -195,6 +198,7 @@ export async function getConversations() {
           email: true,
         },
       },
+      lastSeenMessage: true,
       conversation: {
         select: {
           id: true,
@@ -204,10 +208,10 @@ export async function getConversations() {
             select: {
               sender: true,
               content: true,
-            }
+            },
           },
           messages: {
-            select: {              
+            select: {
               content: true,
               type: true,
               sender: {
@@ -258,4 +262,65 @@ export async function getConversations() {
       },
     },
   });*/
+}
+
+export async function getConversation() {
+  const session = await auth();
+  const loggedUser = session?.user;
+  if (!loggedUser) {
+    throw new Error("Unauthorized");
+  }
+  const loggedUserConversations = await prisma.conversationMember.findMany({
+    where: {
+      userId: loggedUser.id,
+    },
+    select: {
+      conversationId: true,
+    },
+  });
+  return prisma.conversation.findFirstOrThrow({
+    where: {
+      id: 1,
+    },
+    select: {
+      id: true,
+      conversationMembers: {
+        select: {
+          lastSeenMessage: {
+            select: {
+              id: true,
+              sender: true,
+            }
+          },
+          user: {
+            select: {
+              name: true,
+              email: true,
+            },
+          },
+        },
+      },
+      isGroup: true,
+      name: true,
+      
+      lastMessage: {
+        select: {
+          sender: true,
+          content: true,
+        },
+      },
+      messages: {
+        select: {
+          content: true,
+          type: true,
+          sender: {
+            select: {
+              name: true,
+              email: true,
+            },
+          },
+        },
+      },
+    },
+  });
 }

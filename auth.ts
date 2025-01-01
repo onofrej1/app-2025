@@ -15,8 +15,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Google({
       profile(profile) {
-        return { role: profile.role ?? "user", id: profile.id }
+        return { ...profile, role: profile.role ?? "user", id: profile.id }
       },
+      authorization: { params: { scope: "openid email profile https://mail.google.com" } },
+      //allowDangerousEmailAccountLinking: true
     }),
     Credentials({
       credentials: {
@@ -52,28 +54,33 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    jwt({ token, user }) {
+    jwt({ token, user, account }) {
       if(user) {
         token.role = user.role;
       }
       if(user && user.id) {
         token.id = user.id;
-      } 
+      }
+      if (account && account.access_token) {
+        token.accessToken = account.access_token;
+    }
       return token
     },
     session({ session, token }) {
       session.user.role = token.role
       session.user.id = token.id;
-      return session
+      
+      return {...session, token: token.accessToken };
     }
   }
 });
 
 declare module "next-auth" {
   interface Session {
+    token?: string;
     user: {
       id: string;
-      role?: string;
+      role?: string;      
     } & DefaultSession["user"]
   }
   interface User {
@@ -93,7 +100,7 @@ declare module "next-auth/jwt" {
   /** Returned by the `jwt` callback and `auth`, when using JWT sessions */
   interface JWT {
     id: string;
-    role?: string
+    role?: string;    
   }
 }
 
