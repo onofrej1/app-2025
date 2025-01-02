@@ -18,7 +18,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return { ...profile, role: profile.role ?? "user", id: profile.id }
       },
       authorization: { params: { scope: "openid email profile https://mail.google.com" } },
-      //allowDangerousEmailAccountLinking: true
+      allowDangerousEmailAccountLinking: true
     }),
     Credentials({
       credentials: {

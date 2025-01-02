@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/auth";
+const { google } = require("googleapis");
 
 const googleOAuth = {
   client_id: process.env.AUTH_GOOGLE_ID || "",
@@ -11,13 +12,11 @@ const googleOAuth = {
     "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
 };
 
-const { google } = require("googleapis");
-
 export async function getEmailMessages() {
   const session = await auth();
   if (!session) return;
   console.log("user session:");
-  console.log(session.token);
+  //console.log(session.token);
 
   const oauth2Client = new google.auth.OAuth2(
     googleOAuth.client_id,
@@ -32,12 +31,30 @@ export async function getEmailMessages() {
 
   const res = await gmail.users.messages.list({
     userId: "me",
-    maxResults: 10,
+    //maxResults: 2,
+    format: "full",
+    q: 'from:(noreply@discord.com)'
   });
   /*const res = await gmail.users.labels.list({
     userId: 'me',
   });
   const labels = res.data.labels;*/
 
-  return res.data.messages;
+  const messages = res.data.messages;
+
+  const data = [];
+  for (const message of messages) {
+    const msg = await gmail.users.messages.get({
+      userId: "me",
+      id: message.id,
+      format: "full",
+    });
+    const p = msg.data.payload['parts'][0].body.data;
+    const decoded = Buffer.from(p, 'base64').toString('ascii');    
+    console.log(`decoded: --------------------------------------------------`);
+    console.log(decoded);
+    data.push({ ...msg.data, decodedContent: decoded });    
+  }  
+
+  return data;
 }
