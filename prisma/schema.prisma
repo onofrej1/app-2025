@@ -48,6 +48,16 @@ model User {
   messages               Message[]
   friendRequestSenders   FriendRequest[]      @relation("sender")
   friendRequestReceivers FriendRequest[]      @relation("receiver")
+  oauthTokens            OAuthToken[]
+}
+
+model OAuthToken {
+  id           Int     @id @default(autoincrement())
+  user         User    @relation(fields: [userId], references: [id])
+  userId       String
+  accessToken  String?
+  refreshToken String?
+  provider     String?
 }
 
 model Post {
@@ -204,7 +214,7 @@ model Conversation {
   id                  Int                  @id @default(autoincrement())
   name                String?
   isGroup             Boolean
-  lastMessage         Message?              @relation("lastMessage", fields: [lastMessageId], references: [id])
+  lastMessage         Message?             @relation("lastMessage", fields: [lastMessageId], references: [id])
   lastMessageId       Int?
   contacts            Contact[]
   conversationMembers ConversationMember[]
@@ -217,7 +227,7 @@ model ConversationMember {
   userId            String
   conversation      Conversation @relation(fields: [conversationId], references: [id])
   conversationId    Int
-  lastSeenMessage   Message?      @relation(fields: [lastSeenMessageId], references: [id])
+  lastSeenMessage   Message?     @relation(fields: [lastSeenMessageId], references: [id])
   lastSeenMessageId Int?
 }
 
@@ -229,6 +239,7 @@ model Message {
   conversationId      Int
   content             String
   type                String
+  createdAt           DateTime             @default(now())
   conversationMembers ConversationMember[]
   lastConversations   Conversation[]       @relation("lastMessage")
 }

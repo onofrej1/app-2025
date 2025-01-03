@@ -1,4 +1,4 @@
-const googleOAuth = {
+/*const googleOAuth = {
   client_id: process.env.AUTH_GOOGLE_ID || "",
   client_secret: process.env.AUTH_GOOGLE_SECRET || "",
   endpoint: "https://accounts.google.com/o/oauth2/v2/auth",
@@ -52,4 +52,4 @@ export async function GET(request: Request) {
     console.log(profile);
   
     // The profile variable contains all the information that you might need. 
-  }
+  }*/
