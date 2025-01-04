@@ -1,5 +1,6 @@
 "use client";
 import { getEvents } from "@/actions/events";
+//import { getActivities } from "@/actions/strava";
 import {
   CalendarCurrentDate,
   CalendarDayView,  
@@ -16,6 +17,11 @@ import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import React from "react";
 
+const fetchActivities = async () => {
+  const res = await fetch("/api/strava/activities");
+  return res.json();
+};
+
 export default function CalendarPage() {
   const { data: events = [], isFetching } = useQuery({
     queryKey: ['events'],
@@ -31,7 +37,13 @@ export default function CalendarPage() {
       return items;
     }
   });
-  if (isFetching) return null;
+
+  const { data: activities = [], isFetching: isFetchingActivities } = useQuery({
+    queryKey: ['activities'],
+    queryFn: fetchActivities,    
+  });
+  if (isFetching || isFetchingActivities) return null;
+  console.log(activities);
 
   return (
     <Calendar
