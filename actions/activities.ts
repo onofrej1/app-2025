@@ -62,3 +62,31 @@ export async function getActivity(id: number) {
   });
   return activity;
 }
+
+export async function createActivity(data: any) {
+  console.log(data);
+
+  /*const activity = await prisma.activity.create({
+    data: {
+      userId: loggedUser.id,
+      name: "run",
+      date: new Date(),
+      type: "run",
+      distance: 10000,
+      duration: 300,
+    },
+  });
+  for (const point of coords) {
+    //console.log(point);
+    await prisma.activityData.create({
+      data: {
+        activityId: activity.id,
+        lat: Number(point.ATTR.lat),
+        lng: Number(point.ATTR.lon),
+        elevation: Number(point.ele),
+        time: new Date(point.time),
+      },
+    });
+  }*/
+ return data;
+}

@@ -229,8 +229,8 @@ model RunResult {
   name        String
   category    String
   gender      Gender
-  yearOfBirth DateTime
-  team        String
+  yearOfBirth Int
+  club        String
   time        Int
   user        User?    @relation(fields: [userId], references: [id])
   userId      String?

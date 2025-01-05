@@ -53,12 +53,6 @@ export default function CalendarPage() {
     >
       <div className="h-dvh py-6 flex flex-col">
         <div className="flex px-6 items-center gap-2 mb-6">
-          {/*<CalendarViewTrigger
-            className="aria-[current=true]:bg-accent"
-            view="day"
-          >
-            Day
-          </CalendarViewTrigger>*/}
           <CalendarViewTrigger
             view="week"
             className="aria-[current=true]:bg-accent"
@@ -77,7 +71,6 @@ export default function CalendarPage() {
           >
             Year
           </CalendarViewTrigger>*/}
-
           <span className="flex-1" />
 
           <CalendarCurrentDate />

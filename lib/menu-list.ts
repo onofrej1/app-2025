@@ -9,6 +9,7 @@ import {
   LayoutGrid,
   LucideIcon,
 } from "lucide-react";
+import { groupArrayByKey } from "./utils";
 
 type Submenu = {
   href: string;
@@ -48,15 +49,7 @@ const getSubmenu = (resource: Resource) => {
   };
 };
 
-const groupBy = function (xs: any[], key: any) {
-  return xs.reduce(function (rv, x) {
-    (rv[x[key]] = rv[x[key]] || []).push(x);
-    return rv;
-  }, {});
-};
-
-const groupedResources = groupBy(resources, "group");
-console.log(groupedResources);
+const groupedResources = groupArrayByKey(resources, "group");
 
 export function getMenuList(pathname: string): Group[] {
   return [

@@ -23,7 +23,7 @@ export default function Events() {
             <div>Participants: {run._count.registrations}</div>
             {run._count.runResults > 0 && (
               <div>
-                <Link href={`results${run.id}`}>Vysledky </Link>
+                <Link href={`runs/${run.id}/results`}>Vysledky </Link>
               </div>
             )}
             <Link href={`/runs/${run.id}`}>
