@@ -12,7 +12,9 @@ const loader = new Loader({
 
 interface Point {
   lat: number;
-  long: number;
+  lng: number;
+  elevation: number;
+  time: number;
 }
 
 interface MapProps {
@@ -23,10 +25,10 @@ interface MapProps {
 export default function Map({ address, coords = [] }: MapProps) {
   const mapEl = useRef(null);
 
-  function drawPath(map: google.maps.Map, coords: any) {
+  function drawPath(map: google.maps.Map, coords: Point[]) {
     const c = coords.map((point: any) => ({
       lat: Number(point.lat),
-      lng: Number(point.long),
+      lng: Number(point.lng),
     }));
     new google.maps.Polyline({
       path: c,
