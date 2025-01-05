@@ -53,6 +53,7 @@ model User {
   activityFeeds          ActivityFeed[]
   comments               Comment[]
   registrations          Registration[]
+  RunResult              RunResult[]
 }
 
 model OAuthToken {
@@ -73,7 +74,7 @@ model Post {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   published   Boolean   @default(false)
-  publishedAt DateTime
+  publishedAt DateTime?
   author      User      @relation(fields: [authorId], references: [id])
   authorId    String
   category    Category  @relation(fields: [categoryId], references: [id])
@@ -97,7 +98,7 @@ model Comment {
 
 model Tag {
   id    Int    @id @default(autoincrement())
-  name  String
+  title String
   posts Post[]
 }
 
@@ -124,7 +125,7 @@ model Event {
   description    String?
   color          String?
   status         String?
-  location       String
+  location       String?
   contact        String?
   maxAttendees   Int?
   startDate      DateTime
@@ -143,14 +144,14 @@ model Event {
 }
 
 model Organizer {
-  id    Int     @id @default(autoincrement())
-  name  String
-  Event Event[]
+  id     Int     @id @default(autoincrement())
+  name   String
+  events Event[]
 }
 
 model Venue {
   id       Int     @id @default(autoincrement())
-  locality String
+  location String
   events   Event[]
 }
 
@@ -188,12 +189,15 @@ model Run {
   event         Event          @relation(fields: [eventId], references: [id])
   eventId       Int
   registrations Registration[]
+  runResults    RunResult[]
+  runCategories RunCategory[]
 }
 
 model RunCategory {
   id       Int    @id @default(autoincrement())
   category String
   title    String
+  runs     Run[]
 }
 
 model Registration {
@@ -204,13 +208,29 @@ model Registration {
   gender      Gender
   dateOfBirth DateTime
   email       String
-  state       String
+  nation      String
   city        String
-  team        String?
+  club        String?
   phone       String?
   presented   Boolean  @default(false)
   paid        Boolean  @default(false)
   tshirtSize  Boolean  @default(false)
+  user        User?    @relation(fields: [userId], references: [id])
+  userId      String?
+  run         Run      @relation(fields: [runId], references: [id])
+  runId       Int
+}
+
+model RunResult {
+  id          Int      @id @default(autoincrement())
+  rank        Int
+  bib         Int
+  name        String
+  category    String
+  gender      Gender
+  yearOfBirth DateTime
+  team        String
+  time        Int
   user        User?    @relation(fields: [userId], references: [id])
   userId      String?
   run         Run      @relation(fields: [runId], references: [id])

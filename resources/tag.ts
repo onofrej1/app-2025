@@ -1,14 +1,14 @@
 import { Resource } from '@/resources/resources.types';
 
-const category: Resource = {
-    name: 'Category',
-    name_plural: 'Categories',
-    model: 'category',
-    resource: 'categories',
+const tag: Resource = {
+    name: 'Tag',
+    name_plural: 'Tags',
+    model: 'tag',
+    resource: 'tags',
     group: 'Blog',
     filter: [],
     menuIcon: '',
-    rules: 'CreateOrEditCategory',    
+    rules: 'CreateOrEditTag',    
     form: [
         { name: 'title', type: 'text', label: 'Title' },
     ],
@@ -16,4 +16,4 @@ const category: Resource = {
         { name: 'title', header: 'Title' },
     ],
 };
-export { category };
+export { tag };

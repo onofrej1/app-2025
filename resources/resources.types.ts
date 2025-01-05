@@ -67,6 +67,7 @@ interface DataFilter {
 }
 
 type Resource = {
+    group?: string;
     name: string;
     name_plural: string;
     model: PrismaModel;
@@ -90,6 +91,14 @@ type PrismaModel =
 | "task"
 | "event"
 | "attendee"
-| "eventSchedule";
+| "eventSchedule"
+| "tag"
+| "run"
+| "runCategory"
+| 'venue'
+| 'organizer'
+| 'activity'
+| "runResult"
+| "registration";
 
 export type { Resource, FormField, PrismaModel };

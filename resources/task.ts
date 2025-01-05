@@ -6,6 +6,7 @@ const task: Resource = {
   model: 'task',
   resource: 'tasks',
   rules: 'CreateOrEditTask',
+  group: 'Work spaces',
   menuIcon: '',
   filter: [    
   ],

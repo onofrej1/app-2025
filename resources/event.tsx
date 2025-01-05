@@ -8,6 +8,7 @@ const event: Resource = {
   model: 'event',
   resource: 'events',
   rules: 'CreateOrEditEvent',
+  group: 'Events',
   menuIcon: '',
   renderForm: ({ fields, formState }) => {
     console.log(formState);
@@ -17,6 +18,8 @@ const event: Resource = {
         {fields.description}
         {fields.status}
         {fields.color}
+        {fields.contact}
+        {fields.location}
         {fields.venue}
         <div className='flex'>
           <div className='flex-1'>
@@ -26,8 +29,10 @@ const event: Resource = {
             {fields.endDate}
           </div>
         </div>
-        {fields.maxAttendees}
+        {fields.maxAttendees}        
         {fields.createdById}
+        {fields.venueId}
+        {fields.organizerId}
         <Button type="submit">Save</Button>
       </div>
     );
@@ -39,7 +44,8 @@ const event: Resource = {
     { name: 'description', type: 'text', label: 'Description' },
     { name: 'status', type: 'text', label: 'Status' },
     { name: 'color', type: 'text', label: 'Color' },
-    { name: 'venue', type: 'text', label: 'Venue' },
+    { name: 'contact', type: 'text', label: 'Contact' },
+    { name: 'location', type: 'text', label: 'Location' },
     { name: 'maxAttendees', type: 'number', label: 'Max attendees' },
     { name: 'startDate', type: 'datepicker', label: 'Start date' },
     { name: 'endDate', type: 'datepicker', label: 'End date' },
@@ -50,12 +56,30 @@ const event: Resource = {
       label: 'User',
       resource: 'user',
       textField: 'name'
+    },
+    {
+      name: 'venueId', 
+      type: 'fk',
+      relation: 'venue',
+      label: 'Venue',
+      resource: 'venue',
+      textField: 'location'
+    },
+    {
+      name: 'organizerId', 
+      type: 'fk',
+      relation: 'organizer',
+      label: 'Organizer',
+      resource: 'organizer',
+      textField: 'name'
     },    
   ],
   list: [
     { name: 'id', header: 'Id'},
     { name: 'name', header: 'Name' },
     { name: 'description', header: 'Description' },
+    { name: 'startDate', header: 'Start date', render: (row: TableData) => <span>{new Date(row.startDate).toLocaleDateString()}</span> },
+    { name: 'endDate', header: 'End date', render: (row: TableData) => <span>{new Date(row.endDate).toLocaleDateString()}</span> },
     { name: 'status', header: 'Status', render: (row: TableData) => <span>{row.status}</span> },
   ],
 };

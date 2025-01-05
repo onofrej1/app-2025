@@ -1,4 +1,5 @@
 import { resources } from "@/resources";
+import { Resource } from "@/resources/resources.types";
 import {
   Tag,
   Users,
@@ -6,7 +7,7 @@ import {
   Bookmark,
   SquarePen,
   LayoutGrid,
-  LucideIcon
+  LucideIcon,
 } from "lucide-react";
 
 type Submenu = {
@@ -39,6 +40,24 @@ resources.map((resource) => {
   });
 });
 
+const getSubmenu = (resource: Resource) => {
+  return {
+    label: resource.name,
+    href: "/resource/" + resource.resource,
+    icon: SquarePen,
+  };
+};
+
+const groupBy = function (xs: any[], key: any) {
+  return xs.reduce(function (rv, x) {
+    (rv[x[key]] = rv[x[key]] || []).push(x);
+    return rv;
+  }, {});
+};
+
+const groupedResources = groupBy(resources, "group");
+console.log(groupedResources);
+
 export function getMenuList(pathname: string): Group[] {
   return [
     {
@@ -48,13 +67,21 @@ export function getMenuList(pathname: string): Group[] {
           href: "/dashboard",
           label: "Dashboard",
           icon: LayoutGrid,
-          submenus: []
-        }
-      ]
+          submenus: [],
+        },
+      ],
     },
     {
       groupLabel: "Contents",
-      menus: resourceItems /*[
+      menus: Object.keys(groupedResources).map((key) => {
+        return {
+          href: "",
+          label: key,
+          icon: SquarePen,
+          submenus: groupedResources[key].map(getSubmenu),
+        };
+      }),
+      /*menus: resourceItems [
         {
           href: "",
           label: "Posts",
@@ -88,14 +115,14 @@ export function getMenuList(pathname: string): Group[] {
         {
           href: "/conversations",
           label: "Conversations",
-          icon: Users
+          icon: Users,
         },
         {
           href: "/account",
           label: "Friend requests",
-          icon: Settings
-        }
-      ]
+          icon: Settings,
+        },
+      ],
     },
     {
       groupLabel: "Settings",
@@ -103,14 +130,14 @@ export function getMenuList(pathname: string): Group[] {
         {
           href: "/users",
           label: "Users",
-          icon: Users
+          icon: Users,
         },
         {
           href: "/account",
           label: "Account",
-          icon: Settings
-        }
-      ]
-    }
+          icon: Settings,
+        },
+      ],
+    },
   ];
 }
