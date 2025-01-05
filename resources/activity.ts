@@ -11,7 +11,7 @@ const activity: Resource = {
   filter: [],
   form: [
     { name: "name", type: "text", label: "Name" },
-    { name: "distance", type: "number", label: "Distance" },
+    { name: "distance", type: "number", label: "Distance" },    
     { name: "calories", type: "number", label: "Calories burned" },
     { name: "duration", type: "number", label: "Duration [sec]" },
     {

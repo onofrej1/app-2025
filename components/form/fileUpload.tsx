@@ -1,18 +1,21 @@
-import { uploadFiles } from "@/actions/files";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/flowbite/button";
 
-export default function FileUploader() {
+interface FileUploaderProps {
+  onUploadFile: (formData: FormData) => void,
+}
+
+export default function FileUploader({ onUploadFile }: FileUploaderProps) {
   const [file, setFile] = useState<File>();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file_ = event.target.files ? event.target.files[0] : null;
     if (!file_) return;
 
-    if (file_.type !== "image/png" && file_.type !== "image/jpeg") {
+    /*if (file_.type !== "image/png" && file_.type !== "image/jpeg") {
       alert("Please select a PNG or JPEG image file.");
       return;
-    }
+    }*/
 
     if (file_.size > 1024 * 1024) {
       alert("File size should not exceed 1MB.");
@@ -26,9 +29,14 @@ export default function FileUploader() {
     const formData = new FormData();
     if (file) {
       formData.append("myFile", file, file.name);
-      uploadFiles(formData);
+      //uploadFiles(formData);
+      onUploadFile(formData);
     }
   };
+
+  const isImageFile = (type: string) => {
+    return ['image/jpeg', 'image/png'].includes(type);
+  }
 
   return (
     <div>
@@ -40,9 +48,9 @@ export default function FileUploader() {
           <div>
             Last Modified:
             {new Date(file.lastModified).toDateString()}*/}
-          <div className="grid grid-cols-3">
+          {isImageFile(file.type) && <div className="grid grid-cols-3">
             <img src={URL.createObjectURL(file)} width={"100%"} />
-          </div>
+          </div>}
 
           <Button onClick={onFileUpload}>Upload!</Button>
         </div>

@@ -80,6 +80,28 @@ const CreateOrEditRun = z.object({
   price: z.coerce.number(),
   elevation: z.coerce.number(),  
   eventId: z.coerce.number(),
+  runCategories: z.array(z.coerce.number())
+    .optional()
+    .default([])
+});
+
+const CreateRegistration = z.object({
+  id: z.number().optional(),
+  firstName: z.string().trim().min(1),
+  lastName:  z.string().trim().min(1),
+  dateOfBirth: z.coerce.date(),
+  gender:  z.enum(['MAN', 'WOMAN']),
+  email: z.string().email(),
+
+  runId: z.coerce.number(),
+  nation: z.string().trim().min(1),
+  city: z.string().trim().min(1),
+  club: z.string().trim().min(1),
+  phone: z.string().trim().min(1),
+  /*runId: z.coerce.number(),
+  runCategories: z.array(z.coerce.number())
+    .optional()
+    .default([])*/
 });
 
 const CreateOrEditActivity = z.object({
@@ -121,6 +143,7 @@ export type FormSchema =
  | 'CreateOrEditOrganizer'
  | 'CreateOrEditActivity'
  | 'FilterResource'
+ | 'CreateRegistration'
  | 'SendFriendRequest'
  | 'SendMessage'
 
@@ -141,6 +164,7 @@ const rules = {
   CreateOrEditVenue,
   CreateOrEditOrganizer,
   CreateOrEditActivity,
+  CreateRegistration,
   //UpdateUserProfile,
   FilterResource: z.any(),
   SendFriendRequest,

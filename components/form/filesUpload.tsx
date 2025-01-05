@@ -5,7 +5,7 @@ import { XIcon } from "lucide-react";
 
 const MAX_COUNT = 5;
 
-export default function FileUploader() {
+export default function FilesUploader() {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [fileLimit, setFileLimit] = useState(false);
   const [files, setFiles] = useState<{ src: string; name: string; path: string }[]>([]);

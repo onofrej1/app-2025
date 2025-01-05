@@ -18,8 +18,8 @@ export interface MultiSelectOption {
 interface FormField {
     // mandatory props
     name: string;
-    label: string;
-    type: string;
+    label?: string;
+    type?: string;
 
     // optional props
     resource?: PrismaModel;

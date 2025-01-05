@@ -184,6 +184,7 @@ model Run {
   price         Int
   elevation     Int?
   surface       String?
+  tshirt        Boolean        @default(false)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   event         Event          @relation(fields: [eventId], references: [id])
@@ -201,8 +202,8 @@ model RunCategory {
 }
 
 model Registration {
-  id          Int      @id @default(autoincrement())
-  createdAt   DateTime @default(now())
+  id          Int         @id @default(autoincrement())
+  createdAt   DateTime    @default(now())
   firstName   String
   lastName    String
   gender      Gender
@@ -212,12 +213,12 @@ model Registration {
   city        String
   club        String?
   phone       String?
-  presented   Boolean  @default(false)
-  paid        Boolean  @default(false)
-  tshirtSize  Boolean  @default(false)
-  user        User?    @relation(fields: [userId], references: [id])
+  presented   Boolean     @default(false)
+  paid        Boolean     @default(false)
+  tshirtSize  TshirtSize?
+  user        User?       @relation(fields: [userId], references: [id])
   userId      String?
-  run         Run      @relation(fields: [runId], references: [id])
+  run         Run         @relation(fields: [runId], references: [id])
   runId       Int
 }
 
@@ -285,6 +286,15 @@ enum Status {
   TODO
   IN_PROGRESS
   DONE
+}
+
+enum TshirtSize {
+  S 
+  M 
+  L 
+  XL 
+  XXL
+  XXXL
 }
 
 enum Gender {

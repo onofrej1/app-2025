@@ -1,5 +1,5 @@
 "use client";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, UseFormTrigger } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { JSX } from "react";
 import { FormField, MultiSelectOption } from "@/resources/resources.types";
@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { DatePicker } from "./datepicker";
 import { Button } from "../ui/button";
+import { capitalize } from "@/lib/utils";
 
 export interface DefaultFormData {
   [key: string]: any;
@@ -38,6 +39,7 @@ export type actionResult = {
 export type FormRender = (props: {
   fields: Record<string, JSX.Element>;
   formState: FormState;
+  trigger: UseFormTrigger<DefaultFormData>,
 }) => JSX.Element;
 
 interface FormProps {
@@ -65,6 +67,7 @@ export default function Form({
     formState: { isValid, errors, isLoading },
     setError,
     control,
+    trigger,
     handleSubmit,
     getValues,
   } = useForm({
@@ -72,8 +75,8 @@ export default function Form({
     resolver: zodResolver(validationRules),
     defaultValues: data,
   });
-  /*console.log(getValues());
-  console.log(errors);*/
+  console.log(getValues());
+  console.log(errors);
 
   const submitForm = async (formData: unknown) => {
     try {
@@ -99,119 +102,124 @@ export default function Form({
     }
   };
 
-  const renderField = (field: FormField) => (
-    <>
-      {["text", "number", "email", "hidden"].includes(field.type) && (
-        <>
-          <FormInput
-            label={field.label}
-            name={field.name}
-            errors={errors}
-            type={field.type}
-            register={register}
-            onChange={field.onChange}
-          />
-        </>
-      )}
+  const renderField = (field: FormField) => {
+    const type = field.type || 'text';
+    const label = field.label || capitalize(field.name);
+    return (
+      <>
+        {["text", "number", "email", "hidden"].includes(type) && (
+          <>
+            <FormInput
+              label={label}
+              name={field.name}
+              errors={errors}
+              type={type}
+              register={register}
+              onChange={field.onChange}
+            />
+          </>
+        )}
 
-      {field.type === "checkbox" && (
-        <>
+        {type === "checkbox" && (
+          <>
+            <Controller
+              control={control}
+              name={field.name}
+              render={({ field: { onChange, value, name } }) => (
+                <FormCheckbox
+                  label={label}
+                  name={name}
+                  errors={errors}
+                  checked={!!value}
+                  onChange={(value) => {
+                    onChange(value);
+                    if (field.onChange) {
+                      field.onChange(value);
+                    }
+                  }}
+                />
+              )}
+            />
+          </>
+        )}
+
+        {type === "datepicker" && (
+          <>
+            <Controller
+              control={control}
+              name={field.name}
+              render={({ field: { onChange, value, name } }) => (
+                <DatePicker
+                  label={label}
+                  name={name}
+                  value={value}
+                  errors={errors}
+                  onChange={(value: Date | undefined) => {
+                    console.log(value);
+                    onChange(value);
+                    if (field.onChange) {
+                      field.onChange(value);
+                    }
+                  }}
+                />
+              )}
+            />
+          </>
+        )}
+
+        {["select", "fk"].includes(type) && (
           <Controller
             control={control}
             name={field.name}
             render={({ field: { onChange, value, name } }) => (
-              <FormCheckbox
-                label={field.label}
+              <FormSelect
+                label={label}
                 name={name}
                 errors={errors}
-                checked={!!value}
+                value={value}
+                className={field.className}
                 onChange={(value) => {
                   onChange(value);
                   if (field.onChange) {
                     field.onChange(value);
                   }
                 }}
+                options={field.options!}
               />
             )}
           />
-        </>
-      )}
+        )}
 
-      {field.type === "datepicker" && (
-        <>
+        {["m2m"].includes(type) && (
           <Controller
             control={control}
             name={field.name}
-            render={({ field: { onChange, value, name } }) => (
-              <DatePicker
-                label={field.label}
-                name={name}
-                value={value}
-                errors={errors}
-                onChange={(value: Date | undefined) => {
-                  console.log(value);
-                  onChange(value);
-                  if (field.onChange) {
-                    field.onChange(value);
-                  }
-                }}
-              />
-            )}
+            render={({ field: { onChange, value, name } }) => {
+              const selectValue =
+                value && value.length > 0
+                  ? value.map((v: any) => (v.id ? v.id : v))
+                  : [];
+              return (
+                <MultiSelect
+                  name={name}
+                  label={label}
+                  options={field.options! as MultiSelectOption[]}
+                  onValueChange={(v) => {
+                    onChange(v);
+                  }}
+                  defaultValue={selectValue}
+                  placeholder="Select frameworks"
+                  variant="inverted"
+                  animation={2}
+                  maxCount={3}
+                />
+              );
+            }}
           />
-        </>
-      )}
-
-      {["select", "fk"].includes(field.type) && (
-        <Controller
-          control={control}
-          name={field.name}
-          render={({ field: { onChange, value, name } }) => (
-            <FormSelect
-              label={field.label}
-              name={name}
-              errors={errors}
-              value={value}
-              className={field.className}
-              onChange={(value) => {
-                onChange(value);
-                if (field.onChange) {
-                  field.onChange(value);
-                }
-              }}
-              options={field.options!}
-            />
-          )}
-        />
-      )}
-
-      {["m2m"].includes(field.type) && (
-        <Controller
-          control={control}
-          name={field.name}
-          render={({ field: { onChange, value, name } }) => {
-            const selectValue =
-              value && value.length > 0
-                ? value.map((v: any) => (v.id ? v.id : v))
-                : [];
-            return (
-              <MultiSelect
-                name={name}
-                options={field.options! as MultiSelectOption[]}
-                onValueChange={(v) => {
-                  onChange(v);
-                }}
-                defaultValue={selectValue}
-                placeholder="Select frameworks"
-                variant="inverted"
-                animation={2}
-                maxCount={3}
-              />
-            );
-          }}
-        />
-      )}
-    </>
-  );
+        )}
+      </>
+    );
+  };
 
   const fieldsToRender = fields.reduce((acc, field) => {
     acc[field.name] = renderField(field);
@@ -222,6 +230,7 @@ export default function Form({
     const renderContent = render({
       fields: fieldsToRender,
       formState: { isValid, pending: isLoading },
+      trigger 
     });
     return (
       <>

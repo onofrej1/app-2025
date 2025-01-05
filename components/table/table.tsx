@@ -47,7 +47,7 @@ interface TableProps {
   data: TableData[];
   totalRows: number;
   //actions?: ReactNode; //TableAction[];
-  actions: JSX.Element;
+  actions?: JSX.Element;
 }
 
 const toggleSort = (direction: string | null) => {
@@ -123,11 +123,11 @@ export default function TableComponent({
                   {header.render ? header.render(row) : row[header.name]}
                 </TableCell>
               ))}
-              <TableCell className="py-0">
+              {Actions && <TableCell className="py-0">
                 <div className="flex flex-row gap-1 justify-end">
                   {React.cloneElement(Actions, { row })}
                 </div>
-              </TableCell>
+              </TableCell>}
             </TableRow>
           ))}
         </TableBody>

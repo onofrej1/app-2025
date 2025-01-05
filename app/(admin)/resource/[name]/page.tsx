@@ -53,12 +53,18 @@ export default async function Resource({
   const skip = (Number(page) || 1) - 1;
   const take = Number(pageCount) || 10;
 
-  const args = {
+  const args: any = {
     where: whereQuery,
     skip: skip * take,
     take: take,
     orderBy: [{ [sortBy]: sortDir }],
   };
+  if (resource.relations) {
+    args['include'] = resource.relations.reduce((obj, item) => { 
+      obj[item] = true; 
+      return obj;
+     }, {} as Record<string, boolean>);
+  }
   const data = await prismaQuery(resource.model, "findMany", args);
 
   const createResource = async () => {
