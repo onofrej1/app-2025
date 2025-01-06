@@ -1,7 +1,7 @@
 "use client";
 import { Controller, useForm, UseFormTrigger } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { JSX } from "react";
+import { JSX, ReactElement } from "react";
 import { FormField, MultiSelectOption } from "@/resources/resources.types";
 import { FormSchema } from "@/validation";
 import rules from "@/validation";
@@ -36,11 +36,13 @@ export type actionResult = {
   error?: { path: string; message: string };
 };
 
-export type FormRender = (props: {
+export type FormRenderProps = {
   fields: Record<string, JSX.Element>;
   formState: FormState;
   trigger: UseFormTrigger<DefaultFormData>,
-}) => JSX.Element;
+};
+
+export type FormRender = (props: FormRenderProps) => JSX.Element;
 
 interface FormProps {
   fields: FormField[];
@@ -49,6 +51,7 @@ interface FormProps {
   action: (...args: any[]) => any;
   buttons?: ((props: FormState) => JSX.Element)[];
   render?: FormRender;
+  children?: FormRender;
 }
 
 export default function Form({
@@ -58,6 +61,7 @@ export default function Form({
   action,
   buttons,
   render,
+  children
 }: FormProps) {
   const { replace } = useRouter();
   const validationRules = rules[validation];
@@ -226,6 +230,10 @@ export default function Form({
     return acc;
   }, {} as Record<string, JSX.Element>);
 
+  if (children) {
+    return children({ fields: fieldsToRender, formState: { isValid, pending: isLoading }, trigger });
+  }
+
   if (render) {
     const renderContent = render({
       fields: fieldsToRender,
@@ -243,6 +251,7 @@ export default function Form({
   const restMessages = Object.keys(errors).filter(
     (e) => !fieldNames.includes(e)
   );
+  
 
   return (
     <>
