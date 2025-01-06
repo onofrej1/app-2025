@@ -1,11 +1,20 @@
 "use server";
 import { auth } from "@/auth";
-import { prisma } from "@/db/prisma";
 /*import GpxParser from "gpx-parser-ts";
 import { GpxJson } from "gpx-parser-ts/dist/types";*/
 const xml2js = require("xml2js");
 const xmlParser = new xml2js.Parser({ attrkey: "ATTR" });
-const fs = require("fs").promises;
+var togeojson = require('@mapbox/togeojson');
+
+interface Point {
+  lat: number, lng: number, elevation: number, time: number;
+}
+interface GpxData {
+  name: string;
+  type: string;
+  time: number;
+  coords: Point[];
+}
 
 export async function parseGpxData(formData: FormData) {
   const session = await auth();
@@ -14,12 +23,10 @@ export async function parseGpxData(formData: FormData) {
     throw new Error("Unauthorized");
   }
 
-  const formObject = Object.fromEntries(formData.entries());
-  console.log(formObject);
   const file = formData.get('myFile') as Blob;
   const buffer = Buffer.from(await file.arrayBuffer());
   //const parser: GpxParser = new GpxParser();
-  const coords: any[] = [];
+  const coords: Point[] = [];
 
   /*const file = await fs.readFile("./files__/activity_17872238990.gpx", {
     encoding: "utf8",
@@ -27,8 +34,9 @@ export async function parseGpxData(formData: FormData) {
   //const gpxJson: GpxJson = await parser.parse(f);
 
   const data = await xmlParser.parseStringPromise(buffer.toString());
+
   const metadata = data.gpx.metadata[0];
-  let name, type;
+  let name = '', type = '';
 
   const trackpoints: any[] = data.gpx.trk;
   trackpoints.forEach((t) => {
@@ -36,11 +44,16 @@ export async function parseGpxData(formData: FormData) {
     type = t.type[0];
     t.trkseg.forEach((segment: any) => {
       segment.trkpt.forEach((e: any) => {
-        //console.log(e);
-        coords.push(e);
+        const point = {
+          lat: e.ATTR.lat,
+          lng: e.ATTR.lon,
+          time: e.time,
+          elevation: e.ele,
+        }
+        coords.push(point);
       });
     });
   });
   
-  return { time: metadata.time[0], name, type, coords };
+  return { time: metadata.time[0], name, type, coords } satisfies GpxData;
 }

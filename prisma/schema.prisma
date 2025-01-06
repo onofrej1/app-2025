@@ -384,7 +384,7 @@ model ActivityData {
   lat        Float
   lng        Float
   time       DateTime
-  elevation  Int
+  elevation  Float
 }
 
 model ActivityFeed {
