@@ -8,6 +8,8 @@ import { useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
 import type { FeatureCollection, LineString } from "geojson";
 import Form, { FormRender } from "@/components/form/form";
+import { getCoordsDistance } from "@/utils";
+const { differenceInSeconds } = require("date-fns");
 
 var togeojson = require("@mapbox/togeojson");
 
@@ -34,23 +36,60 @@ export default function Activities() {
       const content = e.target.result;            
     };
     reader.readAsText(formObject['myFile'] as Blob);*/
+    console.log(data);
 
     const { coordTimes, name, time, type } = data.features[0].properties as any;
+    let prevPoint: any,
+      totalDistance = 0,
+      totalElevation = 0,
+      avgSpeedKph = 0,
+      totalTime = 0;
     const coords = (data.features[0].geometry as LineString).coordinates.map(
-      (c, index) => {
-        return {
-          lat: c[0],
-          lng: c[1],
-          elevation: c[2],
-          time: new Date(coordTimes[index]),
+      ([lng, lat, elevation], index) => {
+        let distance = 0;
+        let diffInSeconds = 0;
+
+        const time = new Date(coordTimes[index]);
+        if (prevPoint) {
+          distance = getCoordsDistance(prevPoint, { lat, lng });
+          diffInSeconds = differenceInSeconds(time, prevPoint.time);
+        }
+        totalDistance += distance;
+        totalTime += diffInSeconds;
+        totalElevation += elevation;
+
+        const speed = distance / diffInSeconds;
+        const avgSpeedMps = totalDistance / totalTime;
+        avgSpeedKph = avgSpeedMps * 3.6;
+
+        const point = {
+          lat,
+          lng,
+          elevation,
+          time,
+          totalTime,
+          distance,
+          totalDistance,
+          speed,
+          avgSpeed: avgSpeedKph,
         };
+        prevPoint = point;
+        //console.log(distance);
+        //console.log(speed);
+        console.log(avgSpeedKph);
+        return point;
       }
     );
+    console.log(totalDistance);
 
     setGpxData({
       name,
       time,
       type,
+      distance: totalDistance,
+      duration: totalTime,
+      avgSpeed: avgSpeedKph,
+      elevation: totalElevation,
       coords,
     });
   };
@@ -58,9 +97,16 @@ export default function Activities() {
   const fields = [
     { name: "name" },
     { name: "type" },
-    { name: "distance", type: "number" },
-    { name: "duration", type: "number" },
+    { name: "distance", type: "hidden" },
+    { name: "duration", type: "hidden" },
   ];
+
+  const data = {
+    name: gpxData?.name,
+    type: gpxData?.type,
+    //distance: gpxData?.coords[gpxData.coords.length - 1].totalDistance,
+    //duration: gpxData?.coords[gpxData.coords.length - 1].totalTime,
+  };
 
   const renderForm: FormRender = ({ fields }) => {
     const { name, type, distance, duration } = fields;
@@ -71,22 +117,23 @@ export default function Activities() {
           <div className="flex-1">{type}</div>
         </div>
         <div className="flex gap-2">
-          <div className="flex-1">{distance}</div>
-          <div className="flex-1">{duration}</div>
+          <div className="flex-1">
+            
+          </div>
+          <div className="flex-1">
+            
+          </div>
         </div>
         <Button type="submit">Create activity</Button>
       </div>
     );
   };
-  const data = { name: gpxData?.name, type: gpxData?.type };
 
   const saveActivity = async (data: GpxRecord) => {
     console.log(data);
     if (gpxData) {
       gpxData.name = data.name;
       gpxData.type = data.type;
-      gpxData.distance = data.distance;
-      gpxData.duration = data.duration;
       await createActivity(gpxData);
     }
   };

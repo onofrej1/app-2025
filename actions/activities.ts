@@ -3,6 +3,29 @@
 import { auth } from "@/auth";
 import { prisma } from "@/db/prisma";
 
+export interface Point {
+  lat: number;
+  lng: number;
+  elevation: number;
+  time: Date;
+  distance: number;
+  totalDistance: number;
+  totalTime: number;
+  speed: number;
+  avgSpeed: number;
+}
+
+export interface GpxRecord {
+  name: string;
+  type: string;
+  time: string;
+  distance: number;
+  duration: number;
+  elevation: number;
+  avgSpeed: number;
+  coords: Point[];
+}
+
 export async function getActivities() {
   const session = await auth();
   const loggedUser = session?.user;
@@ -61,22 +84,6 @@ export async function getActivity(id: number) {
     },
   });
   return activity;
-}
-
-export interface Point {
-  lat: number;
-  lng: number;
-  elevation: number;
-  time: Date;
-}
-
-export interface GpxRecord {
-  name: string;
-  type: string;
-  time: string;
-  distance: number;
-  duration: number;
-  coords: Point[];
 }
 
 export async function createActivity(data: GpxRecord) {
