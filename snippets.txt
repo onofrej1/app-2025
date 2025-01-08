@@ -95,3 +95,10 @@ function haversine_distance(mk1: any, mk2: any) {
     var d = R * c;
     return d; // returns the distance in meter
   };
+
+  /*const formObject = Object.fromEntries(formData.entries());
+    const reader = new FileReader();
+    reader.onload = function (e: any) {
+      const content = e.target.result;            
+    };
+    reader.readAsText(formObject['myFile'] as Blob);*/

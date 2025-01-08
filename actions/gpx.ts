@@ -4,7 +4,6 @@ import { auth } from "@/auth";
 import { GpxJson } from "gpx-parser-ts/dist/types";*/
 const xml2js = require("xml2js");
 const xmlParser = new xml2js.Parser({ attrkey: "ATTR" });
-var togeojson = require('@mapbox/togeojson');
 
 interface Point {
   lat: number, lng: number, elevation: number, time: number;

@@ -8,11 +8,10 @@ export interface Point {
   lng: number;
   elevation: number;
   time: Date;
+  totalTime: number;
   distance: number;
   totalDistance: number;
-  totalTime: number;
   speed: number;
-  avgSpeed: number;
 }
 
 export interface GpxRecord {

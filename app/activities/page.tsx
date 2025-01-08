@@ -6,10 +6,9 @@ import Map from "@/components/map/map";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
-import type { FeatureCollection, LineString } from "geojson";
+import type { FeatureCollection } from "geojson";
 import Form, { FormRender } from "@/components/form/form";
-import { getCoordsDistance } from "@/utils";
-const { differenceInSeconds } = require("date-fns");
+import { analyzeGpxData } from "@/utils/gpx";
 
 var togeojson = require("@mapbox/togeojson");
 
@@ -30,114 +29,9 @@ export default function Activities() {
     const data: FeatureCollection = togeojson.gpx(
       new DOMParser().parseFromString(buffer.toString(), "text/xml")
     );
-    /*const formObject = Object.fromEntries(formData.entries());
-    const reader = new FileReader();
-    reader.onload = function (e: any) {
-      const content = e.target.result;            
-    };
-    reader.readAsText(formObject['myFile'] as Blob);*/
-    console.log(data);
-
-    const { coordTimes, name, time, type } = data.features[0].properties as any;
-    let prevPoint: any,
-      totalDistance = 0,
-      totalElevation = 0,
-      avgSpeedKph = 0,
-      totalTime = 0,
-      elevationStart: number,
-      split = 1000,
-      avgPace = 0,
-      splitDistance = 0,
-      splitTime = 0,
-      kmPaces: any[] = [],
-      splits: any[] = [];
-
-    const coords = (data.features[0].geometry as LineString).coordinates.map(
-      ([lng, lat, elevation], index) => {
-        let distance = 0;
-        let diffInSeconds = 0;
-
-        const time = new Date(coordTimes[index]);
-        if (!elevationStart) {
-          elevationStart = elevation;
-        }
-        if (prevPoint) {
-          distance = getCoordsDistance(prevPoint, { lat, lng });
-          diffInSeconds = differenceInSeconds(time, prevPoint.time);
-        }
-        totalDistance += distance;
-        totalTime += diffInSeconds;
-        totalElevation += elevation;
-
-        splitDistance += distance;
-        splitTime += diffInSeconds;
-
-        const speed = distance / diffInSeconds;
-        const avgSpeedMps = totalDistance / totalTime;
-        avgSpeedKph = avgSpeedMps * 3.6;
-        const pace = diffInSeconds / 60;
-        console.log(pace);
-
-        const point = {
-          lat,
-          lng,
-          elevation,
-          totalElevation,
-          time,
-          totalTime,
-          distance,
-          totalDistance,
-          speed,
-          avgSpeed: avgSpeedKph,
-        };
-        prevPoint = point;
-
-        if (totalDistance >= split) {
-          const distancePerKm = splitDistance / 1000;
-          const secondsPerKm = splitTime / distancePerKm;
-          const minsPerKm = Math.floor(secondsPerKm / 60);
-          const seconds = secondsPerKm % 60;
-          console.log(minsPerKm, ":", seconds);
-
-          kmPaces.push(`${minsPerKm} : ${seconds}`);
-
-          splits.push({
-            d: splitDistance,
-            t: splitTime,
-            output: `${minsPerKm}:${seconds}`,
-          });
-
-          splitDistance = 0;
-          splitTime = 0;
-
-          split += 1000;
-        }
-        //console.log(elevation);
-        return point;
-      }
-    );
-    console.log(totalDistance);
-    console.log(splits.map((s) => s.output));
-
-    const distancePerKm = totalDistance / 1000;
-    const secondsPerKm = totalTime / distancePerKm;
-    const minsPerKm = Math.floor(secondsPerKm / 60);
-    const seconds = secondsPerKm % 60;
-    avgPace = secondsPerKm;
-    const avgPaceStr = `${minsPerKm}:${seconds}`;
-    console.log(avgPaceStr);
-
-    setGpxData({
-      name,
-      time,
-      type,
-      distance: totalDistance,
-      duration: totalTime,
-      avgSpeed: avgSpeedKph,
-      avgPace,
-      elevation: totalElevation,
-      coords,
-    });
+    
+    const parsedData = analyzeGpxData(data);
+    setGpxData(parsedData);
   };
 
   const fields = [
@@ -150,12 +44,10 @@ export default function Activities() {
   const data = {
     name: gpxData?.name,
     type: gpxData?.type,
-    //distance: gpxData?.coords[gpxData.coords.length - 1].totalDistance,
-    //duration: gpxData?.coords[gpxData.coords.length - 1].totalTime,
   };
 
   const renderForm: FormRender = ({ fields }) => {
-    const { name, type, distance, duration } = fields;
+    const { name, type } = fields;
     return (
       <div className="flex flex-col gap-3">
         <div className="flex gap-2">
