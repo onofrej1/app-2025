@@ -43,13 +43,24 @@ export default function Activities() {
       totalDistance = 0,
       totalElevation = 0,
       avgSpeedKph = 0,
-      totalTime = 0;
+      totalTime = 0,
+      elevationStart: number,
+      split = 1000,
+      avgPace = 0,
+      splitDistance = 0,
+      splitTime = 0,
+      kmPaces: any[] = [],
+      splits: any[] = [];
+
     const coords = (data.features[0].geometry as LineString).coordinates.map(
       ([lng, lat, elevation], index) => {
         let distance = 0;
         let diffInSeconds = 0;
 
         const time = new Date(coordTimes[index]);
+        if (!elevationStart) {
+          elevationStart = elevation;
+        }
         if (prevPoint) {
           distance = getCoordsDistance(prevPoint, { lat, lng });
           diffInSeconds = differenceInSeconds(time, prevPoint.time);
@@ -58,14 +69,20 @@ export default function Activities() {
         totalTime += diffInSeconds;
         totalElevation += elevation;
 
+        splitDistance += distance;
+        splitTime += diffInSeconds;
+
         const speed = distance / diffInSeconds;
         const avgSpeedMps = totalDistance / totalTime;
         avgSpeedKph = avgSpeedMps * 3.6;
+        const pace = diffInSeconds / 60;
+        console.log(pace);
 
         const point = {
           lat,
           lng,
           elevation,
+          totalElevation,
           time,
           totalTime,
           distance,
@@ -74,13 +91,41 @@ export default function Activities() {
           avgSpeed: avgSpeedKph,
         };
         prevPoint = point;
-        //console.log(distance);
-        //console.log(speed);
-        console.log(avgSpeedKph);
+
+        if (totalDistance >= split) {
+          const distancePerKm = splitDistance / 1000;
+          const secondsPerKm = splitTime / distancePerKm;
+          const minsPerKm = Math.floor(secondsPerKm / 60);
+          const seconds = secondsPerKm % 60;
+          console.log(minsPerKm, ":", seconds);
+
+          kmPaces.push(`${minsPerKm} : ${seconds}`);
+
+          splits.push({
+            d: splitDistance,
+            t: splitTime,
+            output: `${minsPerKm}:${seconds}`,
+          });
+
+          splitDistance = 0;
+          splitTime = 0;
+
+          split += 1000;
+        }
+        //console.log(elevation);
         return point;
       }
     );
     console.log(totalDistance);
+    console.log(splits.map((s) => s.output));
+
+    const distancePerKm = totalDistance / 1000;
+    const secondsPerKm = totalTime / distancePerKm;
+    const minsPerKm = Math.floor(secondsPerKm / 60);
+    const seconds = secondsPerKm % 60;
+    avgPace = secondsPerKm;
+    const avgPaceStr = `${minsPerKm}:${seconds}`;
+    console.log(avgPaceStr);
 
     setGpxData({
       name,
@@ -89,6 +134,7 @@ export default function Activities() {
       distance: totalDistance,
       duration: totalTime,
       avgSpeed: avgSpeedKph,
+      avgPace,
       elevation: totalElevation,
       coords,
     });
@@ -117,12 +163,8 @@ export default function Activities() {
           <div className="flex-1">{type}</div>
         </div>
         <div className="flex gap-2">
-          <div className="flex-1">
-            
-          </div>
-          <div className="flex-1">
-            
-          </div>
+          <div className="flex-1"></div>
+          <div className="flex-1"></div>
         </div>
         <Button type="submit">Create activity</Button>
       </div>

@@ -23,6 +23,7 @@ export interface GpxRecord {
   duration: number;
   elevation: number;
   avgSpeed: number;
+  avgPace: number;
   coords: Point[];
 }
 
