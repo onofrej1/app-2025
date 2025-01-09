@@ -1,18 +1,17 @@
 "use server";
 
-import { auth } from "@/auth";
 import { prisma } from "@/db/prisma";
 import { redirect } from "next/navigation";
+import { getSession } from "./auth";
 
 export async function getActivities() {
-  const session = await auth();
-  const loggedUser = session?.user;
-  if (!loggedUser) {
+  const session = await getSession();
+  if (!session.isLoggedIn) {
     throw new Error("Unauthorized");
   }
   const data = await prisma.oAuthToken.findFirst({
     where: {
-      userId: loggedUser.id,
+      userId: session.userId,
       provider: "strava",
     },
     select: {

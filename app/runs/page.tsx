@@ -1,4 +1,5 @@
 "use client";
+import { getSession } from "@/actions/auth";
 import { getRuns } from "@/actions/runs";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
@@ -7,6 +8,8 @@ import Link from "next/link";
 import React from "react";
 
 export default function Events() {
+  const session = getSession();
+  console.log(session);
   const { data: runs = [], isFetching } = useQuery({
     queryKey: ["getRuns"],
     queryFn: getRuns,

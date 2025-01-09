@@ -1,7 +1,7 @@
 "use server";
 
-import { auth } from "@/auth";
 import { prisma } from "@/db/prisma";
+import { getSession } from "./auth";
 
 export interface Point {
   lat: number;
@@ -27,14 +27,13 @@ export interface GpxRecord {
 }
 
 export async function getActivities() {
-  const session = await auth();
-  const loggedUser = session?.user;
-  if (!loggedUser) {
-    throw new Error("unauthorized");
+  const session = await getSession();
+  if (!session.isLoggedIn) {
+    throw new Error("Unauthorized");
   }
   const activities = await prisma.activity.findMany({
     where: {
-      userId: loggedUser.id,
+      userId: session.userId,
     },
     select: {
       user: {
@@ -57,10 +56,9 @@ export async function getActivities() {
 }
 
 export async function getActivity(id: number) {
-  const session = await auth();
-  const loggedUser = session?.user;
-  if (!loggedUser) {
-    throw new Error("unauthorized");
+  const session = await getSession();
+  if (!session.isLoggedIn) {
+    throw new Error("Unauthorized");
   }
   const activity = await prisma.activity.findFirstOrThrow({
     where: {
@@ -88,20 +86,22 @@ export async function getActivity(id: number) {
 
 export async function createActivity(data: GpxRecord) {
   console.log(data);
-  const session = await auth();
-  const loggedUser = session?.user;
-  if (!loggedUser) {
-    return { message: "User not logged" };
+  const session = await getSession();
+  if (!session.isLoggedIn) {
+    throw new Error("Unauthorized");
   }
 
   const activity = await prisma.activity.create({
     data: {
-      userId: loggedUser.id,
+      userId: session.userId,
       name: "run",
       date: new Date(),
       type: "run",
       distance: data.distance,
       duration: data.duration,
+      elevation: data.elevation,
+      avgPace: data.avgPace,
+      avgSpeed: data.avgSpeed
     },
   });
 

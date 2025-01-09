@@ -1,13 +1,12 @@
 "use server";
 
-import { auth } from "@/auth";
 import { prisma } from "@/db/prisma";
+import { getSession } from "./auth";
 
 export async function sendFriendRequest(email: string) {
-  const session = await auth();
-  const loggedUser = session?.user;
-  if (!loggedUser) {
-    return { message: "User not logged" };
+  const session = await getSession();
+  if (!session.isLoggedIn) {
+    throw new Error("Unauthorized");
   }
   const user = await prisma.user.findFirst({ where: { email } });
   if (!user) {
@@ -15,7 +14,7 @@ export async function sendFriendRequest(email: string) {
   }
   const result = await prisma.friendRequest.create({
     data: {
-      sender: { connect: { id: loggedUser.id } },
+      sender: { connect: { id: session.userId } },
       receiver: { connect: { id: user.id } },
       //receiver: fromUser,
     },
@@ -24,16 +23,15 @@ export async function sendFriendRequest(email: string) {
 }
 
 export async function approveFriendRequest(id: number) {
-  const session = await auth();
-  const loggedUser = session?.user;
-  if (!loggedUser) {
+  const session = await getSession();
+  if (!session.isLoggedIn) {
     throw new Error("Unauthorized");
   }
   const friendRequest = await prisma.friendRequest.findUniqueOrThrow({
     where: {
       id,
       receiver: {
-        id: loggedUser.id,
+        id: session.userId,
       },
     },
     select: {
@@ -78,15 +76,15 @@ export async function approveFriendRequest(id: number) {
 }
 
 export async function getFriendRequests() {
-  const session = await auth();
-  const loggedUser = session?.user;
-  if (!loggedUser) {
-    throw new Error("Unauthorized");
+  const session = await getSession();
+  if (!session.isLoggedIn) {
+    return [];
+    //throw new Error("Unauthorized");
   }
   return prisma.friendRequest.findMany({
     where: {
       receiver: {
-        id: loggedUser.id,
+        id: session.userId,
       },
     },
     include: {
@@ -102,9 +100,8 @@ export async function getFriendRequests() {
 }
 
 export async function getMessages(conversationId: number) {
-  const session = await auth();
-  const loggedUser = session?.user;
-  if (!loggedUser) {
+  const session = await getSession();
+  if (!session.isLoggedIn) {
     throw new Error("Unauthorized");
   }
   return prisma.message.findMany({
@@ -132,16 +129,15 @@ export async function createMessage(
   content: string,
   type: string = "text"
 ) {
-  const session = await auth();
-  const loggedUser = session?.user;
-  if (!loggedUser) {
+  const session = await getSession();
+  if (!session.isLoggedIn) {
     throw new Error("Unauthorized");
   }
   const message = await prisma.message.create({
     data: {
       content,
       type,
-      senderId: loggedUser.id,
+      senderId: session.userId,
       conversationId,
     },
     select: {
@@ -168,14 +164,13 @@ export async function createMessage(
 }
 
 export async function getConversations() {
-  const session = await auth();
-  const loggedUser = session?.user;
-  if (!loggedUser) {
+  const session = await getSession();
+  if (!session.isLoggedIn) {
     throw new Error("Unauthorized");
   }
   const loggedUserConversations = await prisma.conversationMember.findMany({
     where: {
-      userId: loggedUser.id,
+      userId: session.userId,
     },
     select: {
       conversationId: true,
@@ -187,7 +182,7 @@ export async function getConversations() {
         in: loggedUserConversations.map((c) => c.conversationId),
       },
       userId: {
-        not: loggedUser.id,
+        not: session.userId,
       },
     },
     select: {
@@ -265,14 +260,13 @@ export async function getConversations() {
 }
 
 export async function getConversation() {
-  const session = await auth();
-  const loggedUser = session?.user;
-  if (!loggedUser) {
+  const session = await getSession();
+  if (!session.isLoggedIn) {
     throw new Error("Unauthorized");
   }
   const loggedUserConversations = await prisma.conversationMember.findMany({
     where: {
-      userId: loggedUser.id,
+      userId: session.userId,
     },
     select: {
       conversationId: true,

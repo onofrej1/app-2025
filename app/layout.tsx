@@ -4,7 +4,6 @@ import "./globals.css";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { Toaster } from "@/components/ui/sonner";
-import { SessionProvider } from "next-auth/react";
 import Alert from "@/components/common/alert";
 import { ReactQueryProvider } from "./react-query-provider";
 import AdminPanelLayout from "@/components/admin-panel/admin-panel-layout";
@@ -29,7 +28,6 @@ export const metadata: Metadata = {
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <ReactQueryProvider>
-      <SessionProvider>
         <html lang="en">
           <body>
             {/*<SidebarProvider>
@@ -47,7 +45,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <DialogModal />
           </body>
         </html>
-      </SessionProvider>
     </ReactQueryProvider>
   );
 }

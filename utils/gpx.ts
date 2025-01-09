@@ -102,7 +102,7 @@ export function analyzeGpxData(data: FeatureCollection) {
           elevationUp: splitAscent,
           elevationDown: splitDescent,
           avgPace: getPacePerKm(splitDistance, splitTime),
-          avgPaceMinSec: getPacePerKm(splitDistance, splitTime, true),
+          avgPaceMinSec: getPacePerKmMinSec(splitDistance, splitTime),
           bestPace: splitBestPace,
           bestPaceMinSec: secondsToMinSec(splitBestPace),
         });

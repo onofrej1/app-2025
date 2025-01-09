@@ -1,5 +1,8 @@
 "use server";
-import { auth } from "@/auth";
+
+import { getSession } from "./auth";
+
+//import { auth } from "@/auth";
 /*import GpxParser from "gpx-parser-ts";
 import { GpxJson } from "gpx-parser-ts/dist/types";*/
 const xml2js = require("xml2js");
@@ -16,9 +19,8 @@ interface GpxData {
 }
 
 export async function parseGpxData(formData: FormData) {
-  const session = await auth();
-  const loggedUser = session?.user;
-  if (!loggedUser) {
+  const session = await getSession();
+  if (!session.isLoggedIn) {
     throw new Error("Unauthorized");
   }
 
