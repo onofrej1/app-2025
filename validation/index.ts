@@ -117,9 +117,9 @@ const CreateOrEditActivity = z.object({
   id: z.number().optional(),
   name: z.string().trim().min(4),
   type: z.string().trim().min(1),
-  distance: z.coerce.number(),
-  calories: z.coerce.number(),
-  duration: z.coerce.number(),  
+  distance: z.coerce.number().optional(),
+  calories: z.coerce.number().optional(),
+  duration: z.coerce.number().optional(),  
 });
 
 const CreateOrEditRunCategory = z.object({
@@ -138,6 +138,20 @@ const CreateOrEditOrganizer = z.object({
   name: z.string().trim().min(4),  
 });
 
+const ContactForm = z.object({
+  name: z.string().trim().min(1),
+  email: z.string().email(),
+  message: z.string().trim().min(4),
+});
+
+const ResetPasswordRequest = z.object({
+  email: z.string().email(),
+});
+
+const ChangePassword = z.object({
+  password: z.string().min(3),
+});
+
 export type FormSchema = 
  | 'LoginUser'
  | 'RegisterUser'
@@ -154,16 +168,20 @@ export type FormSchema =
  | 'FilterResource'
  | 'CreateRegistration'
  | 'CreateRunResult'
+ | 'ContactForm'
  | 'SendFriendRequest'
+ | 'ResetPasswordRequest'
  | 'SendMessage'
+ | 'ChangePassword'
 
-const FilterResource = z.object({
+/*const FilterResource = z.object({
   id: z.string().optional(),
-});
+});*/
 
 const rules = {
   RegisterUser,
   LoginUser,
+  ChangePassword,
   CreateOrEditPost,
   CreateOrEditCategory,
   CreateOrEditTask,
@@ -176,6 +194,8 @@ const rules = {
   CreateOrEditActivity,
   CreateRegistration,
   CreateRunResult,
+  ResetPasswordRequest,
+  ContactForm,
   //UpdateUserProfile,
   FilterResource: z.any(),
   SendFriendRequest,
@@ -186,3 +206,4 @@ export default rules;
 
 export type RegisterUserType = z.infer<typeof RegisterUser>;
 export type LoginUserType = z.infer<typeof LoginUser>;
+export type ContactForm = z.infer<typeof ContactForm>;

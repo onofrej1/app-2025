@@ -1,4 +1,5 @@
-import { auth } from "@/auth";
+//import { auth } from "@/auth";
+import { getSession } from "@/actions/auth";
 import { prisma } from "@/db/prisma";
 import { redirect } from "next/navigation";
 
@@ -11,7 +12,7 @@ const stravaOAuth = {
 };
 
 export async function GET(request: Request) {
-  const session = await auth();
+  const session = await getSession();
   const loggedUser = session?.user;
   if (!loggedUser) {
     throw new Error("Unauthorized");

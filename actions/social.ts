@@ -5,7 +5,7 @@ import { getSession } from "./auth";
 
 export async function sendFriendRequest(email: string) {
   const session = await getSession();
-  if (!session.isLoggedIn) {
+  if (!session) {
     throw new Error("Unauthorized");
   }
   const user = await prisma.user.findFirst({ where: { email } });
@@ -24,7 +24,7 @@ export async function sendFriendRequest(email: string) {
 
 export async function approveFriendRequest(id: number) {
   const session = await getSession();
-  if (!session.isLoggedIn) {
+  if (!session) {
     throw new Error("Unauthorized");
   }
   const friendRequest = await prisma.friendRequest.findUniqueOrThrow({
@@ -77,7 +77,7 @@ export async function approveFriendRequest(id: number) {
 
 export async function getFriendRequests() {
   const session = await getSession();
-  if (!session.isLoggedIn) {
+  if (!session) {
     return [];
     //throw new Error("Unauthorized");
   }
@@ -130,7 +130,7 @@ export async function createMessage(
   type: string = "text"
 ) {
   const session = await getSession();
-  if (!session.isLoggedIn) {
+  if (!session) {
     throw new Error("Unauthorized");
   }
   const message = await prisma.message.create({
@@ -165,7 +165,7 @@ export async function createMessage(
 
 export async function getConversations() {
   const session = await getSession();
-  if (!session.isLoggedIn) {
+  if (!session) {
     throw new Error("Unauthorized");
   }
   const loggedUserConversations = await prisma.conversationMember.findMany({
@@ -261,7 +261,7 @@ export async function getConversations() {
 
 export async function getConversation() {
   const session = await getSession();
-  if (!session.isLoggedIn) {
+  if (!session) {
     throw new Error("Unauthorized");
   }
   const loggedUserConversations = await prisma.conversationMember.findMany({

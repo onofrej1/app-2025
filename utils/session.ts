@@ -4,15 +4,8 @@ export interface SessionData {
   user: string;
   userId: string;
   role: string;
-  isLoggedIn: boolean;
+  token: string | null;
 }
-
-export const defaultSession: SessionData = {
-  user: "",
-  userId: "",
-  role: "user",
-  isLoggedIn: false,
-};
 
 export const sessionOptions: SessionOptions = {
   password: "",

@@ -1,6 +1,6 @@
 import { getSession } from "@/actions/auth";
-import { redirect } from "next/navigation"
- 
+import { redirect } from "next/navigation";
+
 export default async function UserAvatar() {
   const session = await getSession()
   console.log(session);

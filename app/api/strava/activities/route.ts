@@ -31,7 +31,7 @@ export async function GET(request: Request) {
 
   var api = new StravaApiV3.ActivitiesApi();
 
-  var id = 13231456464;
+  var id = '';
 
   var options = {
     includeAllEfforts: false,

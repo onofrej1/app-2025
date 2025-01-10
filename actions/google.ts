@@ -1,6 +1,7 @@
 "use server";
 
-import { auth } from "@/auth";
+import { getSession } from "./auth";
+
 const { google } = require("googleapis");
 
 const googleOAuth = {
@@ -13,7 +14,7 @@ const googleOAuth = {
 };
 
 export async function getEmailMessages() {
-  const session = await auth();
+  const session = await getSession();
   if (!session) return;
   console.log("user session:");
   //console.log(session.token);

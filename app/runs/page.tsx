@@ -1,14 +1,14 @@
 "use client";
-import { getSession } from "@/actions/auth";
 import { getRuns } from "@/actions/runs";
 import { Button } from "@/components/ui/button";
+import { useSession } from "@/hooks/use-session";
 import { formatDate } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import React from "react";
 
 export default function Events() {
-  const session = getSession();
+  const { user: session } = useSession();
   console.log(session);
   const { data: runs = [], isFetching } = useQuery({
     queryKey: ["getRuns"],

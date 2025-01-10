@@ -39,7 +39,7 @@ export type actionResult = {
 export type FormRenderProps = {
   fields: Record<string, JSX.Element>;
   formState: FormState;
-  trigger: UseFormTrigger<DefaultFormData>,
+  trigger: UseFormTrigger<DefaultFormData>;
 };
 
 export type FormRender = (props: FormRenderProps) => JSX.Element;
@@ -61,7 +61,7 @@ export default function Form({
   action,
   buttons,
   render,
-  children
+  children,
 }: FormProps) {
   const { replace } = useRouter();
   const validationRules = rules[validation];
@@ -107,17 +107,18 @@ export default function Form({
   };
 
   const renderField = (field: FormField) => {
-    const type = field.type || 'text';
+    const type = field.type || "text";
     const label = field.label || capitalize(field.name);
     return (
       <>
-        {["text", "number", "email", "hidden"].includes(type) && (
+        {["text", "textarea", "number", "email", "hidden"].includes(type) && (
           <>
             <FormInput
               label={label}
               name={field.name}
               errors={errors}
               type={type}
+              rows={field.rows}
               register={register}
               onChange={field.onChange}
             />
@@ -231,14 +232,22 @@ export default function Form({
   }, {} as Record<string, JSX.Element>);
 
   if (children) {
-    return children({ fields: fieldsToRender, formState: { isValid, pending: isLoading }, trigger });
+    return (
+      <form onSubmit={handleSubmit(submitForm)}>
+        {children({
+          fields: fieldsToRender,
+          formState: { isValid, pending: isLoading },
+          trigger,
+        })}
+      </form>
+    );
   }
 
   if (render) {
     const renderContent = render({
       fields: fieldsToRender,
       formState: { isValid, pending: isLoading },
-      trigger 
+      trigger,
     });
     return (
       <>
@@ -251,7 +260,6 @@ export default function Form({
   const restMessages = Object.keys(errors).filter(
     (e) => !fieldNames.includes(e)
   );
-  
 
   return (
     <>

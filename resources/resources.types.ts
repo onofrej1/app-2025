@@ -20,7 +20,8 @@ interface FormField {
     name: string;
     label?: string;
     type?: string;
-
+    rows?: number;
+    
     // optional props
     resource?: PrismaModel;
     fk?: string;
@@ -33,7 +34,7 @@ interface FormField {
 
     /*value?: string;
     helperText?: string;
-    rows?: number;    
+     
     
     color?: string;
     inputType?: string;

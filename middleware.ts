@@ -1,26 +1,24 @@
-//export { auth as middleware } from "@/auth"
 
 //import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
+import { getSessionToken } from "./actions/auth";
+
+// Define role-based access control
+const adminRoutes = ["/admin", "/settings"];
+const editorRoutes = ["/edit", "/runs"];
 
 export async function middleware(req: NextRequest) {
-  
-  const token = ''; //await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  const session = await getSessionToken(); //await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
-  if (!token) {
-    // If no token is found, redirect to login
+  if (!session || !session.token) {
     return NextResponse.redirect(new URL("/sign-in", req.url));
   }
 
-  // Define role-based access control
-  const adminRoutes = ["/admin", "/settings"];
-  const editorRoutes = ["/edit", "/posts"];
-
-  if (adminRoutes.includes(req.nextUrl.pathname) && token.role !== "admin") {
+  if (adminRoutes.includes(req.nextUrl.pathname) && session.role !== "admin") {
     return NextResponse.redirect(new URL("/no-access", req.url));
   }
 
-  if (editorRoutes.includes(req.nextUrl.pathname) && token.role !== "editor") {
+  if (editorRoutes.includes(req.nextUrl.pathname) && session.role !== "user") {
     return NextResponse.redirect(new URL("/no-access", req.url));
   }
 
@@ -30,5 +28,5 @@ export async function middleware(req: NextRequest) {
 
 // Specify the routes that require the middleware
 export const config = {
-  matcher: ["/admin/:path*", "/edit/:path*"],
+  matcher: ["/admin/:path*", "/runs"],
 };
