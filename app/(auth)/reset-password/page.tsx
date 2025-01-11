@@ -22,12 +22,12 @@ export default function ResetPasswordPage() {
 
   return (
     <>
-      <Form fields={fields} validation={"ChangePassword"} action={sendForm}>
+      <Form fields={fields} validation={"ResetPassword"} action={sendForm}>
         {({ fields }) => (
           <div>
             <div className="flex flex-col gap-3 pb-4">
               {fields.password}
-              {fields.confirmPassword}
+              {/* fields.confirmPassword */}
               <Button type="submit">Send</Button>
             </div>
           </div>

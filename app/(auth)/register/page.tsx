@@ -1,11 +1,12 @@
 "use client";
-import { registerUser } from "@/actions/auth";
+import { register } from "@/actions/auth";
 import Form, { FormState } from "@/components/form/form";
 import { Button } from "@/components/ui/button";
 
-export default function Register() {
+export default function RegisterPage() {
   const fields = [
-    { name: 'name', type: 'text', label: 'Name' },
+    { name: 'firstName', type: 'text', label: 'First name' },
+    { name: 'lastName', type: 'text', label: 'Last name' },
     { name: 'email', type: 'text', label: 'Email' },
     { name: 'password', type: 'text', label: 'Password' },
     //{ name: 'confirm', type: 'checkbox', label: 'Confirm submit' }
@@ -31,7 +32,7 @@ export default function Register() {
         fields={fields}
         validation={'RegisterUser'}
         buttons={buttons}
-        action={registerUser}
+        action={register}
       />
     </>
 

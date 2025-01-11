@@ -1,9 +1,9 @@
 "use client";
 import Form, { FormState } from "@/components/form/form";
 import { Button } from "@/components/ui/button";
-import { SignInUser } from "@/actions/auth";
+import { login } from "@/actions/auth";
 
-export default function Login() {
+export default function LoginPage() {
   //const { data: session, status } = useSession();
   
   const fields = [
@@ -32,7 +32,7 @@ export default function Login() {
         fields={fields}
         validation={'LoginUser'}
         buttons={buttons}
-        action={SignInUser}
+        action={login}
       />
     </>
 

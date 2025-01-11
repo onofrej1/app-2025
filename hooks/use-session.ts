@@ -15,7 +15,7 @@ export function useSession() {
     isFetching,
     user: {
       user: session?.user,
-      //userId: session?.userId,
+      userId: session?.userId,
       role: session?.role,
     },
   };

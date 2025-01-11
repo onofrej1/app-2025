@@ -23,7 +23,7 @@ export default function Conversations() {
             return (
               <div key={conversation.id} className="mb-1">
                 <Button variant="ghost" onClick={() => setConversationId(conversation.conversation.id)}>
-                  {conversation.user.name} - {conversation.user.email}
+                  {conversation.user.firstName} - {conversation.user.email}
                 </Button>
                 <div className="pl-4">
                   <small>{conversation.conversation.lastMessage?.content}</small>

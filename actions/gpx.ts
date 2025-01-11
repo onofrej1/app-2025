@@ -20,7 +20,7 @@ interface GpxData {
 
 export async function parseGpxData(formData: FormData) {
   const session = await getSession();
-  if (!session.isLoggedIn) {
+  if (!session) {
     throw new Error("Unauthorized");
   }
 

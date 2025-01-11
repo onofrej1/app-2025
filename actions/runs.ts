@@ -29,6 +29,5 @@ export async function createRegistration(data: Registration) {
   const registration = prisma.registration.create({
     data,
   });
-  console.log(registration);
   return registration;
 }

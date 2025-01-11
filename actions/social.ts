@@ -92,7 +92,8 @@ export async function getFriendRequests() {
         select: {
           email: true,
           id: true,
-          name: true,
+          firstName: true,
+          lastName: true,
         },
       },
     },
@@ -101,7 +102,7 @@ export async function getFriendRequests() {
 
 export async function getMessages(conversationId: number) {
   const session = await getSession();
-  if (!session.isLoggedIn) {
+  if (!session) {
     throw new Error("Unauthorized");
   }
   return prisma.message.findMany({
@@ -115,7 +116,8 @@ export async function getMessages(conversationId: number) {
       sender: {
         select: {
           id: true,
-          name: true,
+          firstName: true,
+          lastName: true,
           email: true,
           image: true,
         },
@@ -146,7 +148,8 @@ export async function createMessage(
       type: true,
       sender: {
         select: {
-          name: true,
+          firstName: true,
+          lastName: true,
           email: true,
           image: true,
         },
@@ -189,7 +192,8 @@ export async function getConversations() {
       id: true,
       user: {
         select: {
-          name: true,
+          firstName: true,
+          lastName: true,
           email: true,
         },
       },
@@ -211,7 +215,8 @@ export async function getConversations() {
               type: true,
               sender: {
                 select: {
-                  name: true,
+                  firstName: true,
+                  lastName: true,
                   email: true,
                 },
               },
@@ -288,7 +293,8 @@ export async function getConversation() {
           },
           user: {
             select: {
-              name: true,
+              firstName: true,
+              lastName: true,
               email: true,
             },
           },
@@ -309,7 +315,8 @@ export async function getConversation() {
           type: true,
           sender: {
             select: {
-              name: true,
+              firstName: true,
+              lastName: true,
               email: true,
             },
           },

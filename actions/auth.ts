@@ -63,8 +63,8 @@ export async function getSession() {
   return session;
 }
 
-export async function registerUser(data: RegisterUserType) {
-  const { name, email, password } = data;
+export async function register(data: RegisterUserType) {
+  const { firstName, lastName, email, password } = data;
 
   const exist = await prisma.user.findUnique({
     where: {
@@ -81,7 +81,8 @@ export async function registerUser(data: RegisterUserType) {
   try {
     await prisma.user.create({
       data: {
-        name,
+        firstName,
+        lastName,
         email: email,
         password: hashedPassword,
         role: "user",
@@ -93,7 +94,7 @@ export async function registerUser(data: RegisterUserType) {
   return { redirect: "/profile" };
 }
 
-export async function SignInUser(data: { email: string; password: string }) {
+export async function login(data: { email: string; password: string }) {
   const { email, password } = data;
   if (!email || !password) {
     throw new Error("Please enter an email and password");
@@ -136,7 +137,8 @@ export async function SignInUser(data: { email: string; password: string }) {
   return user;
 }
 
-export async function signUserOut() {
+export async function logout() {
+  console.log('logout');
   const session = await getSession();
   if (session) {
     await prisma.session.delete({
@@ -176,7 +178,7 @@ export async function resetPasswordRequest(email: string) {
     user.email,
     "Password Reset Request",
     "requestResetPassword.handlebars",
-    { name: user.name, link: link }
+    { name: user, link: link }
   );
 }
 
@@ -213,10 +215,38 @@ export async function ResetPassword(
   sendEmail(
     user.email,
     "Password Reset Successfully",
-    "resetPassword.handlebars",
+    "changePasswordSuccess.handlebars",
     {
-      name: user.id,
+      name: user.firstName,
     }
   );
   await prisma.resetToken.delete({ where: { id: resetToken.id } });
+}
+
+export async function ChangePassword(password: string) {
+  const session = await getSession();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+  const user = await prisma.user.findFirst({ where: { id: session.userId } });
+  if (!user) {
+    throw new Error("User does not exist");
+  }
+  const hash = await bcrypt.hash(password, Number(process.env.BCRYPT_SALT));
+  await prisma.user.update({
+    data: {
+      password: hash,
+    },
+    where: {
+      id: session.userId,
+    },
+  });
+  sendEmail(
+    user.email,
+    "Password changed Successfully",
+    "changePasswordSuccess.handlebars",
+    {
+      name: user.firstName,
+    }
+  );
 }

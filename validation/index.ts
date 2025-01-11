@@ -7,7 +7,8 @@ import { z } from "zod";
 });*/
 
 const RegisterUser = z.object({
-  name: z.string().trim().min(4),
+  firstName: z.string().trim().min(4),
+  lastName: z.string().trim().min(4),
   email: z.string().email(),
   password: z.string().min(1)
 });
@@ -148,8 +149,13 @@ const ResetPasswordRequest = z.object({
   email: z.string().email(),
 });
 
+const ResetPassword = z.object({
+  password: z.string().min(3),
+});
+
 const ChangePassword = z.object({
   password: z.string().min(3),
+  confirmPassword: z.string().min(3),
 });
 
 export type FormSchema = 
@@ -173,6 +179,7 @@ export type FormSchema =
  | 'ResetPasswordRequest'
  | 'SendMessage'
  | 'ChangePassword'
+ | 'ResetPassword'
 
 /*const FilterResource = z.object({
   id: z.string().optional(),

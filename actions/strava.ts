@@ -6,7 +6,7 @@ import { getSession } from "./auth";
 
 export async function getActivities() {
   const session = await getSession();
-  if (!session.isLoggedIn) {
+  if (!session) {
     throw new Error("Unauthorized");
   }
   const data = await prisma.oAuthToken.findFirst({

@@ -28,7 +28,7 @@ export interface GpxRecord {
 
 export async function getActivities() {
   const session = await getSession();
-  if (!session.isLoggedIn) {
+  if (!session) {
     throw new Error("Unauthorized");
   }
   const activities = await prisma.activity.findMany({
@@ -40,7 +40,8 @@ export async function getActivities() {
         select: {
           id: true,
           email: true,
-          name: true,
+          firstName: true,
+          lastName: true,
         },
       },
       id: true,
@@ -57,7 +58,7 @@ export async function getActivities() {
 
 export async function getActivity(id: number) {
   const session = await getSession();
-  if (!session.isLoggedIn) {
+  if (!session) {
     throw new Error("Unauthorized");
   }
   const activity = await prisma.activity.findFirstOrThrow({
@@ -69,7 +70,8 @@ export async function getActivity(id: number) {
         select: {
           id: true,
           email: true,
-          name: true,
+          firstName: true,
+          lastName: true,
         },
       },
       id: true,
@@ -87,7 +89,7 @@ export async function getActivity(id: number) {
 export async function createActivity(data: GpxRecord) {
   console.log(data);
   const session = await getSession();
-  if (!session.isLoggedIn) {
+  if (!session) {
     throw new Error("Unauthorized");
   }
 

@@ -100,6 +100,7 @@ type PrismaModel =
 | 'organizer'
 | 'activity'
 | "runResult"
-| "registration";
+| "registration"
+| "project";
 
 export type { Resource, FormField, PrismaModel };
