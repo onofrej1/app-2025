@@ -3,7 +3,7 @@ import { TableHeader } from "@/components/table/table";
 import { FormSchema } from "@/validation";
 import { JSX } from "react";
 
-interface SelectOption {
+export interface SelectOption {
     label: string;
     value: string | number;
 }
@@ -31,6 +31,7 @@ interface FormField {
     className?: string;
     options?: SelectOption[] | MultiSelectOption[];
     render?: any;
+    renderLabel?: any;
 
     /*value?: string;
     helperText?: string;

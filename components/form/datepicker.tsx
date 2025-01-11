@@ -52,7 +52,7 @@ export function DatePicker(props: DatePickerProps) {
               mode="single"
               selected={date}
               onSelect={onChange}
-              initialFocus
+              //initialFocus
             />
           </PopoverContent>
         </Popover>

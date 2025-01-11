@@ -76,7 +76,7 @@ export async function register(data: RegisterUserType) {
     return { error: { path: "email", message: "Email already exists" } };
   }
 
-  const hashedPassword = await bcrypt.hash(password, process.env.BCRYPT_SALT!);
+  const hashedPassword = await bcrypt.hash(password, Number(process.env.BCRYPT_SALT!));
 
   try {
     await prisma.user.create({

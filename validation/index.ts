@@ -41,6 +41,16 @@ const CreateOrEditPost = z.object({
     //.transform((val) => val ? val : []),
 });
 
+const CreateOrEditProject = z.object({
+  id: z.coerce.number().optional(),
+  name: z.string().trim().min(4),
+  description: z.string().trim().min(4),
+  status: z.string().min(1),
+  startDate: z.coerce.date(),
+  endDate: z.coerce.date(),
+  managerId: z.string(),
+});
+
 const CreateOrEditTask = z.object({
   id: z.number().optional(),
   title: z.string().trim().min(4),
@@ -49,6 +59,15 @@ const CreateOrEditTask = z.object({
   order: z.coerce.number(),
   deadline: z.date(), //(z.coerce.date()),
   userId: z.string().min(1, 'User field is required'),  
+});
+
+const CreateTask = z.object({
+  id: z.number().optional(),
+  title: z.string().trim().min(4),
+  description: z.string().min(1),
+  status: z.string().optional(),
+  dueDate: z.date(), //(z.coerce.date()),
+  assigneeId: z.string().min(1, 'User field is required'), 
 });
 
 const SendFriendRequest = z.object({  
@@ -149,10 +168,6 @@ const ResetPasswordRequest = z.object({
   email: z.string().email(),
 });
 
-const ResetPassword = z.object({
-  password: z.string().min(3),
-});
-
 const ChangePassword = z.object({
   password: z.string().min(3),
   confirmPassword: z.string().min(3),
@@ -171,6 +186,7 @@ export type FormSchema =
  | 'CreateOrEditVenue'
  | 'CreateOrEditOrganizer'
  | 'CreateOrEditActivity'
+ | 'CreateOrEditProject'
  | 'FilterResource'
  | 'CreateRegistration'
  | 'CreateRunResult'
@@ -180,6 +196,7 @@ export type FormSchema =
  | 'SendMessage'
  | 'ChangePassword'
  | 'ResetPassword'
+ | 'CreateTask'
 
 /*const FilterResource = z.object({
   id: z.string().optional(),
@@ -202,7 +219,9 @@ const rules = {
   CreateRegistration,
   CreateRunResult,
   ResetPasswordRequest,
+  CreateOrEditProject,
   ContactForm,
+  CreateTask,
   //UpdateUserProfile,
   FilterResource: z.any(),
   SendFriendRequest,
@@ -214,3 +233,4 @@ export default rules;
 export type RegisterUserType = z.infer<typeof RegisterUser>;
 export type LoginUserType = z.infer<typeof LoginUser>;
 export type ContactForm = z.infer<typeof ContactForm>;
+export type CreateTaskType = z.infer<typeof CreateTask>;

@@ -1,7 +1,7 @@
 "use client";
 import { Controller, useForm, UseFormTrigger } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { JSX, ReactElement } from "react";
+import { JSX } from "react";
 import { FormField, MultiSelectOption } from "@/resources/resources.types";
 import { FormSchema } from "@/validation";
 import rules from "@/validation";

@@ -2,17 +2,51 @@
 
 import { prisma } from "@/db/prisma";
 import { Task } from "@prisma/client";
+import { getSession } from "./auth";
 
-export async function getTasks() {
-  return prisma.task.findMany();
+export async function getTasks(projectId: number) {
+  return prisma.task.findMany({ where: { projectId } });
+}
+
+export async function getProjects() {
+  return prisma.project.findMany();
+}
+
+export async function createTask(task: Task) {
+  const session = await getSession();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+  const tasks = await prisma.task.findMany({
+    where: { projectId: task.projectId, status: task.status },
+    orderBy: [
+      {
+        order: "desc",
+      },
+    ],
+    take: 1,
+  });
+  task.createdById = session.userId;
+  task.status = "TODO";
+  task.order = tasks.length > 0 ? tasks[0].order + 1 : 1;
+  console.log(task);
+  const newTask = await prisma.task.create({
+    data: task,
+  });
+  return newTask;
 }
 
 export async function updateTask(task: Task) {
-  const tasks = await prisma.task.update({
+  const session = await getSession();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+  console.log(task);
+  const newTask = await prisma.task.update({
     where: {
       id: task.id,
     },
     data: task,
   });
-  return tasks;
+  return newTask;
 }

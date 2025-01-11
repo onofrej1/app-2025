@@ -136,20 +136,20 @@ model TaskComment {
 }
 
 model Task {
-  id          Int           @id @default(autoincrement())
-  title       String
-  description String?
-  status      Status
-  order       Int
-  dueDate     DateTime
-  project     Project       @relation(fields: [projectId], references: [id])
-  projectId   Int
-  createdBy   User          @relation("taskCreatedBy", fields: [createdById], references: [id])
-  createdById String
-  assignee    User          @relation("taskAssignee", fields: [assigneeId], references: [id])
-  assigneeId  String
-  attachments Attachment[]
-  TaskComment TaskComment[]
+  id           Int           @id @default(autoincrement())
+  title        String
+  description  String?
+  status       Status
+  order        Int
+  dueDate      DateTime
+  project      Project       @relation(fields: [projectId], references: [id])
+  projectId    Int
+  createdBy    User          @relation("taskCreatedBy", fields: [createdById], references: [id])
+  createdById  String
+  assignee     User          @relation("taskAssignee", fields: [assigneeId], references: [id])
+  assigneeId   String
+  attachments  Attachment[]
+  taskComments TaskComment[]
 }
 
 model Attachment {

@@ -9,6 +9,7 @@ import { runCategory } from "@/resources/runCategory";
 import { venue } from "@/resources/venue";
 import { organizer } from "@/resources/organizer";
 import { activity } from "@/resources/activity";
+import { project } from "@/resources/project";
 
 const resources: Resource[] = [
   post,
@@ -20,6 +21,24 @@ const resources: Resource[] = [
   runCategory,
   venue,
   organizer,
-  activity
+  activity,
+  project,
 ];
-export { resources };
+
+const include: Record<string, Record<string, boolean>> = {};
+for (const r of resources) {
+  for (const field of r.form) {
+    if (field.type === "m2m") {
+      if (!include[r.model]) include[r.model] = {};
+      include[r.model][field.name] = true;
+    }
+  }
+}
+
+const models = resources.map((r) => ({
+  model: r.model,
+  resource: r.resource,
+  relations: include[r.model] || [],
+}));
+
+export { resources, models };

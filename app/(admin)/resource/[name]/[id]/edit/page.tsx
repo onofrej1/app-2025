@@ -1,7 +1,7 @@
 import ResourceForm from "@/components/resources/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { prismaQuery } from "@/db";
-import { resources } from "@/resources";
+import { models } from "@/resources";
 
 interface ResourceProps {
   params: Promise<{
@@ -13,25 +13,13 @@ interface ResourceProps {
 
 export default async function EditResource({ params }: ResourceProps) {
   const { name: resourceName, id } = await params;
-  const resource = resources.find(r => r.resource === resourceName);
-  if (!resource) {
+  const model = models.find(m => m.resource === resourceName);
+  if (!model) {
     throw new Error(`Resource ${resourceName} not found !`);
   }
-  const form = [{ name: 'id', type: 'hidden', label: 'Id' }, ...resource.form];
 
-  const include: Record<string, boolean> = {};
-  for (const field of form) {
-    if (['fk', 'm2m'].includes(field.type) && field.resource) {
-      const values = await prismaQuery(field.resource, 'findMany', null);
-      field['options'] = values.map((value: any) => ({ value: value.id, label: value[field.textField!] }));
-    }
-    if (field.type === 'm2m') {
-      include[field.name] = true;
-    }
-  }
-
-  const args = { where: { id: Number(id) }, include };
-  const data = await prismaQuery(resource.model, 'findUnique', args);
+  const args = { where: { id: Number(id) }, include: model.relations };
+  const data = await prismaQuery(model.model, 'findUnique', args);
 
   return (
     <>
@@ -40,7 +28,7 @@ export default async function EditResource({ params }: ResourceProps) {
           <CardTitle>Edit item</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResourceForm resource={resource.resource} fields={form} data={data} />
+          <ResourceForm resource={model.resource} data={data} />
         </CardContent>
       </Card>
     </>
