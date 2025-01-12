@@ -57,8 +57,10 @@ const CreateOrEditTask = z.object({
   description: z.string().min(1),
   status: z.string().min(1),
   order: z.coerce.number(),
-  deadline: z.date(), //(z.coerce.date()),
-  userId: z.string().min(1, 'User field is required'),  
+  dueDate: z.date(), //(z.coerce.date()),
+  createdById: z.string().min(1, 'User field is required'),  
+  assigneeId: z.string().min(1, 'User field is required'), 
+  projectId: z.coerce.number(), 
 });
 
 const CreateTask = z.object({
@@ -76,6 +78,20 @@ const SendFriendRequest = z.object({
 
 const SendMessage = z.object({  
   message: z.string().min(1),
+});
+
+const CreateEvent = z.object({
+  id: z.number().optional(),
+  name: z.string().trim().min(4),
+  description: z.string().min(1),
+  status: z.string().min(1),
+  color: z.string().min(1).optional(),
+  location: z.string().optional(),
+  venueId: z.coerce.number().optional(),
+  organizerId: z.coerce.number().optional(),
+  maxAttendees: z.coerce.number().optional(),
+  startDate: z.date(),
+  endDate: z.date(),
 });
 
 const CreateOrEditEvent = z.object({
@@ -197,6 +213,7 @@ export type FormSchema =
  | 'ChangePassword'
  | 'ResetPassword'
  | 'CreateTask'
+ | 'CreateEvent'
 
 /*const FilterResource = z.object({
   id: z.string().optional(),
@@ -211,6 +228,7 @@ const rules = {
   CreateOrEditTask,
   CreateOrEditEvent,
   CreateOrEditTag,
+  CreateEvent,
   CreateOrEditRun,
   CreateOrEditRunCategory,
   CreateOrEditVenue,

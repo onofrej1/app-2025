@@ -7,7 +7,7 @@ const organizer: Resource = {
     resource: 'organizers',
     filter: [],
     menuIcon: '',
-    group: 'Manage runs',
+    group: 'Events',
     rules: 'CreateOrEditOrganizer',    
     form: [
         { name: 'name', type: 'text', label: 'Name' },

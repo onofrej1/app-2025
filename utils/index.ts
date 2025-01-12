@@ -37,3 +37,17 @@ function toErrorWithMessage(maybeError: unknown): ErrorWithMessage {
     return new Error(String(maybeError));
   }
 }
+
+export function getSelectOptions(data: any[], labelKey: any) {
+  return data.map((value: any) => ({
+    value: value.id,
+    label: value[labelKey],
+  }));
+}
+
+export function renderSelectOptions(data: any[], render: any) {
+  return data.map((value: any) => ({
+    value: value.id,
+    label: render(value),
+  }));
+}

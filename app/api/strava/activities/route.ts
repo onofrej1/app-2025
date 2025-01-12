@@ -1,18 +1,17 @@
-import { auth } from "@/auth";
+import { getSession } from "@/actions/auth";
 import { prisma } from "@/db/prisma";
 import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 var StravaApiV3 = require("./../../../../../strava-api-v3");
 
 export async function GET(request: Request) {
-  const session = await auth();
-  const loggedUser = session?.user;
-  if (!loggedUser) {
+  const session = await getSession();
+  if (!session) {
     throw new Error("Unauthorized");
   }
   const data = await prisma.oAuthToken.findFirst({
     where: {
-      userId: loggedUser.id,
+      userId: session.userId,
       provider: "strava",
     },
     select: {

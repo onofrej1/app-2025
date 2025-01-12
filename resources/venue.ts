@@ -7,7 +7,7 @@ const venue: Resource = {
     resource: 'venues',
     filter: [],
     menuIcon: '',
-    group: 'Manage runs',
+    group: 'Events',
     rules: 'CreateOrEditVenue',    
     form: [
         { name: 'location', type: 'text', label: 'Location' },
