@@ -38,17 +38,6 @@ export default function Tasks() {
   const [activeGroup, setActiveGroup] = useState("");
   const [items, setItems] = useState<{ id: number, group: string, value: Task}[]>([]);
 
-  /*const { error, loading, value: data = [] } = useAsync<ReturnType<typeof getTasks>>(getTasks(Number(params.id)));
-  let items;
-  if (!loading) {
-    items = data.map((task) => ({
-      id: task.id,
-      className: "",
-      group: task.status,
-      value: task,
-    }));
-  }*/
-
   const { data: itemsData = [], isFetching } = useQuery({
     queryKey: ["tasks", params.id],
     queryFn: () => getTasks(Number(params.id)),
@@ -63,12 +52,6 @@ export default function Tasks() {
     },
   });
   useEffect(() => {
-    /*const d = itemsData.map((task) => ({
-      id: task.id,
-      className: "",
-      group: task.status,
-      value: task,
-    }));*/
     if (!isFetching) {
       setItems(itemsData);
     }    
