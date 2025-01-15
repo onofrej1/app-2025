@@ -269,14 +269,14 @@ export async function getConversation() {
   if (!session) {
     throw new Error("Unauthorized");
   }
-  const loggedUserConversations = await prisma.conversationMember.findMany({
+  /*const loggedUserConversations = await prisma.conversationMember.findMany({
     where: {
       userId: session.userId,
     },
     select: {
       conversationId: true,
     },
-  });
+  });*/
   return prisma.conversation.findFirstOrThrow({
     where: {
       id: 1,

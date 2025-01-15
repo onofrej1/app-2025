@@ -3,9 +3,15 @@
 import { prisma } from "@/db/prisma";
 import { Task } from "@prisma/client";
 import { getSession } from "./auth";
+import { Action, Model } from "@/types";
 
 export async function getTasks(projectId: number) {
   return prisma.task.findMany({ where: { projectId } });
+}
+
+export async function updateTasks(tasks: Task[]) {
+  console.log(tasks);
+  //return prisma.task.findMany({ where: { projectId } });
 }
 
 export async function getProjects() {
@@ -41,12 +47,21 @@ export async function updateTask(task: Task) {
   if (!session) {
     throw new Error("Unauthorized");
   }
-  console.log(task);
-  const newTask = await prisma.task.update({
+  const updatedTask = await prisma.task.update({
     where: {
       id: task.id,
     },
     data: task,
   });
-  return newTask;
+
+  await prisma.activityFeed.create({
+    data: {
+      actorId: session.userId,
+      objectType: Model.task,
+      objectId: task.id,
+      verb: Action.created,
+      time: new Date(),
+    }
+  });
+  return updatedTask;
 }

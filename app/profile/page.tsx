@@ -1,21 +1,18 @@
-import SignInGoogle from "@/components/auth/sign-in-google";
+import { getFeed } from "@/actions/feed";
+import { getFeedData } from "@/utils/feed";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-//import SignIn from "@/components/sign-in";
 
 export default async function Home() {
-  /*const session = await auth();
-  console.log(session);
-  if (!session) {
-    redirect('/sign-in');
-  }*/
+  const feed = await getFeed();
+  console.log(feed);
+  const data = getFeedData(feed);
 
   return (
     <div className="">
-      {/*<SignInGoogle />
-      <SignOut />*/}                
-      Profile page. Logged user: {/*session?.user.email*/}
       <Link href="/home">Home page</Link>
+      {data.map((message, index) => {
+        return <div dangerouslySetInnerHTML={{ __html: message }} key={index}></div>;
+      })}
     </div>
   );
 }

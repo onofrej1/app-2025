@@ -120,6 +120,7 @@ model Project {
   status      String?
   startDate   DateTime
   endDate     DateTime
+  //cost      number?
   manager     User     @relation(fields: [managerId], references: [id])
   managerId   String
   tasks       Task[]
@@ -139,13 +140,17 @@ model Task {
   id           Int           @id @default(autoincrement())
   title        String
   description  String?
+  priority     String?
+  type         String?
   status       Status
   order        Int
   dueDate      DateTime
   project      Project       @relation(fields: [projectId], references: [id])
   projectId    Int
+  createdAt    DateTime      @default(now())
   createdBy    User          @relation("taskCreatedBy", fields: [createdById], references: [id])
   createdById  String
+  updatedAt    DateTime      @updatedAt
   assignee     User          @relation("taskAssignee", fields: [assigneeId], references: [id])
   assigneeId   String
   attachments  Attachment[]
@@ -171,6 +176,7 @@ model Event {
   location       String?
   contact        String?
   maxAttendees   Int?
+  onlineLink     String?
   startDate      DateTime
   endDate        DateTime
   createdAt      DateTime        @default(now())
@@ -184,6 +190,7 @@ model Event {
   organizer      Organizer?      @relation(fields: [organizerId], references: [id])
   organizerId    Int?
   runs           Run[]
+  //attachments    Attachment[]
 }
 
 model Organizer {

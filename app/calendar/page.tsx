@@ -1,12 +1,12 @@
 "use client";
-import { getActivities } from "@/actions/activities";
 import {
   createEvent,
+  getEvent,
   getEvents,
   getOrganizers,
   getVenues,
+  updateEvent,
 } from "@/actions/events";
-//import { getActivities } from "@/actions/strava";
 import {
   CalendarCurrentDate,
   CalendarDayView,
@@ -23,24 +23,19 @@ import { Calendar } from "@/components/calendar";
 import Form from "@/components/form/form";
 import { Button } from "@/components/ui/button";
 import useAsync from "@/hooks/useAsync";
-import useFetch from "@/hooks/useFetch";
 import { FormField } from "@/resources/resources.types";
 import { useDialog } from "@/state";
 import { cn, getSelectOptions } from "@/utils";
 import { Event } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
-import React, { use, useState } from "react";
-//import renderCell from "./components/renderCell";
+import React from "react";
 import { format, isToday } from "date-fns";
 
 export default function CalendarPage() {
   const { open, setTitle, setContent, onClose } = useDialog();
-  //const [selectedDate, setSelectedDate] = useState<Date>();
-  //const organizers = use(getOrganizers());
-  const { loading: isLoadingOrganizers, value: organizers = [] } =
-    useAsync(getOrganizers);
-  const { loading: isLoadingVenues, value: venues = [] } = useAsync(getVenues);
+  const { value: organizers = [] } = useAsync(getOrganizers);
+  const { value: venues = [] } = useAsync(getVenues);
 
   const { data: events = [], isFetching } = useQuery({
     queryKey: ["events"],
@@ -57,45 +52,37 @@ export default function CalendarPage() {
     },
   });
 
-  /*const { data: activities = [], isFetching: isFetchingActivities } = useQuery({
-    queryKey: ["activities"],
-    queryFn: getActivities,
-  });*/
   if (isFetching) return null;
 
   const sendForm = (data: Event) => {
-    console.log(data);
-    createEvent(data);
+    console.log('d',data);
+    data.id ? updateEvent(data) : createEvent(data);
     onClose();
   };
 
-  const editEventForm = (event: CalendarEvent) => {
-    const ev = events.find(e => e.id === event.id);
+  const openEditEventModal = async (event: CalendarEvent) => {
+    const data = await getEvent(Number(event.id));
     setTitle("Edit event");
-    setContent(addEventForm(ev));
+    setContent(eventForm(data));
     open();
   };
 
-  const showAddEventForm = (e: any) => {
-    console.log(e);
-    const date = new Date(e);
-    //setSelectedDate(date);
+  const openAddEventModal = (date: Date) => {
     const data = {
       startDate: date,
       endDate: date,
-      status: "new event",
+      status: "New event",
     };
-    //setContent(addEventForm(data));
+    setContent(eventForm(data));
     open();
   };
 
   const renderCell = (_date: Date, currentEvents: CalendarEvent[]) => {
-    console.log(currentEvents);
     return (
       <div className="relative">
         <span
-          className="bg-slate-200 absolute top-1 right-1 w-4 h-4 rounded-full flex items-center justify-center p-0"
-          onClick={() => showAddEventForm(_date)}
+          className="bg-slate-200 hover:cursor-pointer absolute top-1 right-1 w-4 h-4 rounded-full flex items-center justify-center p-0"
+          onClick={() => openAddEventModal(_date)}
         >
           <Plus size={12} />
         </span>
@@ -111,7 +98,7 @@ export default function CalendarPage() {
         {currentEvents.map((event) => {
           return (
             <div
-              onClick={() => editEventForm(event)}
+              onClick={() => openEditEventModal(event)}
               key={event.id}
               className="px-1 rounded text-sm flex items-center gap-1 hover:cursor-pointer"
             >
@@ -132,15 +119,7 @@ export default function CalendarPage() {
     );
   };
 
-  const addEventForm = (data?: Event) => {
-    console.log('d', data);
-    /*if (!data && selectedDate) {
-      console.log('create data');
-      data = {};
-      data.startDate = selectedDate;
-      data.endDate = selectedDate;
-    }*/
-
+  const eventForm = (data?: Partial<Event>) => {
     let fields: FormField[] = [
       { name: "name", label: "Name" },
       { name: "description", label: "Description" },
@@ -208,12 +187,7 @@ export default function CalendarPage() {
   };
 
   return (
-    <Calendar
-      //onClick={(e) => showAddEventModal(e)}
-      //onEventClick={(e) => console.log(e)}
-      events={events}
-      renderCell={renderCell}
-    >
+    <Calendar events={events} renderCell={renderCell}>
       <div className="h-dvh py-6 flex flex-col">
         <div className="flex px-6 items-center gap-2 mb-6">
           <CalendarViewTrigger
@@ -249,8 +223,6 @@ export default function CalendarPage() {
             <ChevronRight size={20} />
             <span className="sr-only">Next</span>
           </CalendarNextTrigger>
-
-          {/*<ModeToggle />*/}
         </div>
 
         <div className="flex-1 overflow-auto px-6 relative">

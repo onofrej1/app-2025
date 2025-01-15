@@ -72,6 +72,7 @@ export default function Form({
     setError,
     control,
     trigger,
+    setValue,
     handleSubmit,
     getValues,
   } = useForm({
@@ -182,6 +183,7 @@ export default function Form({
                 name={name}
                 errors={errors}
                 value={value}
+                setValue={setValue}
                 className={field.className}
                 onChange={(value) => {
                   onChange(value);

@@ -3,6 +3,7 @@
 import { prisma } from "@/db/prisma";
 import { Event } from "@prisma/client";
 import { getSession } from "./auth";
+import { Model, Action } from "@/types";
 
 export async function getEvents() {
   return prisma.event.findMany();
@@ -33,6 +34,15 @@ export async function createEvent(data: Event) {
   const event = await prisma.event.create({
     data,
   });
+  await prisma.activityFeed.create({
+    data: {
+      actorId: session.userId,
+      objectType: Model.event,
+      objectId: event.id,
+      verb: Action.created,
+      time: new Date(),
+    }
+  });
   return event;
 }
 
@@ -46,6 +56,16 @@ export async function updateEvent(data: Event) {
       id: data.id,
     },
     data,
+  });
+
+  const t = await prisma.activityFeed.create({
+    data: {
+      actorId: session.userId,
+      objectType: Model.event,
+      objectId: event.id,
+      verb: Action.updated,
+      time: new Date(),
+    }
   });
   return event;
 }

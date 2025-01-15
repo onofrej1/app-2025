@@ -15,8 +15,7 @@ import {
   TooltipContent,
   TooltipProvider,
 } from "@/components/ui/tooltip";
-import { signOut } from "@/auth";
-import { signUserOut } from "@/actions/auth";
+import { logout } from "@/actions/auth";
 
 interface MenuProps {
   isOpen: boolean | undefined;
@@ -120,7 +119,7 @@ export function Menu({ isOpen }: MenuProps) {
               <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
                   <Button
-                    onClick={signUserOut}
+                    onClick={logout}
                     variant="outline"
                     className="w-full justify-center h-10 mt-5"
                   >

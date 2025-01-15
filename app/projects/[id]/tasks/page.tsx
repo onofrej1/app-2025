@@ -1,7 +1,7 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./tasks.css";
-import { createTask, getTasks, updateTask } from "@/actions/tasks";
+import { createTask, getTasks, updateTask, updateTasks } from "@/actions/tasks";
 import { Task } from "@prisma/client";
 import { useDialog } from "@/state";
 import Form from "@/components/form/form";
@@ -10,6 +10,22 @@ import { useParams } from "next/navigation";
 import { getUsers } from "@/actions/users";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FormField } from "@/resources/resources.types";
+import {
+  DndContext,
+  DragOverEvent,
+  DragOverlay,
+  DragStartEvent,
+} from "@dnd-kit/core";
+import { Draggable } from "@/components/dnd-kit/draggable";
+import { Droppable } from "@/components/dnd-kit/droppable";
+import { arrayMove, SortableContext, useSortable } from "@dnd-kit/sortable";
+import TaskCard from "./components/taskCard";
+import useAsync from "@/hooks/useAsync";
+import { Return } from "@prisma/client/runtime/library";
+import { createPortal } from "react-dom";
+
+//import {Draggable} from './Draggable';
+//import {Droppable} from './Droppable';
 
 export default function Tasks() {
   const { open, setTitle, setContent, onClose } = useDialog();
@@ -20,8 +36,20 @@ export default function Tasks() {
   const [activeItemClone, setActiveItemClone] =
     useState<HTMLDivElement | null>();
   const [activeGroup, setActiveGroup] = useState("");
+  const [items, setItems] = useState<{ id: number, group: string, value: Task}[]>([]);
 
-  const { data: items = [], isFetching } = useQuery({
+  /*const { error, loading, value: data = [] } = useAsync<ReturnType<typeof getTasks>>(getTasks(Number(params.id)));
+  let items;
+  if (!loading) {
+    items = data.map((task) => ({
+      id: task.id,
+      className: "",
+      group: task.status,
+      value: task,
+    }));
+  }*/
+
+  const { data: itemsData = [], isFetching } = useQuery({
     queryKey: ["tasks", params.id],
     queryFn: () => getTasks(Number(params.id)),
     select: (data) => {
@@ -34,6 +62,18 @@ export default function Tasks() {
       return items;
     },
   });
+  useEffect(() => {
+    /*const d = itemsData.map((task) => ({
+      id: task.id,
+      className: "",
+      group: task.status,
+      value: task,
+    }));*/
+    if (!isFetching) {
+      setItems(itemsData);
+    }    
+  }, [isFetching]);
+
   const { data: users = [], isFetching: isFetchingUsers } = useQuery({
     queryKey: ["users"],
     queryFn: getUsers,
@@ -46,133 +86,13 @@ export default function Tasks() {
     },
   });
   if (isFetching || isFetchingUsers) return null;
-
-  const onDragStart = (e: React.DragEvent, group: string) => {
-    setActiveGroup(group);
-    setActiveItem(null);
-    setActiveItemClone(null);
-
-    const el = e.target as HTMLDivElement;
-    e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.clearData();
-    e.dataTransfer.setData("groupText", group);
-
-    el.classList.add("opacity-20");
-    const clone = el.cloneNode(true) as HTMLDivElement;
-    clone.classList.add("hidden");
-    setActiveItem(el);
-    setActiveItemClone(clone);
-  };
-
-  const onDragEnd = (e: React.DragEvent) => {
-    const el = e.target as HTMLDivElement;
-    el.classList.remove("opacity-20");
-  };
-
-  const onDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
-
-  const onDragEnter = (e: React.DragEvent, group: any) => {
-    const el = e.target as HTMLDivElement;
-    e.preventDefault();
-    if (groups.includes(el.id)) {
-      setActiveGroup(el.id);
-    }
-
-    /*const sourceGroup = e.dataTransfer.getData("groupText");
-    if (group !== sourceGroup) {
-      el.classList.add("group-over");
-    }*/
-  };
-
-  const onDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    const el = e.target as HTMLDivElement;
-    el.classList.remove("group-over");
-  };
-
-  const onDragEnterItem = (e: React.DragEvent) => {
-    e.preventDefault();
-    const el = e.target as HTMLDivElement;
-    const parent = el.parentNode!;
-
-    const item = items.find((i) => i.id === Number(el.id));
-    //if (activeItemClone?.id !== el.id) {
-    activeItemClone?.classList.remove("hidden");
-    //}
-
-    if (item?.group === activeGroup) {
-      activeItem?.classList.add("hidden");
-    }
-
-    if (isBefore(activeItemClone as HTMLDivElement, el)) {
-      parent.insertBefore(activeItemClone!, el);
-    } else {
-      parent.insertBefore(activeItemClone!, el.nextSibling);
-    }
-  };
-
-  function isBefore(el1: Node, el2: Node) {
-    if (el2.parentNode === el1.parentNode)
-      for (
-        var cur = el1.previousSibling;
-        cur && cur.nodeType !== 9;
-        cur = cur.previousSibling
-      )
-        if (cur === el2) return true;
-    return false;
-  }
-
-  const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    const el = e.target as HTMLDivElement;
-
-    e.preventDefault();
-    const id = activeItem?.id;
-
-    const newItems = items.map((i: any) => {
-      el.parentElement?.childNodes.forEach((n, index) => {
-        const newEl = n as HTMLDivElement;
-        if (Number(newEl.id) === i.id) {
-          i.value.order = index + 1;
-          console.log("update task");
-          updateTask(i.value);
-        }
-      });
-
-      if (i.id === Number(id) && i.group !== activeGroup) {
-        i.group = activeGroup;
-        i.value.status = activeGroup;
-        updateTask(i.value);
-      }
-      return i;
-    });
-    el.classList.remove("group-over");
-    //setItems(newItems);
-    activeItem?.classList.add("hidden");
-    activeItemClone?.classList.add("hidden");
-  };
-
-  function throttle(mainFunction: any, delay: number) {
-    let timerFlag: any = null;
-
-    return (...args: any[]) => {
-      if (timerFlag === null) {
-        mainFunction(...args);
-        timerFlag = setTimeout(() => {
-          timerFlag = null;
-        }, delay);
-      }
-    };
-  }
-
-  const c = throttle(onDragEnterItem, 200);
+  //if (loading) return null;
 
   const sendForm = async (data: Task) => {
     data.projectId = Number(params.id);
-    data.id ? updateTask(data) : createTask(data);    
+    data.id ? updateTask(data) : createTask(data);
     onClose();
-    queryClient.invalidateQueries({ queryKey: ['tasks', params.id] });
+    queryClient.invalidateQueries({ queryKey: ["tasks", params.id] });
   };
 
   const manageTaskForm = (data?: Task) => {
@@ -241,46 +161,134 @@ export default function Tasks() {
     open();
   };
 
+  function onDragOver(event: DragOverEvent) {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeId = active.id;
+    const overId = over.id;
+
+    if (activeId === overId) return;
+    const isActiveATask = active.data.current?.type === "Task";
+    const isOverATask = over.data.current?.type === "Task";
+
+    if (!isActiveATask) return;
+    console.log(isActiveATask);
+    console.log(isOverATask);
+    // dropping a task over another task
+    if (isActiveATask && isOverATask) {
+      //setTasks((tasks)=>{
+      const activeIndex = items.findIndex((t) => t.id === activeId);
+      const overIndex = items.findIndex((t) => t.id === overId);
+      items[activeIndex].group = items[overIndex].group;
+      const arr = arrayMove(items, activeIndex, overIndex);
+      setItems(arr);
+      console.log(
+        "first",
+        arr.map((i) => i.id)
+      );
+      //})
+    }
+
+    const isOverAColumn = over.data.current?.type === "Column";
+    //dorpping a task over another coloumn
+    if (isActiveATask && isOverAColumn) {
+      //setTasks((tasks)=>{
+      const activeIndex = items.findIndex((t) => t.id === activeId);
+      items[activeIndex].group = overId as "TODO" | "IN_PROGRESS" | "DONE";
+      console.log('active group', items[activeIndex].group);
+      const arr = arrayMove(items, activeIndex, activeIndex);
+      setItems(arr);
+      console.log(
+        "second",
+        arr.map((i) => i.id)
+      );
+      //})
+    }
+  }
+
+  function handleDragEnd(event: any) {
+    console.log('drag end');
+    setActiveItem(null);
+    const { active, over } = event;
+    console.log(active);
+    console.log(over);
+    if (active.id !== over.id) {
+      //setItems((items) => {
+      console.log("change order");
+      console.log(active.id);
+      console.log(over.id);
+      const oldIndex = items.findIndex((i) => i.id === active.id);
+      const newIndex = items.findIndex((i) => i.id === over.id);
+      console.log(oldIndex);
+      console.log(newIndex);
+
+      const arr = arrayMove(items, oldIndex, newIndex);
+      console.log(arr);
+      setItems(arr);
+      //updateTasks(arr);
+      //});
+    }
+  }
+
+  const onDragStart = (event: DragStartEvent) => {
+    if (event.active.data.current?.type === "Task") {
+      setActiveItem(event.active.data.current.task);
+      return;
+    }
+  };
+
+  console.log(items.map((i) => i.id));
   return (
-    <>
+    <DndContext
+      onDragStart={onDragStart}
+      onDragEnd={handleDragEnd}
+      onDragOver={onDragOver}
+    >
+      <Draggable id={999}>Drag me</Draggable>
+
+      {/*<Droppable className="bg-slate-200 w-[300px] h-[300px] p-3 mb-3">
+        <div>Drop here</div>
+      </Droppable>*/}
+
       <Button onClick={showAddNewTaskModal}>Add new task</Button>
       <div className="groups flex flex-wrap p-1 m-1">
         {groups.map((group) => (
-          <div
-            className="group m-3 p-3 bg-green-600 min-w-[150px]"
-            key={group}
-            id={group}
-            onDrop={onDrop}
-            onDragEnter={(e) => throttle(onDragEnter(e, group), 200)}
-            onDragLeave={onDragLeave}
-            onDragOver={onDragOver}
-          >
-            <h1 className="title mb-4">{group}</h1>
-            <div key={"wrapper" + group}>
-              {items
-                .filter((item) => item.group === group)
-                .sort((a, b) => (a.value.order > b.value.order ? 1 : -1))
-                .map((item) => (
-                  <div
-                    key={item.group + "-" + item.id}
-                    id={item.id.toString()}
-                    className={`mt-2 p-2 hover:cursor-move bg-yellow-300 relative transition-all duration-1`}
-                    draggable
-                    onDragStart={(e) => onDragStart(e, group)}
-                    onDragEnd={onDragEnd}
-                    onDragEnter={c}
-                  >
-                    {item.value.title} - {item.value.id}
-                    <Button onClick={() => showEditTaskModal(item.value)}>
-                      Edit
-                    </Button>
-                  </div>
-                ))}
+          <Droppable key={group} id={group} >
+            <div /*key={group}*/ className="bg-slate-200 m-3 p-3 h-[400px]">
+              <h1 className="title mb-4">{group}</h1>
+              <div key={"wrapper" + group}>
+                <SortableContext
+                  id={group}
+                  items={items
+                    .filter((item) => item.group === group)
+                    .map((i) => i.id)}
+                >
+                  {items
+                    .filter((item) => item.group === group)
+                    //.sort((a, b) => (a.value.order > b.value.order ? 1 : -1))
+                    .map((item) => {
+                      return <TaskCard key={item.id} task={item} />;
+                      /*<Draggable id={item.id} data={{ itemId: item.id }} key={item.group + "-" + item.id}>
+                      {item.value.title} - {item.value.id}
+                      <Button onClick={() => showEditTaskModal(item.value)}>
+                        Edit
+                      </Button>
+                    </Draggable>*/
+                    })}
+                </SortableContext>
+              </div>
             </div>
-          </div>
+          </Droppable>
         ))}
       </div>
       {/*manageTaskForm()*/}
-    </>
+      {createPortal(
+        <DragOverlay>
+          {activeItem && <TaskCard task={activeItem} />}
+        </DragOverlay>,
+        document.body
+      )}
+    </DndContext>
   );
 }

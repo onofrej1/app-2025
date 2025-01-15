@@ -244,3 +244,6 @@ export async function getUnreadMails() {
   imap.connect();
   return [];
 }
+
+//q = await prisma.event.findFirst({ where: { id: r.objectId }});
+      //message = `${r.actor.firstName} ${r.actor.lastName} ${r.verb} ${q?.name} ${r.objectType}`;
