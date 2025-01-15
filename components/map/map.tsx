@@ -7,8 +7,8 @@ import { Point } from "@/actions/activities";
 
 const loader = new Loader({
   apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAP_KEY!,
-  version: "weekly",
-  libraries: ["places"],
+  //version: "weekly",
+  //libraries: ["places"],
 });
 
 interface MapProps {
@@ -35,7 +35,7 @@ export default function Map({ address, coords = [] }: MapProps) {
   }
 
   useEffect(() => {
-    async function loadMap() {
+    /*async function loadMap() {
       const maps = await loader.importLibrary("maps");
       if (address) {
         const geocoder = new google.maps.Geocoder();
@@ -60,7 +60,7 @@ export default function Map({ address, coords = [] }: MapProps) {
         });
       }
     }
-    loadMap();
+    loadMap();*/
   }, [address]);
 
   useEffect(() => {
@@ -73,6 +73,8 @@ export default function Map({ address, coords = [] }: MapProps) {
           zoom: 13,
         });
         drawPath(map, coords);
+        //google.maps.event.trigger(map, 'resize');
+        //map.setZoom(12);
       }
     }
     loadMap();

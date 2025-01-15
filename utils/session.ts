@@ -8,7 +8,7 @@ export interface SessionData {
 }
 
 export const sessionOptions: SessionOptions = {
-  password: "",
+  password: process.env.SESSION_PASSWORD!,
   cookieName: "iron-examples-app-router-server-component-and-action",
   cookieOptions: {
     // secure only works in `https` environments
