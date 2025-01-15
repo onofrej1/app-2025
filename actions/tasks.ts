@@ -10,7 +10,6 @@ export async function getTasks(projectId: number) {
 }
 
 export async function updateTasks(tasks: Task[]) {
-  console.log(tasks);
   //return prisma.task.findMany({ where: { projectId } });
 }
 
@@ -35,7 +34,7 @@ export async function createTask(task: Task) {
   task.createdById = session.userId;
   task.status = "TODO";
   task.order = tasks.length > 0 ? tasks[0].order + 1 : 1;
-  console.log(task);
+
   const newTask = await prisma.task.create({
     data: task,
   });

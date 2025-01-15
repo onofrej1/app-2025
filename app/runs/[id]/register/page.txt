@@ -32,8 +32,6 @@ export default function Register() {
 
   const buttons = [
     ({ isValid, pending }: FormState) => {
-      console.log(isValid);
-      console.log(pending);
       return (
         <Button key="submit" type="submit" className="mt-3">
           Register user
@@ -43,7 +41,6 @@ export default function Register() {
   ];
 
   const sendRegistration = async (data: Registration) => {
-    console.log(data);
     await createRegistration(data);
   };  
 

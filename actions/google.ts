@@ -16,8 +16,6 @@ const googleOAuth = {
 export async function getEmailMessages() {
   const session = await getSession();
   if (!session) return;
-  console.log("user session:");
-  //console.log(session.token);
 
   const oauth2Client = new google.auth.OAuth2(
     googleOAuth.client_id,

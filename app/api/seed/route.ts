@@ -29,8 +29,25 @@ export async function GET(request: Request) {
   const organizers = [];
   const venues = [];
 
-  const existingUsers = await prisma.user.findMany();
-  const user = existingUsers[0];
+  const hashedPassword = await bcrypt.hash(
+    process.env.TEST_USER_PASSWORD!,
+    Number(process.env.BCRYPT_SALT!)
+  );
+
+  const user = await prisma.user.create({
+    data: {
+      email: process.env.EMAIL_USER!,
+      firstName: "John",
+      lastName: "Doe",
+      emailVerified: false,
+      role: "USER",
+      status: "ACTIVE",
+      password: hashedPassword,
+      lastLogin: new Date(),
+    },
+  });
+  /*const existingUsers = await prisma.user.findMany();
+  const user = existingUsers[0];*/
 
   for (const i of count) {
     categories.push({
@@ -47,12 +64,10 @@ export async function GET(request: Request) {
     });
   }
 
-  const categories_ = await prisma.category.createMany({ data: categories });
-  const tags_ = await prisma.tag.createMany({ data: tags });
-  const organizers_ = await prisma.organizer.createMany({ data: organizers });
-  const venues_ = await prisma.venue.createMany({ data: venues });
-
-  const _categories = await prisma.category.findMany();
+  await prisma.category.createMany({ data: categories });
+  await prisma.tag.createMany({ data: tags });
+  await prisma.organizer.createMany({ data: organizers });
+  await prisma.venue.createMany({ data: venues });
 
   const users: Partial<User>[] = [];
   const posts: Partial<Post>[] = [];
@@ -66,11 +81,6 @@ export async function GET(request: Request) {
   const runs: Partial<Run>[] = [];
   const registrations: Partial<Registration>[] = [];
   const runResults: Partial<RunResult>[] = [];
-
-  const hashedPassword = await bcrypt.hash(
-    process.env.TEST_USER_PASSWORD!,
-    Number(process.env.BCRYPT_SALT!)
-  );
 
   for (const [i, element] of count.entries()) {
     users.push({
@@ -90,7 +100,7 @@ export async function GET(request: Request) {
       content: faker.lorem.paragraphs({ min: 3, max: 5 }),
       slug: faker.lorem.slug(),
       authorId: user.id,
-      categoryId: _categories[0].id,
+      categoryId: random([1, 2, 3]),
     });
 
     comments.push({
@@ -132,7 +142,7 @@ export async function GET(request: Request) {
       name: faker.lorem.words({ min: 2, max: 3 }),
       description: faker.lorem.sentences(),
       color: faker.internet.color(),
-      location: faker.location.street + " " + faker.location.city,
+      location: faker.location.street() + " " + faker.location.city(),
       maxAttendees: faker.number.int({ min: 1, max: 9 }),
       contact: faker.person.fullName(),
       createdById: user.id,
@@ -172,20 +182,22 @@ export async function GET(request: Request) {
       eventId: i + 1,
       tshirt: i % 2 === 0 ? true : false,
     });
+  }
 
-    const clubs = [
-      "BK Furca Kosice",
-      "BKO Vysna Mysla",
-      "Obal servis Kosice",
-      "US Steel Kosice",
-      "Presov running team"
-    ];
+  const clubs = [
+    "BK Furca Kosice",
+    "BKO Vysna Mysla",
+    "Obal servis Kosice",
+    "US Steel Kosice",
+    "Presov running team",
+  ];
 
+  for(let i = 0; i < 150; i++) {
     registrations.push({
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
       email: faker.internet.email(),
-      gender: random(["MAN", "WOMEN"]),
+      gender: random(["MAN", "WOMAN"]),
       dateOfBirth: faker.date.past(),
       city: faker.location.city(),
       nation: faker.location.state(),
@@ -236,33 +248,33 @@ export async function GET(request: Request) {
     },
   ];
 
-  const users_ = await prisma.user.createMany({ data: users as User[] });
-  const posts_ = await prisma.post.createMany({ data: posts as Post[] });
-  const comments_ = await prisma.comment.createMany({
+  await prisma.user.createMany({ data: users as User[] });
+  await prisma.post.createMany({ data: posts as Post[] });
+  await prisma.comment.createMany({
     data: comments as Comment[],
   });
-  const projects_ = await prisma.project.createMany({
+  await prisma.project.createMany({
     data: projects as Project[],
   });
-  const tasks_ = await prisma.task.createMany({ data: tasks as Task[] });
-  const taskComments_ = await prisma.taskComment.createMany({
+  await prisma.task.createMany({ data: tasks as Task[] });
+  await prisma.taskComment.createMany({
     data: taskComments as TaskComment[],
   });
-  const events_ = await prisma.event.createMany({ data: events as Event[] });
-  const eventSchedules_ = await prisma.eventSchedule.createMany({
+  await prisma.event.createMany({ data: events as Event[] });
+  await prisma.eventSchedule.createMany({
     data: eventSchedules as EventSchedule[],
   });
-  const attendees_ = await prisma.attendee.createMany({
+  await prisma.attendee.createMany({
     data: attendees as Attendee[],
   });
-  const runs_ = await prisma.run.createMany({ data: runs as Run[] });
-  const runCategories_ = await prisma.runCategory.createMany({
+  await prisma.run.createMany({ data: runs as Run[] });
+  await prisma.runCategory.createMany({
     data: runCategories as RunCategory[],
   });
-  const registrations_ = await prisma.registration.createMany({
+  await prisma.registration.createMany({
     data: registrations as Registration[],
   });
-  const runResults_ = await prisma.runResult.createMany({
+  await prisma.runResult.createMany({
     data: runResults as RunResult[],
   });
 

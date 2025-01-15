@@ -19,7 +19,7 @@ export async function sendTextEmail(
 
   const sendMailPromise = () =>
     new Promise<string>((resolve, reject) => {
-        getTransport().sendMail(mailOptions, function (err) {
+      getTransport().sendMail(mailOptions, function (err) {
         if (!err) {
           resolve("Email sent");
         } else {

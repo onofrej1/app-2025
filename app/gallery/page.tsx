@@ -19,9 +19,7 @@ export default function App() {
     caption: "caption" + k,
     src: "/assets/images/img" + (k + 1) + ".jpg",
     orientation: vertical.includes(k+1) ? 'vertical' : 'horizontal'
-  }));
-  console.log(images);
-  
+  }));  
 
   return (
     <div className="container1">

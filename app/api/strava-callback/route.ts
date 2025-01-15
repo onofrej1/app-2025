@@ -21,7 +21,6 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   const page = url.searchParams.get("page");
-  console.log(page);
 
   const params = {
     client_id: stravaOAuth.client_id,
@@ -43,10 +42,9 @@ export async function GET(request: Request) {
   }
 
   const data = await response.json();
-  console.log(data);
   await prisma.oAuthToken.create({
     data: {
-        userId: loggedUser.id,
+        userId: session.userId,
         provider: 'strava',
         accessToken: data.access_token,
         refreshToken: data.refresh_token,

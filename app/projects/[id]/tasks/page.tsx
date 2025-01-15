@@ -36,7 +36,9 @@ export default function Tasks() {
   const [activeItemClone, setActiveItemClone] =
     useState<HTMLDivElement | null>();
   const [activeGroup, setActiveGroup] = useState("");
-  const [items, setItems] = useState<{ id: number, group: string, value: Task}[]>([]);
+  const [items, setItems] = useState<
+    { id: number; group: string; value: Task }[]
+  >([]);
 
   const { data: itemsData = [], isFetching } = useQuery({
     queryKey: ["tasks", params.id],
@@ -54,7 +56,7 @@ export default function Tasks() {
   useEffect(() => {
     if (!isFetching) {
       setItems(itemsData);
-    }    
+    }
   }, [isFetching]);
 
   const { data: users = [], isFetching: isFetchingUsers } = useQuery({
@@ -156,61 +158,34 @@ export default function Tasks() {
     const isOverATask = over.data.current?.type === "Task";
 
     if (!isActiveATask) return;
-    console.log(isActiveATask);
-    console.log(isOverATask);
     // dropping a task over another task
     if (isActiveATask && isOverATask) {
-      //setTasks((tasks)=>{
       const activeIndex = items.findIndex((t) => t.id === activeId);
       const overIndex = items.findIndex((t) => t.id === overId);
       items[activeIndex].group = items[overIndex].group;
       const arr = arrayMove(items, activeIndex, overIndex);
       setItems(arr);
-      console.log(
-        "first",
-        arr.map((i) => i.id)
-      );
-      //})
     }
 
     const isOverAColumn = over.data.current?.type === "Column";
     //dorpping a task over another coloumn
     if (isActiveATask && isOverAColumn) {
-      //setTasks((tasks)=>{
       const activeIndex = items.findIndex((t) => t.id === activeId);
       items[activeIndex].group = overId as "TODO" | "IN_PROGRESS" | "DONE";
-      console.log('active group', items[activeIndex].group);
       const arr = arrayMove(items, activeIndex, activeIndex);
       setItems(arr);
-      console.log(
-        "second",
-        arr.map((i) => i.id)
-      );
-      //})
     }
   }
 
   function handleDragEnd(event: any) {
-    console.log('drag end');
     setActiveItem(null);
     const { active, over } = event;
-    console.log(active);
-    console.log(over);
     if (active.id !== over.id) {
-      //setItems((items) => {
-      console.log("change order");
-      console.log(active.id);
-      console.log(over.id);
       const oldIndex = items.findIndex((i) => i.id === active.id);
       const newIndex = items.findIndex((i) => i.id === over.id);
-      console.log(oldIndex);
-      console.log(newIndex);
 
       const arr = arrayMove(items, oldIndex, newIndex);
-      console.log(arr);
       setItems(arr);
-      //updateTasks(arr);
-      //});
     }
   }
 
@@ -237,7 +212,7 @@ export default function Tasks() {
       <Button onClick={showAddNewTaskModal}>Add new task</Button>
       <div className="groups flex flex-wrap p-1 m-1">
         {groups.map((group) => (
-          <Droppable key={group} id={group} >
+          <Droppable key={group} id={group}>
             <div /*key={group}*/ className="bg-slate-200 m-3 p-3 h-[400px]">
               <h1 className="title mb-4">{group}</h1>
               <div key={"wrapper" + group}>

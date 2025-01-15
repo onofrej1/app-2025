@@ -13,7 +13,6 @@ export default function Contact() {
   ];
 
   const sendForm = async (data: ContactForm) => {
-    console.log(data);
     //await contactEmail(data.email, data.name, data.message);
   };
 

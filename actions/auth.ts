@@ -34,7 +34,6 @@ export async function getSession() {
     await cookies(),
     sessionOptions
   );
-
   if (!session || !session.token || !session.userId) {
     return null;
   }
@@ -85,7 +84,7 @@ export async function register(data: RegisterUserType) {
         lastName,
         email: email,
         password: hashedPassword,
-        role: "user",
+        role: "USER",
       },
     });
   } catch (e) {
@@ -138,7 +137,6 @@ export async function login(data: { email: string; password: string }) {
 }
 
 export async function logout() {
-  console.log('logout');
   const session = await getSession();
   if (session) {
     await prisma.session.delete({
@@ -147,7 +145,7 @@ export async function logout() {
         sessionToken: session.token!,
       },
     });
-    session.destroy();
+    //session.destroy();
   }
 }
 

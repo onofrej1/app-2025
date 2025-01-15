@@ -55,7 +55,6 @@ export default function CalendarPage() {
   if (isFetching) return null;
 
   const sendForm = (data: Event) => {
-    console.log('d',data);
     data.id ? updateEvent(data) : createEvent(data);
     onClose();
   };

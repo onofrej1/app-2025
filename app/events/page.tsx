@@ -12,7 +12,6 @@ export default function Events() {
     queryFn: getEvents,
   });
   if (isFetching) return;
-  //console.log(events);
 
   return (
     <div>

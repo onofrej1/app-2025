@@ -87,7 +87,6 @@ export async function getActivity(id: number) {
 }
 
 export async function createActivity(data: GpxRecord) {
-  console.log(data);
   const session = await getSession();
   if (!session) {
     throw new Error("Unauthorized");

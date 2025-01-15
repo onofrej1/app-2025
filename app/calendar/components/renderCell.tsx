@@ -27,7 +27,6 @@ export default function renderCell(
   });
 
   const showAddEventModal = (e: any) => {
-    console.log(e);
     const date = new Date(e);
     //setSelectedDate(date);
     const data = {

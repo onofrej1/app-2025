@@ -11,7 +11,6 @@ const event: Resource = {
   group: 'Events',
   menuIcon: '',
   renderForm: ({ fields, formState }) => {
-    console.log(formState);
     return (
       <div className='flex flex-col gap-4'>
         {fields.name}

@@ -9,13 +9,11 @@ export default function LoginPage() {
   const fields = [
     { name: 'email', type: 'text', label: 'Email' },
     { name: 'password', type: 'text', label: 'Password' },
-    //{ name: 'confirm', type: 'checkbox', label: 'Confirm submit' }
+    //{ name: 'confirm', type: 'checkbox', label: 'Remember me' }
   ];
 
   const buttons = [
     ({ isValid, pending }: FormState) => {
-      console.log(isValid);
-      console.log(pending);
       return <Button key="submit" type="submit" className="mt-3">Login</Button>
     }
   ];

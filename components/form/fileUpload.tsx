@@ -21,7 +21,6 @@ export default function FileUploader({ onUploadFile }: FileUploaderProps) {
       alert("File size should not exceed 1MB.");
       return;
     }
-    console.log(URL.createObjectURL(file_));
     setFile(file_);
   };
 
