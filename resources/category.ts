@@ -5,14 +5,15 @@ const category: Resource = {
     name_plural: 'Categories',
     model: 'category',
     resource: 'categories',
+    group: 'Blog',
     filter: [],
     menuIcon: '',
     rules: 'CreateOrEditCategory',    
     form: [
-        { name: 'name', type: 'text', label: 'Name' },
+        { name: 'title', type: 'text', label: 'Title' },
     ],
     list: [
-        { name: 'name', header: 'Name' },
+        { name: 'title', header: 'Title' },
     ],
 };
 export { category };

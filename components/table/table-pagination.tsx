@@ -44,7 +44,6 @@ export default function TablePagination({ totalRows }: TablePaginationProps) {
   }));
 
   const totalPages = Math.ceil(totalRows / Number(pageCount));
-  console.log(totalPages);
 
   return (
     <div className="flex flex-row ga-2 items-center justify-center">

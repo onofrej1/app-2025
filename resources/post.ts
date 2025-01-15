@@ -6,6 +6,7 @@ const post: Resource = {
   model: 'post',
   resource: 'posts',
   rules: 'CreateOrEditPost',
+  group: 'Blog',
   menuIcon: '',
   filter: [
     { name: 'title', type: 'text', label: 'Title' },
@@ -28,6 +29,7 @@ const post: Resource = {
   form: [
     { name: 'title', type: 'text', label: 'Title' },
     { name: 'content', type: 'text', label: 'Content' },
+    { name: 'published', type: 'checkbox', label: 'Published' },
     {
       name: 'authorId', 
       type: 'fk',
@@ -37,17 +39,28 @@ const post: Resource = {
       textField: 'name'
     },
     {
-      name: 'categories', 
-      type: 'm2m',
-      label: 'Categories',
+      name: 'categoryId', 
+      type: 'fk',
+      relation: 'category',
+      label: 'Category',
       resource: 'category',
-      textField: 'name'
+      textField: 'title'
+    },
+    {
+      name: 'tags', 
+      type: 'm2m',
+      label: 'Tags',
+      resource: 'tag',
+      textField: 'title'
     }
   ],
   list: [
     { name: 'id', header: 'Id'},
     { name: 'title', header: 'Title' },
-    { name: 'content', header: 'Content' },
+    { 
+      name: 'content', 
+      header: 'Content', 
+    },
   ],
 };
 export { post };

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Table,
@@ -8,17 +8,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button, ButtonProps } from "@/components/ui/button";
-import { LucideIcon, Pencil, Trash2, ArrowDownUp, ArrowDownWideNarrow, ArrowUpWideNarrow } from "lucide-react";
+import { ButtonProps } from "@/components/ui/button";
+import {
+  ArrowDownUp,
+  ArrowDownWideNarrow,
+  ArrowUpWideNarrow,
+} from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { toast } from "sonner"
+import { JSX } from "react";
+import React from "react";
 
-type IconNames = 'edit' | 'delete';
-
-export const Icons: Record<IconNames, LucideIcon> = {
-  'edit': Pencil,
-  'delete': Trash2,
-}
+type IconNames = "edit" | "delete";
 
 export interface TableData {
   [key: string]: any;
@@ -27,6 +27,7 @@ export interface TableData {
 export interface TableHeader {
   name: string;
   header: string;
+  render?: (data: TableData) => JSX.Element;
 }
 
 interface TableActionResponse {
@@ -35,56 +36,61 @@ interface TableActionResponse {
 }
 
 export interface TableAction {
-  label: string;  
-  action: (data: TableData) => Promise<TableActionResponse> | void;
+  label: string;
+  action: (data: TableData) => TableActionResponse | void;
   icon?: IconNames;
-  variant?: ButtonProps['variant'];
+  variant?: ButtonProps["variant"];
 }
 
 interface TableProps {
   headers: TableHeader[];
   data: TableData[];
   totalRows: number;
-  actions?: TableAction[];
+  //actions?: ReactNode; //TableAction[];
+  actions?: JSX.Element;
 }
 
 const toggleSort = (direction: string | null) => {
-  if (!direction) return 'asc';
-  if (direction === 'asc') return 'desc';
-  if (direction === 'desc') return null;
-}
+  if (!direction) return "asc";
+  if (direction === "asc") return "desc";
+  if (direction === "desc") return null;
+};
 
 const getSortIcon = (direction: string | null) => {
-  if (direction === 'asc') return ArrowUpWideNarrow;
-  if (direction === 'desc') return ArrowDownWideNarrow;
+  if (direction === "asc") return ArrowUpWideNarrow;
+  if (direction === "desc") return ArrowDownWideNarrow;
   return ArrowDownUp;
-}
+};
 
-export default function TableComponent({ headers, data, actions }: TableProps) {
+export default function TableComponent({
+  headers,
+  data,
+  actions: Actions,
+}: TableProps) {
   const searchParams = useSearchParams();
   const { replace, push } = useRouter();
   const pathname = usePathname();
 
   const sortTable = (column: string) => {
     const params = new URLSearchParams(searchParams);
-    const currSortBy = params.get('sortBy');
-    const currDirection = params.get('sortDir');
-    params.set('page', '1');
+    const currSortBy = params.get("sortBy");
+    const currDirection = params.get("sortDir");
+    params.set("page", "1");
 
-    const dir = currSortBy === column ? toggleSort(currDirection) : 'asc';
+    const dir = currSortBy === column ? toggleSort(currDirection) : "asc";
     if (dir) {
-      params.set('sortBy', column);
-      params.set('sortDir', dir);
+      params.set("sortBy", column);
+      params.set("sortDir", dir);
     } else {
-      params.delete('sortBy');
-      params.delete('sortDir');
+      params.delete("sortBy");
+      params.delete("sortDir");
     }
 
     replace(`${pathname}?${params.toString()}`);
   };
 
-  const Icon = getSortIcon(searchParams.get('sortDir'));
-  const sortBy = searchParams.get('sortBy');
+  const Icon = getSortIcon(searchParams.get("sortDir"));
+  const sortBy = searchParams.get("sortBy");
 
   return (
     <>
@@ -93,10 +99,17 @@ export default function TableComponent({ headers, data, actions }: TableProps) {
         <TableHeader>
           <TableRow>
             {headers.map((header) => (
-              <TableHead key={header.name} onClick={() => sortTable(header.name)}>
+              <TableHead
+                key={header.name}
+                onClick={() => sortTable(header.name)}
+              >
                 <div className="table-header flex flex-row gap-2 items-center cursor-pointer">
-                  {header.header} {sortBy === header.name ? <Icon size={14} />
-                    : <ArrowDownUp className="sort-icon" size={14} />}
+                  {header.header}{" "}
+                  {sortBy === header.name ? (
+                    <Icon size={14} />
+                  ) : (
+                    <ArrowDownUp className="sort-icon" size={14} />
+                  )}
                 </div>
               </TableHead>
             ))}
@@ -107,39 +120,18 @@ export default function TableComponent({ headers, data, actions }: TableProps) {
             <TableRow key={index}>
               {headers.map((header) => (
                 <TableCell key={header.name}>
-                  {row[header.name]}
+                  {header.render ? header.render(row) : row[header.name]}
                 </TableCell>
               ))}
-              <TableCell className="py-0">
-                <div className="flex flex-row gap-1">
-                {actions?.map((action) => {
-                  const Icon = action.icon ? Icons[action.icon] : null;
-                  return (
-                    <Button 
-                      size={"sm"}
-                      variant={action.variant || 'default'}
-                      onClick={async () => {
-                        const response = await action.action(row);
-                        if (response && response.message) {
-                          toast(response.message);
-                        }
-                        if (response && response.redirect) {
-                          push(response.redirect);
-                        }
-                      }}
-                      key={action.label} 
-                      className="flex flex-row gap-2">
-                      {Icon && <Icon size={14} />}
-                      {action.label}
-                    </Button>
-                  )
-                })}
+              {Actions && <TableCell className="py-0">
+                <div className="flex flex-row gap-1 justify-end">
+                  {React.cloneElement(Actions, { row })}
                 </div>
-              </TableCell>
+              </TableCell>}
             </TableRow>
           ))}
         </TableBody>
       </Table>
     </>
-  )
+  );
 }

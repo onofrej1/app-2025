@@ -1,0 +1,249 @@
+https://stackoverflow.com/questions/34546272/cannot-find-module-bcrypt
+
+
+{/*<FormMultiSelect
+              label={field.label}
+              name={name}
+              errors={errors}
+              value={value}
+              onChange={onChange}
+              textField={field.textField!}
+              options={field.options! as MultiSelectOption[]}
+              //ref={ref}
+            />*/}
+
+
+            export type State =
+  | {
+    status: "success";
+    message: string;
+    redirect?: string;    
+  }
+  | {
+    status: "error";
+    message: string;
+    errors?: Array<{
+      path: string;
+      message: string;
+    }>;
+  }
+  | null;
+
+export async function submitForm(
+  fields: FormField[],
+  formSchema: FormSchema,
+  action: (...args : any[]) => any,
+  actionParams: any,
+  prevState: State | null,
+  formData: FormData,
+): Promise<State> {
+  let response;
+  try {
+    const data: { [key: string]: any } = {};
+    fields.forEach((field) => {      
+        data[field.name] = field.type === 'm2m' ? formData.getAll(field.name) : formData.get(field.name);      
+    });
+    const validation = rules[formSchema];
+    const parsedData = validation ? validation.parse(data) : data;
+
+    response = await action(...actionParams, parsedData);
+  } catch (e) {
+    console.log('An error occured saving form data:', e);
+
+    if (e instanceof ZodError) {
+      return parseValidationError(e);
+    }
+    return {
+      status: "error",
+      message: "Something went wrong. Please try again.",
+    };
+  }
+
+  if (response) {
+    return {
+      status: "success",
+      message: "Done.",
+      redirect: response.redirect      
+    };
+  }
+
+  return {
+    status: "success",
+    message: "Done.",
+  };
+}
+
+function haversine_distance(mk1: any, mk2: any) {
+    var R = 3958.8; // Radius of the Earth in miles
+    var rlat1 = mk1.lat * (Math.PI/180); // Convert degrees to radians
+    var rlat2 = mk2.lat * (Math.PI/180); // Convert degrees to radians
+    var difflat = rlat2-rlat1; // Radian difference (latitudes)
+    var difflon = (mk2.lng-mk1.lng) * (Math.PI/180); // Radian difference (longitudes)
+
+    var d = 2 * R * Math.asin(Math.sqrt(Math.sin(difflat/2)*Math.sin(difflat/2)+Math.cos(rlat1)*Math.cos(rlat2)*Math.sin(difflon/2)*Math.sin(difflon/2)));
+    return d;
+  }
+
+  var getDistance = function(p1: any, p2: any) {
+    var R = 6378137; // Earth’s mean radius in meter
+    var dLat = rad(p2.lat - p1.lat);
+    var dLong = rad(p2.lng - p1.lng);
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(rad(p1.lat)) * Math.cos(rad(p2.lat)) *
+      Math.sin(dLong / 2) * Math.sin(dLong / 2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    var d = R * c;
+    return d; // returns the distance in meter
+  };
+
+  /*const formObject = Object.fromEntries(formData.entries());
+    const reader = new FileReader();
+    reader.onload = function (e: any) {
+      const content = e.target.result;            
+    };
+    reader.readAsText(formObject['myFile'] as Blob);*/
+
+    const imap = new Imap({
+  user: process.env.EMAIL_USER,
+  password: process.env.EMAIL_PASS,
+  host: "imap.gmail.com",
+  port: 993,
+  tls: true,
+  tlsOptions: { rejectUnauthorized: false },
+});
+
+/*const client = new ImapFlow({
+  host: "imap.gmail.com",
+  port: 993,
+  secure: true,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS+' ',
+  },
+});*/
+
+export async function fetchEmails() {
+  //return [];
+  await client.connect();
+
+  // Select and lock a mailbox. Throws if mailbox does not exist
+  let lock = await client.getMailboxLock("INBOX");
+  try {
+    let tree = await client.listTree();
+    //let message = await client.fetchOne(client.mailbox.exists, { source: true });
+    //console.log(message.source.toString());
+
+    // list subjects for all messages
+    // uid value is always included in FETCH response, envelope strings are in unicode.
+    for await (let message of client.fetch("1:*", { envelope: true })) {
+      //console.log(`${message.uid}: ${message.envelope.subject}`);
+    }
+  } finally {
+    // Make sure lock is released, otherwise next `getMailboxLock()` never returns
+    lock.release();
+  }
+
+  // log out and close connection
+  await client.logout();
+}
+
+export async function fetchEmails2() {
+  await client.connect();
+  const lock = await client.getMailboxLock("INBOX");
+  try {
+    for await (const message of client.fetch("1:*", {
+      envelope: true,
+      bodyParts: true,
+      bodyStructure: true,
+    })) {
+      const { content } = await client.download(message.uid, ["TEXT"]);
+      //console.log("Email Content:", content.toString());
+      return(content.toString());
+    }
+  } catch(e) {
+    console.log('error occured');
+    console.log(e);
+  } finally {
+    lock.release();
+    if (client) {
+        await client.logout();
+    }    
+  }
+}
+
+export async function getEmails() {
+  console.log("get emails:");
+  const body: any[] = [];
+  imap.once("ready", () => {
+    imap.openBox("INBOX", false, () => {
+      imap.search(
+        ["UNSEEN", ["SINCE", new Date()]],
+        (err: any, results: any) => {
+          const f = imap.fetch(results, { bodies: "" });
+          f.on("message", (msg: any) => {
+            msg.on("body", (stream: any) => {
+              simpleParser(stream, async (err: any, parsed: any) => {
+                console.log(parsed);
+                body.push({ body: parsed });
+              });
+            });
+            msg.once("attributes", (attrs: any) => {
+              const { uid } = attrs;
+              imap.addFlags(uid, ["\\Seen"], () => {
+                console.log("Marked as read!");
+              });
+            });
+          });
+          f.once("error", (ex: any) => {
+            return Promise.reject(ex);
+          });
+          f.once("end", () => {
+            console.log("Done fetching all messages!");
+            imap.end();
+            return Promise.resolve(body);
+          });
+        }
+      );
+    });
+  });
+}
+
+export async function getUnreadMails() {
+  imap.once("ready", function () {
+    imap.openBox("INBOX", true, function (err: any, box: any) {
+      if (err) throw err;
+
+      const searchCriteria = [
+        ["FROM", "Discord"],
+        //["HEADER", "SUBJECT", SUBJECT],
+        ["UNSEEN", ["SINCE", "Day, Year"]],
+      ];
+      const fetchOptions = { bodies: ["HEADER", "TEXT"], markSeen: true };
+
+      imap.search(searchCriteria, function (err: any, results: any) {
+        if (err) throw err;
+
+        const mailStream = imap.fetch(results, fetchOptions);
+
+        mailStream.on("message", function (message: any) {
+          message.on("body", function (stream: any, info: any) {
+            simpleParser(stream, (err: any, mail: any) => {
+              console.log("Subject:", mail.subject);
+              //console.log("Body:", mail.text);
+            });
+          });
+        });
+
+        mailStream.once("end", function () {
+          imap.end();
+        });
+      });
+    });
+  });
+
+  imap.connect();
+  return [];
+}
+
+//q = await prisma.event.findFirst({ where: { id: r.objectId }});
+      //message = `${r.actor.firstName} ${r.actor.lastName} ${r.verb} ${q?.name} ${r.objectType}`;

@@ -1,8 +1,7 @@
 "use client";
-import { Controller, FieldPath, useForm } from "react-hook-form";
+import { Controller, useForm, UseFormTrigger } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
-import { JSX, startTransition, useActionState, useRef } from "react";
+import { JSX } from "react";
 import { FormField, MultiSelectOption } from "@/resources/resources.types";
 import { FormSchema } from "@/validation";
 import rules from "@/validation";
@@ -13,7 +12,9 @@ import { MultiSelect } from "@/components/form/multi-select";
 import FormCheckbox from "@/components/form/checkbox";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { validateForm, ValidationResult } from "@/utils/validate";
+import { DatePicker } from "./datepicker";
+import { Button } from "../ui/button";
+import { capitalize } from "@/lib/utils";
 
 export interface DefaultFormData {
   [key: string]: any;
@@ -35,10 +36,13 @@ export type actionResult = {
   error?: { path: string; message: string };
 };
 
-export type FormRenderFunc = (props: {
+export type FormRenderProps = {
   fields: Record<string, JSX.Element>;
   formState: FormState;
-}) => JSX.Element;
+  trigger: UseFormTrigger<DefaultFormData>;
+};
+
+export type FormRender = (props: FormRenderProps) => JSX.Element;
 
 interface FormProps {
   fields: FormField[];
@@ -46,7 +50,8 @@ interface FormProps {
   data?: DefaultFormData;
   action: (...args: any[]) => any;
   buttons?: ((props: FormState) => JSX.Element)[];
-  render?: FormRenderFunc;
+  render?: FormRender;
+  children?: FormRender;
 }
 
 export default function Form({
@@ -56,189 +61,211 @@ export default function Form({
   action,
   buttons,
   render,
+  children,
 }: FormProps) {
   const { replace } = useRouter();
-
   const validationRules = rules[validation];
 
   const {
     register,
-    formState: { isValid, errors },
+    formState: { isValid, errors, isLoading },
     setError,
-    clearErrors,
     control,
-    handleSubmit
+    trigger,
+    setValue,
+    handleSubmit,
+    getValues,
   } = useForm({
-    mode: "onSubmit",
+    //mode: "onSubmit",
     resolver: zodResolver(validationRules),
     defaultValues: data,
   });
+  console.log(getValues());
+  console.log(errors);
 
-  const [error, submitAction, pending] = useActionState(
-    async (previousState: any, formData: FormData) => {
-      clearErrors();
-      console.log(formData);
-      const validationResult: ValidationResult = validateForm(
-        fields,
-        validation,
-        formData
-      );
-
-      if (validationResult.status && validationResult.status === "error") {
-        validationResult.errors?.forEach((error) => {
-          setError(error.path as FieldPath<FormValues>, {
-            message: error.message,
-          });
-        });
+  const submitForm = async (formData: unknown) => {
+    try {
+      const data: actionResult = await action(formData);
+      if (!data) {
         return;
       }
-      try {
-        const submitResult: actionResult = await action(validationResult.data);
-
-        if (submitResult.message) {
-          toast(submitResult.message);
-        }
-        if (submitResult.error) {
-          setError(submitResult.error.path, {
-            message: submitResult.error.message,
-          });
-        }
-        if (submitResult.redirect) {
-          replace(submitResult.redirect);
-          return;
-        }
-      } catch (e) {
-        console.log(e);
-        // todo parse, log error message
-        return "An error occured";
+      if (data.message) {
+        toast(data.message);
       }
-    },
-    null
-  );
-  if (error) {
-    toast(error);
-  }
+      if (data.error) {
+        setError(data.error.path, {
+          message: data.error.message,
+        });
+      }
+      if (data.redirect) {
+        replace(data.redirect);
+        return;
+      }
+    } catch (e) {
+      console.log(e);
+      return "An error occured";
+    }
+  };
 
-  const renderField = (field: FormField) => (
-    <>
-      {["text", "number", "email", "hidden"].includes(field.type) && (
-        <>
-          <FormInput
-            label={field.label}
-            name={field.name}
-            errors={errors}
-            type={field.type}
-            register={register}
-            onChange={field.onChange}
-          />
-        </>
-      )}
+  const renderField = (field: FormField) => {
+    const type = field.type || "text";
+    const label = field.label || capitalize(field.name);
+    return (
+      <>
+        {["text", "textarea", "number", "email", "hidden"].includes(type) && (
+          <>
+            <FormInput
+              label={label}
+              name={field.name}
+              errors={errors}
+              type={type}
+              rows={field.rows}
+              register={register}
+              onChange={field.onChange}
+            />
+          </>
+        )}
 
-      {field.type === "checkbox" && (
-        <>
+        {type === "checkbox" && (
+          <>
+            <Controller
+              control={control}
+              name={field.name}
+              render={({ field: { onChange, value, name } }) => (
+                <FormCheckbox
+                  label={label}
+                  name={name}
+                  errors={errors}
+                  checked={!!value}
+                  onChange={(value) => {
+                    onChange(value);
+                    if (field.onChange) {
+                      field.onChange(value);
+                    }
+                  }}
+                />
+              )}
+            />
+          </>
+        )}
+
+        {type === "datepicker" && (
+          <>
+            <Controller
+              control={control}
+              name={field.name}
+              render={({ field: { onChange, value, name } }) => (
+                <DatePicker
+                  label={label}
+                  name={name}
+                  value={value}
+                  errors={errors}
+                  onChange={(value: Date | undefined) => {
+                    console.log(value);
+                    onChange(value);
+                    if (field.onChange) {
+                      field.onChange(value);
+                    }
+                  }}
+                />
+              )}
+            />
+          </>
+        )}
+
+        {["select", "fk"].includes(type) && (
           <Controller
             control={control}
             name={field.name}
             render={({ field: { onChange, value, name } }) => (
-              <FormCheckbox
-                label={field.label}
+              <FormSelect
+                label={label}
                 name={name}
                 errors={errors}
-                checked={!!value}
+                value={value}
+                setValue={setValue}
+                className={field.className}
                 onChange={(value) => {
                   onChange(value);
                   if (field.onChange) {
                     field.onChange(value);
                   }
                 }}
+                options={field.options!}
               />
             )}
           />
-        </>
-      )}
+        )}
 
-      {["select", "fk"].includes(field.type) && (
-        <Controller
-          control={control}
-          name={field.name}
-          render={({ field: { onChange, value, name } }) => (
-            <FormSelect
-              label={field.label}
-              name={name}
-              errors={errors}
-              value={value}
-              className={field.className}
-              onChange={(value) => {
-                onChange(value);
-                if (field.onChange) {
-                  field.onChange(value);
-                }
-              }}
-              options={field.options!}
-            />
-          )}
-        />
-      )}
-
-      {["m2m"].includes(field.type) && (
-        <Controller
-          control={control}
-          name={field.name}
-          render={({ field: { onChange, value, name } }) => {
-            console.log(value);
-            return <MultiSelect
-              name={name}
-              options={field.options! as MultiSelectOption[]}
-              onValueChange={(v) => {
-                console.log(v);
-                onChange(v);
-              }}
-              defaultValue={value}
-              placeholder="Select frameworks"
-              variant="inverted"
-              animation={2}
-              maxCount={3}
-            />
-            }
-          }
-        />
-      )}
-    </>
-  );
+        {["m2m"].includes(type) && (
+          <Controller
+            control={control}
+            name={field.name}
+            render={({ field: { onChange, value, name } }) => {
+              const selectValue =
+                value && value.length > 0
+                  ? value.map((v: any) => (v.id ? v.id : v))
+                  : [];
+              return (
+                <MultiSelect
+                  name={name}
+                  label={label}
+                  options={field.options! as MultiSelectOption[]}
+                  onValueChange={(v) => {
+                    onChange(v);
+                  }}
+                  defaultValue={selectValue}
+                  placeholder="Select frameworks"
+                  variant="inverted"
+                  animation={2}
+                  maxCount={3}
+                />
+              );
+            }}
+          />
+        )}
+      </>
+    );
+  };
 
   const fieldsToRender = fields.reduce((acc, field) => {
     acc[field.name] = renderField(field);
     return acc;
   }, {} as Record<string, JSX.Element>);
 
+  if (children) {
+    return (
+      <form onSubmit={handleSubmit(submitForm)}>
+        {children({
+          fields: fieldsToRender,
+          formState: { isValid, pending: isLoading },
+          trigger,
+        })}
+      </form>
+    );
+  }
+
   if (render) {
     const renderContent = render({
       fields: fieldsToRender,
-      formState: { isValid, pending },
+      formState: { isValid, pending: isLoading },
+      trigger,
     });
-    return <>{renderContent}</>;
+    return (
+      <>
+        <form onSubmit={handleSubmit(submitForm)}>{renderContent}</form>
+      </>
+    );
   }
 
   const fieldNames = fields.map((f) => f.name);
   const restMessages = Object.keys(errors).filter(
     (e) => !fieldNames.includes(e)
   );
-  const formRef = useRef<HTMLFormElement>(null);
-  
+
   return (
     <>
-      <form
-      //ref={formRef}
-      action={submitAction}
-      /*onSubmit={(evt) => {
-        evt.preventDefault();
-        handleSubmit(() => {
-          //startTransition(() => submitAction(new FormData(formRef.current!)));
-          console.log(new FormData(formRef.current!));
-          submitAction(new FormData(formRef.current!));
-        })(evt);
-      }}*/
-      >
+      <form onSubmit={handleSubmit(submitForm)}>
         {fields.map((field) => (
           <div className="mb-3" key={field.name}>
             {renderField(field)}
@@ -254,7 +281,7 @@ export default function Form({
         {buttons?.length ? (
           <div className="flex space-x-2">
             {buttons.map((Button, index) => (
-              <Button key={index} isValid={isValid} pending={pending} />
+              <Button key={index} isValid={isValid} pending={isLoading} />
             ))}
           </div>
         ) : (

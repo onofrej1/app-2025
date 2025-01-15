@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { PrismaModel } from "@/resources/resources.types";
-import { prisma } from "./prisma";
+import { prisma } from "@/db/prisma";
 
 export async function prismaQuery(
   resource: PrismaModel,

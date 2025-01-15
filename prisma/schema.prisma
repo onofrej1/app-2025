@@ -5,10 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider        = "prisma-client-js"
-  //engineType = "library"
-  //engineType = "library"
-  //previewFeatures = ["driverAdapters"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -16,62 +13,303 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id            String          @id @default(cuid())
-  name          String?
-  username      String?         @unique
-  email         String?         @unique
-  emailVerified DateTime?
-  password      String?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  // Optional for WebAuthn support
-  Authenticator Authenticator[]
+model Profile {
+  id     Int     @id @default(autoincrement())
+  bio    String?
+  gender Gender
+  user   User    @relation(fields: [userId], references: [id])
+  userId String  @unique
+}
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  posts     Post[]
+model User {
+  id            String    @id @default(cuid())
+  firstName     String
+  lastName      String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  password      String
+  image         String?
+  role          String
+  status        String?
+  //accounts      Account[]
+  sessions      Session[]
+
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+  lastLogin              DateTime             @default(now())
+  posts                  Post[]
+  profile                Profile?
+  events                 Event[]
+  attendees              Attendee[]
+  user1contacts          Contact[]            @relation("user1")
+  user2contacts          Contact[]            @relation("user2")
+  conversationMembers    ConversationMember[]
+  messages               Message[]
+  friendRequestSenders   FriendRequest[]      @relation("sender")
+  friendRequestReceivers FriendRequest[]      @relation("receiver")
+  oauthTokens            OAuthToken[]
+  activities             Activity[]
+  activityFeeds          ActivityFeed[]
+  comments               Comment[]
+  registrations          Registration[]
+  runResults             RunResult[]
+  resetTokens            ResetToken[]
+  assignedTasks          Task[]               @relation("taskAssignee")
+  createdTasks           Task[]               @relation("taskCreatedBy")
+  taskAttachments        Attachment[]
+  projects               Project[]
+  taskComments           TaskComment[]
+}
+
+model OAuthToken {
+  id           Int     @id @default(autoincrement())
+  user         User    @relation(fields: [userId], references: [id])
+  userId       String
+  accessToken  String?
+  refreshToken String?
+  provider     String?
 }
 
 model Post {
-  id        Int     @id @default(autoincrement())
-  title     String
-  content   String?
-  published Boolean @default(false)
-  author    User @relation(fields: [authorId], references: [id])
-  authorId  String
-  categories Category[]
+  id          Int       @id @default(autoincrement())
+  title       String
+  content     String    @db.Text
+  summary     String?   @db.Text
+  slug        String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+  author      User      @relation(fields: [authorId], references: [id])
+  authorId    String
+  category    Category  @relation(fields: [categoryId], references: [id])
+  categoryId  Int
+  tags        Tag[]
+  comments    Comment[]
 }
 
-model Category {
+model Comment {
+  id        Int       @id @default(autoincrement())
+  comment   String    @db.Text
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id])
+  userId    String
+  post      Post      @relation(fields: [postId], references: [id])
+  postId    Int
+  parent    Comment?  @relation("parent", fields: [parentId], references: [id])
+  parentId  Int?
+  comments  Comment[] @relation("parent")
+}
+
+model Tag {
   id    Int    @id @default(autoincrement())
-  name  String
+  title String
   posts Post[]
 }
 
-model Account {
-  id                       String  @id @default(cuid())
-  userId                   String  @unique
-  type                     String
-  provider                 String
-  providerAccountId        String
-  refresh_token            String? @db.Text
-  access_token             String? @db.Text
-  expires_at               Int?
-  token_type               String?
-  scope                    String?
-  id_token                 String? @db.Text
-  session_state            String?
-  refresh_token_expires_in Int?
-  user                     User?   @relation(fields: [userId], references: [id])
+model Category {
+  id    Int     @id @default(autoincrement())
+  title String?
+  posts Post[]
+}
 
+model Project {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  status      String?
+  startDate   DateTime
+  endDate     DateTime
+  //cost      number?
+  manager     User     @relation(fields: [managerId], references: [id])
+  managerId   String
+  tasks       Task[]
+}
+
+model TaskComment {
+  id        Int      @id @default(autoincrement())
+  comment   String   @db.Text
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  task      Task     @relation(fields: [taskId], references: [id])
+  taskId    Int
+}
+
+model Task {
+  id           Int           @id @default(autoincrement())
+  title        String
+  description  String?
+  priority     String?
+  type         String?
+  status       Status
+  order        Int
+  dueDate      DateTime
+  project      Project       @relation(fields: [projectId], references: [id])
+  projectId    Int
+  createdAt    DateTime      @default(now())
+  createdBy    User          @relation("taskCreatedBy", fields: [createdById], references: [id])
+  createdById  String
+  updatedAt    DateTime      @updatedAt
+  assignee     User          @relation("taskAssignee", fields: [assigneeId], references: [id])
+  assigneeId   String
+  attachments  Attachment[]
+  taskComments TaskComment[]
+}
+
+model Attachment {
+  id           Int    @id @default(autoincrement())
+  fileName     String
+  fileUrl      String
+  task         Task   @relation(fields: [taskId], references: [id])
+  taskId       Int
+  uploadedBy   User   @relation(fields: [uploadedById], references: [id])
+  uploadedById String
+}
+
+model Event {
+  id             Int             @id @default(autoincrement())
+  name           String
+  description    String?         @db.Text
+  color          String?
+  status         String?
+  location       String?
+  contact        String?
+  maxAttendees   Int?
+  onlineLink     String?
+  startDate      DateTime
+  endDate        DateTime
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  createdBy      User            @relation(fields: [createdById], references: [id])
+  createdById    String
+  venue          Venue?          @relation(fields: [venueId], references: [id])
+  venueId        Int?
+  eventSchedules EventSchedule[]
+  attendees      Attendee[]
+  organizer      Organizer?      @relation(fields: [organizerId], references: [id])
+  organizerId    Int?
+  runs           Run[]
+  //attachments    Attachment[]
+}
+
+model Organizer {
+  id     Int     @id @default(autoincrement())
+  name   String
+  events Event[]
+}
+
+model Venue {
+  id       Int     @id @default(autoincrement())
+  location String
+  events   Event[]
+}
+
+model Attendee {
+  id       Int     @id @default(autoincrement())
+  user     User    @relation(fields: [userId], references: [id])
+  userId   String
+  event    Event   @relation(fields: [eventId], references: [id])
+  eventId  Int
+  status   String?
+  attended Boolean @default(false)
+}
+
+model EventSchedule {
+  id        Int      @id @default(autoincrement())
+  activity  String
+  location  String?
+  startTime DateTime
+  endTime   DateTime
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@unique([provider, providerAccountId])
-  @@index([userId])
+  event     Event    @relation(fields: [eventId], references: [id])
+  eventId   Int
 }
+
+model Run {
+  id            Int            @id @default(autoincrement())
+  title         String
+  distance      Int
+  price         Int
+  elevation     Int?
+  surface       String?
+  tshirt        Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  event         Event          @relation(fields: [eventId], references: [id])
+  eventId       Int
+  registrations Registration[]
+  runResults    RunResult[]
+  runCategories RunCategory[]
+}
+
+model RunCategory {
+  id       Int    @id @default(autoincrement())
+  category String
+  title    String
+  runs     Run[]
+}
+
+model Registration {
+  id          Int         @id @default(autoincrement())
+  createdAt   DateTime    @default(now())
+  firstName   String
+  lastName    String
+  gender      Gender
+  dateOfBirth DateTime
+  email       String
+  nation      String
+  city        String
+  club        String?
+  phone       String?
+  presented   Boolean     @default(false)
+  paid        Boolean     @default(false)
+  tshirtSize  TshirtSize?
+  user        User?       @relation(fields: [userId], references: [id])
+  userId      String?
+  run         Run         @relation(fields: [runId], references: [id])
+  runId       Int
+}
+
+model RunResult {
+  id          Int     @id @default(autoincrement())
+  rank        Int
+  bib         Int
+  name        String
+  category    String
+  gender      Gender
+  yearOfBirth Int
+  club        String
+  time        Int
+  user        User?   @relation(fields: [userId], references: [id])
+  userId      String?
+  run         Run     @relation(fields: [runId], references: [id])
+  runId       Int
+}
+
+/**
+ * model Account {
+ * id                       String  @id @default(cuid())
+ * userId                   String  @unique
+ * type                     String
+ * provider                 String
+ * providerAccountId        String
+ * refresh_token            String? @db.Text
+ * access_token             String? @db.Text
+ * expires_at               Int?
+ * token_type               String?
+ * scope                    String?
+ * id_token                 String? @db.Text
+ * session_state            String?
+ * refresh_token_expires_in Int?
+ * user                     User?   @relation(fields: [userId], references: [id])
+ * createdAt DateTime @default(now())
+ * updatedAt DateTime @updatedAt
+ * @@unique([provider, providerAccountId])
+ * @@index([userId])
+ * }
+ */
 
 model Session {
   id           String   @id @default(cuid())
@@ -86,26 +324,139 @@ model Session {
   @@index([userId])
 }
 
-model VerificationToken {
-  identifier String
-  token      String
-  expires    DateTime
-
-  @@unique([identifier, token])
+model ResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 }
 
-// Optional for WebAuthn support
-model Authenticator {
-  credentialID         String  @unique
-  userId               String
-  providerAccountId    String
-  credentialPublicKey  String
-  counter              Int
-  credentialDeviceType String
-  credentialBackedUp   Boolean
-  transports           String?
+/**
+ * model VerificationToken {
+ * identifier String
+ * token      String
+ * expires    DateTime
+ * @@unique([identifier, token])
+ * }
+ */
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+enum Status {
+  TODO
+  IN_PROGRESS
+  DONE
+}
 
-  @@id([userId, credentialID])
+enum TshirtSize {
+  S
+  M
+  L
+  XL
+  XXL
+  XXXL
+}
+
+enum Gender {
+  MAN
+  WOMAN
+}
+
+model Contact {
+  id             Int          @id @default(autoincrement())
+  user1          User         @relation("user1", fields: [user1Id], references: [id])
+  user1Id        String
+  user2          User         @relation("user2", fields: [user2Id], references: [id])
+  user2Id        String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  conversationId Int
+}
+
+model Conversation {
+  id                  Int                  @id @default(autoincrement())
+  name                String?
+  isGroup             Boolean
+  lastMessage         Message?             @relation("lastMessage", fields: [lastMessageId], references: [id])
+  lastMessageId       Int?
+  contacts            Contact[]
+  conversationMembers ConversationMember[]
+  messages            Message[]
+}
+
+model ConversationMember {
+  id                Int          @id @default(autoincrement())
+  user              User         @relation(fields: [userId], references: [id])
+  userId            String
+  conversation      Conversation @relation(fields: [conversationId], references: [id])
+  conversationId    Int
+  lastSeenMessage   Message?     @relation(fields: [lastSeenMessageId], references: [id])
+  lastSeenMessageId Int?
+}
+
+model Message {
+  id                  Int                  @id @default(autoincrement())
+  sender              User                 @relation(fields: [senderId], references: [id])
+  senderId            String
+  conversation        Conversation         @relation(fields: [conversationId], references: [id])
+  conversationId      Int
+  content             String               @db.Text
+  type                String
+  createdAt           DateTime             @default(now())
+  conversationMembers ConversationMember[]
+  lastConversations   Conversation[]       @relation("lastMessage")
+}
+
+model FriendRequest {
+  id         Int    @id @default(autoincrement())
+  sender     User   @relation("sender", fields: [senderId], references: [id])
+  senderId   String
+  receiver   User   @relation("receiver", fields: [receiverId], references: [id])
+  receiverId String
+}
+
+model Activity {
+  id           Int            @id @default(autoincrement())
+  user         User           @relation(fields: [userId], references: [id])
+  userId       String
+  name         String
+  type         String
+  createdAt    DateTime       @default(now())
+  date         DateTime
+  duration     Int
+  distance     Int
+  elevation    Int
+  avgSpeed     Int
+  avgPace      Int
+  calories     Int?
+  activityData ActivityData[]
+}
+
+/**
+ * model Device {
+ * id     Int    @id @default(autoincrement())
+ * user   User   @relation(fields: [userId], references: [id])
+ * userId String
+ * name   String
+ * }
+ */
+
+model ActivityData {
+  id         Int      @id @default(autoincrement())
+  activity   Activity @relation(fields: [activityId], references: [id])
+  activityId Int
+  lat        Float
+  lng        Float
+  time       DateTime
+  elevation  Float
+}
+
+model ActivityFeed {
+  id         Int      @id @default(autoincrement())
+  actor      User     @relation(fields: [actorId], references: [id])
+  actorId    String
+  verb       String
+  objectType String
+  objectId   Int
+  targetType String?
+  targetId   Int?
+  time       DateTime
 }

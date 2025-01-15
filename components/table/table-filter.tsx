@@ -7,7 +7,7 @@ import {
   useParams,
 } from "next/navigation";
 import { useDebouncedCallback } from "use-debounce";
-//import Form, { FormRenderFunc } from "./form/form";
+import Form, { FormRender } from "@/components/form/form";
 import { resources } from "@/resources";
 import { FormSchema } from "@/validation";
 
@@ -41,13 +41,13 @@ export default function TableFilter() {
     field["onChange"] = (value: any) => filter(field.name, value);
   });
 
-  /*const render: FormRenderFunc = ({ fields, formState }) => {
+  const render: FormRender = ({ fields, formState }) => {
     return (
       <div className="flex flex-row flex-wrap gap-2">
         {filters.map(f => <div key={f.name}>{fields[f.name]}</div>)}
       </div>
     )
-  };*/
+  };
 
   const filter = (fieldName: string, value: any) => {
     const params = new URLSearchParams(searchParams);
@@ -64,14 +64,13 @@ export default function TableFilter() {
 
   return (
     <div>
-      {/*<Form
+      <Form
       fields={filters}
-      validation={FormSchema.FilterResource}
+      validation="FilterResource"
       data={defaultData}
       render={render}
-      useClient={true}
-      action={() => { }}
-    />*/}
+      action={() => null}
+    />
     </div>
   );
 }
