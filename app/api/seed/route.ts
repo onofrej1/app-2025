@@ -192,7 +192,11 @@ export async function GET(request: Request) {
     "Presov running team",
   ];
 
+  const rank: Record<number, number> = {};
   for(let i = 0; i < 150; i++) {
+    const runId = random([1, 2, 3]);
+    if (!rank[runId]) rank[runId] = 0;
+
     registrations.push({
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
@@ -204,7 +208,7 @@ export async function GET(request: Request) {
       club: random(clubs),
       paid: false,
       presented: false,
-      runId: random([1, 2, 3]),
+      runId,
       phone: faker.phone.number(),
     });
 
@@ -214,8 +218,8 @@ export async function GET(request: Request) {
       club: random(clubs),
       bib: faker.number.int({ min: 50, max: 250 }),
       gender: random(["MAN", "WOMAN"]),
-      rank: i + 1,
-      runId: random([1, 2, 3]),
+      rank: ++rank[runId],
+      runId,
       yearOfBirth: random([1980, 1984, 1965, 1998, 2002]),
       time: 1200 + i * 50,
     });
