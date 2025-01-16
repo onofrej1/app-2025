@@ -14,6 +14,9 @@ import {
   Attendee,
   Registration,
   RunResult,
+  Conversation,
+  Contact,
+  ConversationMember,
 } from "@prisma/client";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
@@ -46,6 +49,7 @@ export async function GET(request: Request) {
       lastLogin: new Date(),
     },
   });
+
   /*const existingUsers = await prisma.user.findMany();
   const user = existingUsers[0];*/
 
@@ -81,10 +85,14 @@ export async function GET(request: Request) {
   const runs: Partial<Run>[] = [];
   const registrations: Partial<Registration>[] = [];
   const runResults: Partial<RunResult>[] = [];
+  const conversations: Partial<Conversation>[] = [];
+  const contacts: Partial<Contact>[] = [];
+  const conversationMembers: Partial<ConversationMember>[] = [];
 
-  for (const [i, element] of count.entries()) {
+  for (const [index, element] of count.entries()) {
+    const i = index + 1;
     users.push({
-      email: `user${i + 1}@example.com`, //faker.internet.email(),
+      email: `user${i}@example.com`, //faker.internet.email(),
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
       emailVerified: false,
@@ -93,20 +101,26 @@ export async function GET(request: Request) {
       password: hashedPassword,
       lastLogin: new Date(),
     });
+  }
 
+  await prisma.user.createMany({ data: users as User[] });
+  const ids = await prisma.user.findMany({ select: { id: true } });
+  const userIds = ids.map((i) => i.id);
+
+  for (const [i, element] of count.entries()) {
     posts.push({
       title: faker.lorem.word(),
       summary: faker.lorem.paragraph(),
       content: faker.lorem.paragraphs({ min: 3, max: 5 }),
       slug: faker.lorem.slug(),
-      authorId: user.id,
+      authorId: random(userIds),
       categoryId: random([1, 2, 3]),
     });
 
     comments.push({
       comment: faker.lorem.paragraphs({ min: 3, max: 5 }),
-      userId: user.id,
-      postId: i + 1,
+      userId: random(userIds),
+      postId: i,
     });
 
     projects.push({
@@ -115,7 +129,7 @@ export async function GET(request: Request) {
       status: faker.lorem.word(),
       startDate: faker.date.future(),
       endDate: faker.date.future(),
-      managerId: user.id,
+      managerId: random(userIds),
     });
 
     tasks.push({
@@ -123,16 +137,16 @@ export async function GET(request: Request) {
       description: faker.lorem.sentence(),
       status: "TODO",
       dueDate: faker.date.future(),
-      order: i + 1,
-      assigneeId: user.id,
-      createdById: user.id,
+      order: i,
+      assigneeId: random(userIds),
+      createdById: random(userIds),
       projectId: 1,
     });
 
     taskComments.push({
       comment: faker.lorem.sentences(),
-      userId: user.id,
-      taskId: i + 1,
+      userId: random(userIds),
+      taskId: i,
     });
 
     const startDate = new Date();
@@ -145,11 +159,11 @@ export async function GET(request: Request) {
       location: faker.location.street() + " " + faker.location.city(),
       maxAttendees: faker.number.int({ min: 1, max: 9 }),
       contact: faker.person.fullName(),
-      createdById: user.id,
+      createdById: random(userIds),
       startDate,
       endDate,
-      organizerId: i % 2 === 0 ? i + 1 : null,
-      venueId: i % 2 === 0 ? i + 1 : null,
+      organizerId: i % 2 === 0 ? i : null,
+      venueId: i % 2 === 0 ? i : null,
       status: "Created",
     });
 
@@ -163,14 +177,14 @@ export async function GET(request: Request) {
       location: faker.location.streetAddress() + " " + faker.location.city(),
       startTime,
       endTime,
-      eventId: i + 1,
+      eventId: i,
     });
 
     attendees.push({
       attended: false,
       status: random(["YES", "MAYBE", "NO"]),
       eventId: random([1, 2, 3]),
-      userId: user.id,
+      userId: random(userIds),
     });
 
     runs.push({
@@ -179,8 +193,54 @@ export async function GET(request: Request) {
       elevation: faker.number.int({ min: 10, max: 600 }),
       price: random([10, 15, 20, 25]),
       surface: random(["road", "grass"]),
-      eventId: i + 1,
+      eventId: i,
       tshirt: i % 2 === 0 ? true : false,
+    });
+  }
+
+  for (let j = 0; j < 4; j++) {
+    const i = j + 1;
+    conversations.push({
+      isGroup: false,
+    });
+
+    contacts.push({
+      conversationId: i,
+      user1Id: userIds[0],
+      user2Id: userIds[i],
+    });
+
+    conversationMembers.push({
+      conversationId: i,
+      userId: userIds[0],
+    });
+
+    conversationMembers.push({
+      conversationId: i,
+      userId: userIds[i],
+    });
+  }
+
+  for (let j = 4; j < 8; j++) {
+    const i = j + 1;
+    conversations.push({
+      isGroup: false,
+    });
+
+    contacts.push({
+      conversationId: i,
+      user1Id: userIds[4],
+      user2Id: userIds[i - 4],
+    });
+
+    conversationMembers.push({
+      conversationId: i,
+      userId: userIds[4],
+    });
+
+    conversationMembers.push({
+      conversationId: i,
+      userId: userIds[i - 4],
     });
   }
 
@@ -193,7 +253,7 @@ export async function GET(request: Request) {
   ];
 
   const rank: Record<number, number> = {};
-  for(let i = 0; i < 150; i++) {
+  for (let i = 0; i < 150; i++) {
     const runId = random([1, 2, 3]);
     if (!rank[runId]) rank[runId] = 0;
 
@@ -221,7 +281,7 @@ export async function GET(request: Request) {
       rank: ++rank[runId],
       runId,
       yearOfBirth: random([1980, 1984, 1965, 1998, 2002]),
-      time: 1200 + i * 50,
+      time: 1200 + i * 5,
     });
   }
 
@@ -252,7 +312,6 @@ export async function GET(request: Request) {
     },
   ];
 
-  await prisma.user.createMany({ data: users as User[] });
   await prisma.post.createMany({ data: posts as Post[] });
   await prisma.comment.createMany({
     data: comments as Comment[],
@@ -280,6 +339,15 @@ export async function GET(request: Request) {
   });
   await prisma.runResult.createMany({
     data: runResults as RunResult[],
+  });
+  await prisma.conversation.createMany({
+    data: conversations as Conversation[],
+  });
+  await prisma.contact.createMany({
+    data: contacts as Contact[],
+  });
+  await prisma.conversationMember.createMany({
+    data: conversationMembers as ConversationMember[],
   });
 
   return NextResponse.json({ result: "done" });
