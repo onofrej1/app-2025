@@ -18,17 +18,6 @@ export async function isAuthenticated() {
   return true;
 }
 
-export async function getSessionToken() {
-  const session = await getIronSession<SessionData>(
-    await cookies(),
-    sessionOptions
-  );
-  return {
-    token: session.token,
-    role: session.role,
-  };
-}
-
 export async function getSession() {
   const session = await getIronSession<SessionData>(
     await cookies(),

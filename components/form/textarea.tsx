@@ -2,43 +2,40 @@
 
 import { ErrorMessage } from "@hookform/error-message";
 import { Label } from "../ui/label";
-import { Input } from "../ui/input";
 import { DefaultFormData } from "./form";
 import { FieldErrors, RegisterOptions, UseFormRegister } from "react-hook-form";
 import { renderError } from "./utils";
+import { Textarea as TextareaInput } from "../ui/textarea";
 import { ChangeEvent, ChangeEventHandler } from "react";
 
 interface InputProps {
   label?: string;
-  type: string;
   name: string;
   placeholder?: string;
-  onChange?: ChangeEventHandler<HTMLInputElement>;
+  rows?: number;
+  onChange?: ChangeEventHandler<HTMLTextAreaElement>;
   errors: FieldErrors<DefaultFormData>;
   register: UseFormRegister<DefaultFormData>;
 }
 
-export default function FormInput(props: InputProps) {
-  const { label, name, type, placeholder, onChange, errors, register } =
-    props;
-  if (type === "hidden") {
-    return <Input type="hidden" {...register(name)} placeholder={label} />;
-  }
+export default function Textarea(props: InputProps) {
+  const { label, name, rows, placeholder, onChange, errors, register } = props;
 
   const registerOptions: RegisterOptions = {};
   if (onChange) {
-    registerOptions["onChange"] = (e: ChangeEvent<HTMLInputElement>) => onChange(e);
+    registerOptions["onChange"] = (e: ChangeEvent<HTMLTextAreaElement>) =>
+      onChange(e);
   }
 
   return (
     <div>
       {label && <Label>{label}</Label>}
       <div className="pt-1">
-        <Input
+        <TextareaInput
           key={name}
-          type={type || "text"}
+          rows={rows || 3}
           {...register(name, registerOptions)}
-          placeholder={placeholder || label}
+          placeholder={placeholder}
         />
       </div>
 

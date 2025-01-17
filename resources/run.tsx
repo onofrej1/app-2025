@@ -17,7 +17,7 @@ const run: Resource = {
   form: [
     { name: 'title', type: 'text', label: 'Title' },
     { name: 'distance', type: 'number', label: 'Distance' },
-    { name: 'price', type: 'nubmer', label: 'Price [eur]' },    
+    { name: 'price', type: 'number', label: 'Price [eur]' },    
     { name: 'elevation', type: 'text', label: 'Elevation' },
     { name: 'surface', type: 'text', label: 'Surface' },
     {

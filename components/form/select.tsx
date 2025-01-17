@@ -12,14 +12,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { renderError } from "./utils";
-import { X } from "lucide-react";
 
 interface SelectOption {
   label: string;
   value: string | number;
 }
 
-interface InputProps {
+interface SelectProps {
   label?: string;
   name: string;
   errors?: FieldErrors<DefaultFormData>;
@@ -40,7 +39,7 @@ export default function FormSelect({
   setValue,
   className,
   onChange,
-}: InputProps) {
+}: SelectProps) {
   return (
     <div>
       {label && <Label>{label}</Label>}

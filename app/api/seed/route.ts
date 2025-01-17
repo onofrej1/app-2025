@@ -107,7 +107,8 @@ export async function GET(request: Request) {
   const ids = await prisma.user.findMany({ select: { id: true } });
   const userIds = ids.map((i) => i.id);
 
-  for (const [i, element] of count.entries()) {
+  for (const [index, element] of count.entries()) {
+    const i = index + 1;
     posts.push({
       title: faker.lorem.word(),
       summary: faker.lorem.paragraph(),
@@ -313,6 +314,7 @@ export async function GET(request: Request) {
   ];
 
   await prisma.post.createMany({ data: posts as Post[] });
+  
   await prisma.comment.createMany({
     data: comments as Comment[],
   });

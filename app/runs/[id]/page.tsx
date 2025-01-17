@@ -48,6 +48,18 @@ export default function Run() {
     }    
   }
 
+  const sortData = (sortBy: string, sortDir: string) => {
+    console.log('sort', sortBy);
+    if (!uploadData) return;
+    let data = uploadData;
+    if (sortBy === 'name') {
+      data = uploadData.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortBy === 'rank') {
+      data = uploadData.sort((a, b) => b.rank - a.rank)
+    }
+    setUploadData([...data]);
+  }
+
   return (
     <div>
       Run {run.title} {run.distance} km Upload results
@@ -57,6 +69,7 @@ export default function Run() {
         headers={headers}
         data={uploadData}
         totalRows={uploadData.length}
+        onSort={sortData}
       />}
       <Button onClick={saveResults}>Save results</Button>
     </div>

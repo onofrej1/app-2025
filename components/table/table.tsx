@@ -48,6 +48,7 @@ interface TableProps {
   totalRows: number;
   //actions?: ReactNode; //TableAction[];
   actions?: JSX.Element;
+  onSort?: (sortBy: string, sortDir: string) => void,
 }
 
 const toggleSort = (direction: string | null) => {
@@ -66,6 +67,7 @@ export default function TableComponent({
   headers,
   data,
   actions: Actions,
+  onSort,
 }: TableProps) {
   const searchParams = useSearchParams();
   const { replace, push } = useRouter();
@@ -85,8 +87,11 @@ export default function TableComponent({
       params.delete("sortBy");
       params.delete("sortDir");
     }
-
-    replace(`${pathname}?${params.toString()}`);
+    if (onSort && dir && column) {
+      onSort(column, dir);
+    } else {
+      replace(`${pathname}?${params.toString()}`);
+    }
   };
 
   const Icon = getSortIcon(searchParams.get("sortDir"));

@@ -5,8 +5,8 @@ import React, { useEffect } from "react";
 import Form, { FormRender } from "@/components/form/form";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils";
-import { useSession } from "next-auth/react";
 import { socket } from "@/socket";
+import { useSession } from "@/hooks/use-session";
 
 interface ChatProps {
   conversationId: number;
@@ -14,7 +14,7 @@ interface ChatProps {
 
 export default function Chat(props: ChatProps) {
   const { conversationId } = props;
-  const { data: session, status } = useSession();
+  const { isFetching: isSessionLoading, user, userId } = useSession();
   const queryClient = useQueryClient();
   const { data: messages = [], isFetching } = useQuery({
     queryKey: ["messages", conversationId],
@@ -78,10 +78,10 @@ export default function Chat(props: ChatProps) {
               key={message.id}
               className={cn(
                 "flex",
-                message.sender.id === session?.user.id && "justify-end"
+                message.sender.id === userId && "justify-end"
               )}
             >
-              {message.sender.name} -{message.content}
+              {message.sender.lastName} {message.sender.firstName} - {message.content}
             </div>
           );
         })}

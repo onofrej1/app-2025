@@ -2,14 +2,15 @@
 import { contactEmail } from "@/actions/emails";
 import Form from "@/components/form/form";
 import { Button } from "@/components/ui/button";
+import { FormField } from "@/resources/resources.types";
 import { ContactForm } from "@/validation";
 import React from "react";
 
 export default function Contact() {
-  const fields = [
-    { name: "name", label: "Name" },
-    { name: "email", type: "email" },
-    { name: "message", type: "textarea", rows: 5, label: "Message" },
+  const fields: FormField[] = [
+    { type: "text", name: "name", label: "Name" },
+    { type: "email", name: "email" },
+    { type: "textarea", name: "message", rows: 5, label: "Message" },
   ];
 
   const sendForm = async (data: ContactForm) => {
@@ -25,10 +26,6 @@ export default function Contact() {
               {fields.name}
               {fields.email}
               {fields.message}
-              {/*<div className="flex gap-3">
-                <div className="flex-1">{fields.gender}</div>
-                <div className="flex-1">{fields.dateOfBirth}</div>
-              </div>*/}
               <Button type="submit">Contact</Button>
             </div>
           </div>

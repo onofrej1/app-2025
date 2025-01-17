@@ -2,7 +2,13 @@
 import { Controller, useForm, UseFormTrigger } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { JSX } from "react";
-import { FormField, MultiSelectOption } from "@/resources/resources.types";
+import {
+  FormField,
+  MultiSelectOption,
+  MultiSelectType,
+  SelectType,
+  TextAreaType,
+} from "@/resources/resources.types";
 import { FormSchema } from "@/validation";
 import rules from "@/validation";
 import FormInput from "@/components/form/input";
@@ -15,6 +21,7 @@ import { toast } from "sonner";
 import { DatePicker } from "./datepicker";
 import { Button } from "../ui/button";
 import { capitalize } from "@/lib/utils";
+import Textarea from "./textarea";
 
 export interface DefaultFormData {
   [key: string]: any;
@@ -112,14 +119,26 @@ export default function Form({
     const label = field.label || capitalize(field.name);
     return (
       <>
-        {["text", "textarea", "number", "email", "hidden"].includes(type) && (
+        {["text", "number", "email", "hidden"].includes(type) && (
           <>
             <FormInput
               label={label}
               name={field.name}
               errors={errors}
               type={type}
-              rows={field.rows}
+              register={register}
+              onChange={field.onChange}
+            />
+          </>
+        )}
+
+        {type === "textarea" && (
+          <>
+            <Textarea
+              label={label}
+              name={field.name}
+              errors={errors}
+              rows={(field as TextAreaType).rows}
               register={register}
               onChange={field.onChange}
             />
@@ -191,7 +210,7 @@ export default function Form({
                     field.onChange(value);
                   }
                 }}
-                options={field.options!}
+                options={(field as SelectType).options!}
               />
             )}
           />
@@ -210,7 +229,9 @@ export default function Form({
                 <MultiSelect
                   name={name}
                   label={label}
-                  options={field.options! as MultiSelectOption[]}
+                  options={
+                    (field as MultiSelectType).options! as MultiSelectOption[]
+                  }
                   onValueChange={(v) => {
                     onChange(v);
                   }}

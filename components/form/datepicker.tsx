@@ -19,7 +19,7 @@ import { Label } from "@/components/ui/label";
 import { ErrorMessage } from "@hookform/error-message";
 
 interface DatePickerProps {
-  label?: string;  
+  label?: string;
   name: string;
   errors: FieldErrors<DefaultFormData>;
   onChange?: any;
@@ -28,7 +28,6 @@ interface DatePickerProps {
 
 export function DatePicker(props: DatePickerProps) {
   const { label, name, errors, value: date, onChange } = props;
-  //const [date, setDate] = React.useState<Date>();
 
   return (
     <div>
