@@ -25,7 +25,8 @@ model User {
   id            String    @id @default(cuid())
   firstName     String
   lastName      String
-  email         String    @unique
+  userName      String?
+  email         String?   @unique
   emailVerified Boolean   @default(false)
   password      String
   image         String?
@@ -59,6 +60,7 @@ model User {
   taskAttachments        Attachment[]
   projects               Project[]
   taskComments           TaskComment[]
+  accounts               Account[]
 }
 
 model OAuthToken {
@@ -286,6 +288,28 @@ model RunResult {
   userId      String?
   run         Run     @relation(fields: [runId], references: [id])
   runId       Int
+}
+
+model Account {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  //type                     String
+  provider              String
+  providerAccountId     String
+  refreshToken          String?  @db.Text
+  accessToken           String?  @db.Text
+  expiresAt             Int?
+  tokenType             String?
+  scope                 String?
+  idToken               String?  @db.Text
+  sessionState          String?
+  refreshTokenExpiresAt Int?
+  user                  User?    @relation(fields: [userId], references: [id])
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 /**

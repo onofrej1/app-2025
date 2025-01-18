@@ -55,7 +55,7 @@ interface FormProps {
   fields: FormField[];
   validation: FormSchema;
   data?: DefaultFormData;
-  action: (...args: any[]) => any;
+  action?: (...args: any[]) => any;
   buttons?: ((props: FormState) => JSX.Element)[];
   render?: FormRender;
   children?: FormRender;
@@ -91,6 +91,8 @@ export default function Form({
   console.log(errors);
 
   const submitForm = async (formData: unknown) => {
+    if (!action) return;
+    
     try {
       const data: actionResult = await action(formData);
       if (!data) {

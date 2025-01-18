@@ -8,6 +8,7 @@ import bcrypt from "bcryptjs";
 import { SessionData, sessionOptions } from "@/utils/session";
 import { v4 as uuidv4 } from "uuid";
 import { sendEmail } from "@/utils/email";
+import { redirect } from "next/dist/server/api-utils";
 const crypto = require("crypto");
 
 export async function isAuthenticated() {
@@ -136,6 +137,7 @@ export async function logout() {
     });
     //session.destroy();
   }
+  return { redirect: '/login' };
 }
 
 export async function resetPasswordRequest(email: string) {

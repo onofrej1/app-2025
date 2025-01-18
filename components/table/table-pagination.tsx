@@ -12,6 +12,8 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { FormField } from "@/resources/resources.types";
+import Form from "../form/form";
 
 interface TablePaginationProps {
   totalRows: number;
@@ -31,10 +33,10 @@ export default function TablePagination({ totalRows }: TablePaginationProps) {
     replace(`${pathname}?${params.toString()}`);
   };
 
-  const handlePageCount = useDebouncedCallback((pageCount: string) => {
+  const handlePageCount = useDebouncedCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     const params = new URLSearchParams(searchParams);
     params.set("page", "1");
-    params.set("pageCount", pageCount);
+    params.set("pageCount", e.target.value);
     replace(`${pathname}?${params.toString()}`);
   }, 300);
 
@@ -42,6 +44,10 @@ export default function TablePagination({ totalRows }: TablePaginationProps) {
     label: v.toString(),
     value: v,
   }));
+
+  const fields: FormField[] = [
+    { type: "select", name: "pageCount", onChange: handlePageCount, options: pageCountOptions },
+  ];
 
   const totalPages = Math.ceil(totalRows / Number(pageCount));
 
@@ -85,13 +91,18 @@ export default function TablePagination({ totalRows }: TablePaginationProps) {
       </Pagination>
 
       <span className="pr-2">Pages</span>
-      <FormSelect
+      {/*<FormSelect
         name="pageCount"
         inline
         value={pageCount?.toString()}
         onChange={handlePageCount}
         options={pageCountOptions}
-      />
+      />*/}
+      <Form fields={fields} validation={"ContactForm"}>
+        {({ fields }) => (
+          <div className="flex flex-col gap-3 pb-4">{fields.pageCount}</div>
+        )}
+      </Form>
     </div>
   );
 }
