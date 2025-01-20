@@ -14,40 +14,49 @@ datasource db {
 }
 
 model Profile {
-  id     Int     @id @default(autoincrement())
-  bio    String?
-  gender Gender
-  user   User    @relation(fields: [userId], references: [id])
-  userId String  @unique
+  id       Int     @id @default(autoincrement())
+  //isPublic Boolean @default(false)
+  phone    String?
+  intro    String?
+  bio      String?
+  country  String?
+  language String?
+  company  String?
+  jobTitle String?
+  website  String?
+  gender   Gender
+  user     User    @relation(fields: [userId], references: [id])
+  userId   String  @unique
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String     @id @default(cuid())
   firstName     String
   lastName      String
   userName      String?
-  email         String?   @unique
-  emailVerified Boolean   @default(false)
+  email         String?    @unique
+  emailVerified Boolean    @default(false)
+  dateOfBirth   DateTime?
   password      String
   image         String?
   role          String
-  status        String?
-  //accounts      Account[]
+  status        UserStatus
   sessions      Session[]
 
-  createdAt              DateTime             @default(now())
-  updatedAt              DateTime             @updatedAt
-  lastLogin              DateTime             @default(now())
+  registeredAt           DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+  canceledAt             DateTime? // soft delete
+  lastLogin              DateTime        @default(now())
   posts                  Post[]
   profile                Profile?
   events                 Event[]
   attendees              Attendee[]
-  user1contacts          Contact[]            @relation("user1")
-  user2contacts          Contact[]            @relation("user2")
-  conversationMembers    ConversationMember[]
-  messages               Message[]
-  friendRequestSenders   FriendRequest[]      @relation("sender")
-  friendRequestReceivers FriendRequest[]      @relation("receiver")
+  //user1contacts          Contact[]            @relation("user1")
+  //user2contacts          Contact[]            @relation("user2")
+  //conversationMembers    ConversationMember[]
+  //messages               Message[]
+  friendRequestSenders   FriendRequest[] @relation("sender")
+  friendRequestReceivers FriendRequest[] @relation("receiver")
   oauthTokens            OAuthToken[]
   activities             Activity[]
   activityFeeds          ActivityFeed[]
@@ -55,12 +64,28 @@ model User {
   registrations          Registration[]
   runResults             RunResult[]
   resetTokens            ResetToken[]
-  assignedTasks          Task[]               @relation("taskAssignee")
-  createdTasks           Task[]               @relation("taskCreatedBy")
+  assignedTasks          Task[]          @relation("taskAssignee")
+  createdTasks           Task[]          @relation("taskCreatedBy")
   taskAttachments        Attachment[]
   projects               Project[]
   taskComments           TaskComment[]
   accounts               Account[]
+  address                Address?
+  groups                 Group[]
+  followerUsers          Follows[]       @relation("follower")
+  followedUsers          Follows[]       @relation("followed")
+  UserGroup              UserGroup[]
+}
+
+model Address {
+  id      String @id @default(cuid())
+  street  String
+  city    String
+  state   String
+  country String
+  type    String
+  user    User   @relation(fields: [userId], references: [id])
+  userId  String @unique
 }
 
 model OAuthToken {
@@ -73,46 +98,75 @@ model OAuthToken {
 }
 
 model Post {
-  id          Int       @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   title       String
-  content     String    @db.Text
-  summary     String?   @db.Text
+  content     String      @db.Text
+  summary     String?     @db.Text
+  cover       String?     @db.Text
   slug        String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  published   Boolean   @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  status      PostStatus
+  //published       Boolean   @default(false)
   publishedAt DateTime?
-  author      User      @relation(fields: [authorId], references: [id])
+  metaTitle   String?
+  //metaDescription String?
+  author      User        @relation(fields: [authorId], references: [id])
   authorId    String
-  category    Category  @relation(fields: [categoryId], references: [id])
-  categoryId  Int
+  categories  Category[]
   tags        Tag[]
   comments    Comment[]
+  postViews   PostViews[]
+}
+
+model PostViews {
+  id     Int  @id @default(autoincrement())
+  views  Int  @default(0)
+  likes  Int  @default(0)
+  post   Post @relation(fields: [postId], references: [id])
+  postId Int
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
 }
 
 model Comment {
-  id        Int       @id @default(autoincrement())
-  comment   String    @db.Text
-  createdAt DateTime  @default(now())
-  user      User      @relation(fields: [userId], references: [id])
-  userId    String
-  post      Post      @relation(fields: [postId], references: [id])
-  postId    Int
-  parent    Comment?  @relation("parent", fields: [parentId], references: [id])
-  parentId  Int?
-  comments  Comment[] @relation("parent")
+  id          Int           @id @default(autoincrement())
+  comment     String        @db.Text
+  status      CommentStatus @default(PENDING)
+  publishedAt DateTime      @default(now())
+  editedAt    DateTime?
+  user        User          @relation(fields: [userId], references: [id])
+  userId      String
+  post        Post          @relation(fields: [postId], references: [id])
+  postId      Int
+  parent      Comment?      @relation("parent", fields: [parentId], references: [id])
+  parentId    Int?
+  comments    Comment[]     @relation("parent")
+}
+
+enum CommentStatus {
+  PENDING
+  APPROVED
+  SPAM
 }
 
 model Tag {
-  id    Int    @id @default(autoincrement())
-  title String
-  posts Post[]
+  id          Int     @id @default(autoincrement())
+  title       String
+  description String?
+  slug        String?
+  posts       Post[]
 }
 
 model Category {
-  id    Int     @id @default(autoincrement())
-  title String?
-  posts Post[]
+  id          Int     @id @default(autoincrement())
+  title       String
+  description String?
+  slug        String?
+  posts       Post[]
 }
 
 model Project {
@@ -122,7 +176,7 @@ model Project {
   status      String?
   startDate   DateTime
   endDate     DateTime
-  //cost      number?
+  cost        Int
   manager     User     @relation(fields: [managerId], references: [id])
   managerId   String
   tasks       Task[]
@@ -144,7 +198,7 @@ model Task {
   description  String?
   priority     String?
   type         String?
-  status       Status
+  status       TaskStatus
   order        Int
   dueDate      DateTime
   project      Project       @relation(fields: [projectId], references: [id])
@@ -153,10 +207,17 @@ model Task {
   createdBy    User          @relation("taskCreatedBy", fields: [createdById], references: [id])
   createdById  String
   updatedAt    DateTime      @updatedAt
-  assignee     User          @relation("taskAssignee", fields: [assigneeId], references: [id])
+  assignee     User[]        @relation("taskAssignee")
   assigneeId   String
   attachments  Attachment[]
   taskComments TaskComment[]
+  labels       TaskLabel[]
+}
+
+model TaskLabel {
+  id    Int    @id @default(autoincrement())
+  title String
+  tasks Task[]
 }
 
 model Attachment {
@@ -179,8 +240,10 @@ model Event {
   contact        String?
   maxAttendees   Int?
   onlineLink     String?
+  eventUrl       String?
   startDate      DateTime
   endDate        DateTime
+  allDay         Boolean         @default(false)
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   createdBy      User            @relation(fields: [createdById], references: [id])
@@ -191,13 +254,21 @@ model Event {
   attendees      Attendee[]
   organizer      Organizer?      @relation(fields: [organizerId], references: [id])
   organizerId    Int?
+  eventType      EventType       @relation(fields: [eventTypeId], references: [id])
+  eventTypeId    Int
   runs           Run[]
   //attachments    Attachment[]
 }
 
+model EventType {
+  id    Int     @id @default(autoincrement())
+  type  String
+  Event Event[]
+}
+
 model Organizer {
   id     Int     @id @default(autoincrement())
-  name   String
+  title  String
   events Event[]
 }
 
@@ -365,10 +436,16 @@ model ResetToken {
  * }
  */
 
-enum Status {
+enum TaskStatus {
   TODO
   IN_PROGRESS
   DONE
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BANNED
 }
 
 enum TshirtSize {
@@ -381,52 +458,80 @@ enum TshirtSize {
 }
 
 enum Gender {
-  MAN
-  WOMAN
+  MALE
+  FEMALE
 }
 
-model Contact {
-  id             Int          @id @default(autoincrement())
-  user1          User         @relation("user1", fields: [user1Id], references: [id])
-  user1Id        String
-  user2          User         @relation("user2", fields: [user2Id], references: [id])
-  user2Id        String
-  conversation   Conversation @relation(fields: [conversationId], references: [id])
-  conversationId Int
+/**
+ * model Contact {
+ * id             Int          @id @default(autoincrement())
+ * user1          User         @relation("user1", fields: [user1Id], references: [id])
+ * user1Id        String
+ * user2          User         @relation("user2", fields: [user2Id], references: [id])
+ * user2Id        String
+ * conversation   Conversation @relation(fields: [conversationId], references: [id])
+ * conversationId Int
+ * }
+ * model Conversation {
+ * id                  Int                  @id @default(autoincrement())
+ * name                String?
+ * isGroup             Boolean
+ * lastMessage         Message?             @relation("lastMessage", fields: [lastMessageId], references: [id])
+ * lastMessageId       Int?
+ * contacts            Contact[]
+ * conversationMembers ConversationMember[]
+ * messages            Message[]
+ * }
+ * model ConversationMember {
+ * id                Int          @id @default(autoincrement())
+ * user              User         @relation(fields: [userId], references: [id])
+ * userId            String
+ * conversation      Conversation @relation(fields: [conversationId], references: [id])
+ * conversationId    Int
+ * lastSeenMessage   Message?     @relation(fields: [lastSeenMessageId], references: [id])
+ * lastSeenMessageId Int?
+ * }
+ * model Message {
+ * id                  Int                  @id @default(autoincrement())
+ * sender              User                 @relation(fields: [senderId], references: [id])
+ * senderId            String
+ * conversation        Conversation         @relation(fields: [conversationId], references: [id])
+ * conversationId      Int
+ * content             String               @db.Text
+ * type                String
+ * createdAt           DateTime             @default(now())
+ * conversationMembers ConversationMember[]
+ * lastConversations   Conversation[]       @relation("lastMessage")
+ * }
+ */
+
+model Group {
+  id          Int         @id @default(autoincrement())
+  name        String
+  description String
+  users       User[]
+  UserGroup   UserGroup[]
 }
 
-model Conversation {
-  id                  Int                  @id @default(autoincrement())
-  name                String?
-  isGroup             Boolean
-  lastMessage         Message?             @relation("lastMessage", fields: [lastMessageId], references: [id])
-  lastMessageId       Int?
-  contacts            Contact[]
-  conversationMembers ConversationMember[]
-  messages            Message[]
+model UserGroup {
+  id          Int      @id @default(autoincrement())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  group       Group    @relation(fields: [groupId], references: [id])
+  groupId     Int
+  joinedAt    DateTime @default(now())
+  leftGroupAt DateTime @default(now())
+  role        String
+  status      String
 }
 
-model ConversationMember {
-  id                Int          @id @default(autoincrement())
-  user              User         @relation(fields: [userId], references: [id])
-  userId            String
-  conversation      Conversation @relation(fields: [conversationId], references: [id])
-  conversationId    Int
-  lastSeenMessage   Message?     @relation(fields: [lastSeenMessageId], references: [id])
-  lastSeenMessageId Int?
-}
-
-model Message {
-  id                  Int                  @id @default(autoincrement())
-  sender              User                 @relation(fields: [senderId], references: [id])
-  senderId            String
-  conversation        Conversation         @relation(fields: [conversationId], references: [id])
-  conversationId      Int
-  content             String               @db.Text
-  type                String
-  createdAt           DateTime             @default(now())
-  conversationMembers ConversationMember[]
-  lastConversations   Conversation[]       @relation("lastMessage")
+model Follows {
+  id         Int      @id @default(autoincrement())
+  follower   User     @relation("follower", fields: [followerId], references: [id])
+  followerId String
+  followed   User     @relation("followed", fields: [followedId], references: [id])
+  followedId String
+  followedAt DateTime @default(now())
 }
 
 model FriendRequest {
