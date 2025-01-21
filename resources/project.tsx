@@ -15,6 +15,7 @@ const project: Resource = {
     { name: "status", type: "text", label: "Status" },
     { name: "startDate", type: "datepicker", label: "Start date" },
     { name: "endDate", type: "datepicker", label: "End date" },
+    { name: "cost", type: "number", label: "Cost" },
     {
       name: "managerId",
       type: "fk",

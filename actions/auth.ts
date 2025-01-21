@@ -8,7 +8,6 @@ import bcrypt from "bcryptjs";
 import { SessionData, sessionOptions } from "@/utils/session";
 import { v4 as uuidv4 } from "uuid";
 import { sendEmail } from "@/utils/email";
-import { redirect } from "next/dist/server/api-utils";
 const crypto = require("crypto");
 
 export async function isAuthenticated() {
@@ -75,6 +74,7 @@ export async function register(data: RegisterUserType) {
         email: email,
         password: hashedPassword,
         role: "USER",
+        status: "ACTIVE"
       },
     });
   } catch (e) {
@@ -164,7 +164,7 @@ export async function resetPasswordRequest(email: string) {
   const link = `${process.env.BASE_URL}/reset-password?token=${resetToken}&id=${user.id}`;
 
   sendEmail(
-    user.email,
+    user.email!,
     "Password Reset Request",
     "requestResetPassword.handlebars",
     { name: user, link: link }
@@ -202,7 +202,7 @@ export async function ResetPassword(
     },
   });
   sendEmail(
-    user.email,
+    user.email!,
     "Password Reset Successfully",
     "changePasswordSuccess.handlebars",
     {
@@ -231,7 +231,7 @@ export async function ChangePassword(password: string) {
     },
   });
   sendEmail(
-    user.email,
+    user.email!,
     "Password changed Successfully",
     "changePasswordSuccess.handlebars",
     {

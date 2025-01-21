@@ -62,9 +62,6 @@ export async function GET(request: Request) {
     },
   });
 
-  /*const existingUsers = await prisma.user.findMany();
-  const user = existingUsers[0];*/
-
   for (const i of count) {
     let title = faker.lorem.word();
     categories.push({
@@ -122,7 +119,7 @@ export async function GET(request: Request) {
   const userFriends: Partial<UserFriend>[] = [];
   const conversationMembers: Partial<ConversationMember>[] = [];
 
-  for (const [index, element] of count.entries()) {
+  for (const [index] of count.entries()) {
     const i = index + 1;
     users.push({
       email: `user${i}@example.com`, //faker.internet.email(),
@@ -145,7 +142,7 @@ export async function GET(request: Request) {
       type: "Race",
     },
     {
-      type: "Workout",
+      type: "Running kemp",
     }
   );
 
@@ -179,7 +176,7 @@ export async function GET(request: Request) {
       content: faker.lorem.paragraphs({ min: 3, max: 5 }),
       slug: faker.lorem.slug(),
       authorId: random(userIds),
-      status: "DRAFT",
+      status: random(["DRAFT", "PUBLISHED"]),
       metaTitle: faker.lorem.word(),
     });
 
@@ -229,7 +226,6 @@ export async function GET(request: Request) {
       status: "TODO",
       dueDate: faker.date.future(),
       order: i,
-      assigneeId: random(userIds),
       createdById: random(userIds),
       projectId: 1,
       priority: random(["HIGH", "LOWER"]),
@@ -355,7 +351,7 @@ export async function GET(request: Request) {
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
       email: faker.internet.email(),
-      gender: random(["MAN", "WOMAN"]),
+      gender: random(["MALE", "FEMALE"]),
       dateOfBirth: faker.date.past(),
       city: faker.location.city(),
       nation: faker.location.state(),
@@ -371,7 +367,7 @@ export async function GET(request: Request) {
       category: random(["A", "B", "C", "D", "E", "F"]),
       club: random(clubs),
       bib: faker.number.int({ min: 50, max: 250 }),
-      gender: random(["MAN", "WOMAN"]),
+      gender: random(["MALE", "FEMALE"]),
       rank: ++rank[runId],
       runId,
       yearOfBirth: random([1980, 1984, 1965, 1998, 2002]),

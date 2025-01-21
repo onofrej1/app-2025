@@ -10,35 +10,33 @@ const RegisterUser = z.object({
   firstName: z.string().trim().min(4),
   lastName: z.string().trim().min(4),
   email: z.string().email(),
-  password: z.string().min(1)
+  password: z.string().min(1),
 });
 
-const LoginUser = z.object({  
+const LoginUser = z.object({
   email: z.string().email(),
-  password: z.string().min(2)
+  password: z.string().min(2),
 });
 
 const CreateOrEditCategory = z.object({
   id: z.number().optional(),
-  title: z.string().trim().min(1)
+  title: z.string().trim().min(1),
 });
 
 const CreateOrEditTag = z.object({
   id: z.number().optional(),
-  title: z.string().trim().min(4)
+  title: z.string().trim().min(4),
 });
 
 const CreateOrEditPost = z.object({
   id: z.number().optional(),
   title: z.string().trim().min(4),
-  published: z.coerce.boolean(),
+  status: z.string().min(1),
   content: z.string().min(1),
-  authorId: z.string().min(1, 'Author field is required'),
-  categoryId: z.coerce.number(),
-  tags: z.array(z.coerce.number())
-    .optional()
-    .default([])
-    //.transform((val) => val ? val : []),
+  authorId: z.string().min(1, "Author field is required"),
+  categories: z.array(z.coerce.number()).optional().default([]),
+  tags: z.array(z.coerce.number()).optional().default([]),
+  //.transform((val) => val ? val : []),
 });
 
 const CreateOrEditProject = z.object({
@@ -57,10 +55,10 @@ const CreateOrEditTask = z.object({
   description: z.string().min(1),
   status: z.string().min(1),
   order: z.coerce.number(),
-  dueDate: z.date(), //(z.coerce.date()),
-  createdById: z.string().min(1, 'User field is required'),  
-  assigneeId: z.string().min(1, 'User field is required'), 
-  projectId: z.coerce.number(), 
+  dueDate: z.date(),
+  createdById: z.string().min(1, "User field is required"),
+  assignee: z.array(z.coerce.number()).optional().default([]),
+  projectId: z.coerce.number(),
 });
 
 const CreateTask = z.object({
@@ -69,14 +67,14 @@ const CreateTask = z.object({
   description: z.string().min(1),
   status: z.string().optional(),
   dueDate: z.date(), //(z.coerce.date()),
-  assigneeId: z.string().min(1, 'User field is required'), 
+  assigneeId: z.string().min(1, "User field is required"),
 });
 
-const SendFriendRequest = z.object({  
+const SendFriendRequest = z.object({
   email: z.string().email(),
 });
 
-const SendMessage = z.object({  
+const SendMessage = z.object({
   message: z.string().min(1),
 });
 
@@ -106,7 +104,7 @@ const CreateOrEditEvent = z.object({
   maxAttendees: z.coerce.number().nullable(),
   startDate: z.date(),
   endDate: z.date(),
-  createdById: z.string().min(1, 'User field is required'),  
+  createdById: z.string().min(1, "User field is required"),
 });
 
 const CreateOrEditRun = z.object({
@@ -114,40 +112,40 @@ const CreateOrEditRun = z.object({
   title: z.string().trim().min(4),
   distance: z.coerce.number(),
   price: z.coerce.number(),
-  elevation: z.coerce.number(),  
+  elevation: z.coerce.number(),
   eventId: z.coerce.number(),
-  runCategories: z.array(z.coerce.number())
-    .optional()
-    .default([])
+  runCategories: z.array(z.coerce.number()).optional().default([]),
 });
 
 const CreateRegistration = z.object({
   id: z.number().optional(),
   firstName: z.string().trim().min(1),
-  lastName:  z.string().trim().min(1),
+  lastName: z.string().trim().min(1),
   dateOfBirth: z.coerce.date(),
-  gender:  z.enum(['MAN', 'WOMAN']),
+  gender: z.enum(["MAN", "WOMAN"]),
   email: z.string().email(),
 
   runId: z.coerce.number(),
   nation: z.string().trim().min(1),
   city: z.string().trim().min(1),
   club: z.string().trim().min(1),
-  phone: z.string().trim().min(1),  
+  phone: z.string().trim().min(1),
 });
 
-const CreateRunResult = z.array(z.object({
-  id: z.number().optional(),
-  name: z.string().trim().min(1),
-  club:  z.string().trim().min(1),
-  category:  z.string().trim().min(1),
-  bib:  z.coerce.number(),
-  rank: z.coerce.number(),
-  time: z.coerce.number(),  
-  gender: z.enum(['MAN', 'WOMAN']),
-  yearOfBirth: z.coerce.number(),
-  runId: z.coerce.number(),
-}));
+const CreateRunResult = z.array(
+  z.object({
+    id: z.number().optional(),
+    name: z.string().trim().min(1),
+    club: z.string().trim().min(1),
+    category: z.string().trim().min(1),
+    bib: z.coerce.number(),
+    rank: z.coerce.number(),
+    time: z.coerce.number(),
+    gender: z.enum(["MAN", "WOMAN"]),
+    yearOfBirth: z.coerce.number(),
+    runId: z.coerce.number(),
+  })
+);
 
 const CreateOrEditActivity = z.object({
   id: z.number().optional(),
@@ -155,23 +153,23 @@ const CreateOrEditActivity = z.object({
   type: z.string().trim().min(1),
   distance: z.coerce.number().optional(),
   calories: z.coerce.number().optional(),
-  duration: z.coerce.number().optional(),  
+  duration: z.coerce.number().optional(),
 });
 
 const CreateOrEditRunCategory = z.object({
   id: z.number().optional(),
-  category: z.string().trim().min(1), 
-  title: z.string().trim().min(4),  
+  category: z.string().trim().min(1),
+  title: z.string().trim().min(4),
 });
 
 const CreateOrEditVenue = z.object({
-  id: z.number().optional(),  
+  id: z.number().optional(),
   location: z.string().trim().min(1),
 });
 
 const CreateOrEditOrganizer = z.object({
   id: z.number().optional(),
-  name: z.string().trim().min(4),  
+  name: z.string().trim().min(4),
 });
 
 const ContactForm = z.object({
@@ -189,31 +187,31 @@ const ChangePassword = z.object({
   confirmPassword: z.string().min(3),
 });
 
-export type FormSchema = 
- | 'LoginUser'
- | 'RegisterUser'
- | 'CreateOrEditPost'
- | 'CreateOrEditCategory'
- | 'CreateOrEditTag'
- | 'CreateOrEditTask'
- | 'CreateOrEditEvent'
- | 'CreateOrEditRun'
- | 'CreateOrEditRunCategory'
- | 'CreateOrEditVenue'
- | 'CreateOrEditOrganizer'
- | 'CreateOrEditActivity'
- | 'CreateOrEditProject'
- | 'FilterResource'
- | 'CreateRegistration'
- | 'CreateRunResult'
- | 'ContactForm'
- | 'SendFriendRequest'
- | 'ResetPasswordRequest'
- | 'SendMessage'
- | 'ChangePassword'
- | 'ResetPassword'
- | 'CreateTask'
- | 'CreateEvent'
+export type FormSchema =
+  | "LoginUser"
+  | "RegisterUser"
+  | "CreateOrEditPost"
+  | "CreateOrEditCategory"
+  | "CreateOrEditTag"
+  | "CreateOrEditTask"
+  | "CreateOrEditEvent"
+  | "CreateOrEditRun"
+  | "CreateOrEditRunCategory"
+  | "CreateOrEditVenue"
+  | "CreateOrEditOrganizer"
+  | "CreateOrEditActivity"
+  | "CreateOrEditProject"
+  | "FilterResource"
+  | "CreateRegistration"
+  | "CreateRunResult"
+  | "ContactForm"
+  | "SendFriendRequest"
+  | "ResetPasswordRequest"
+  | "SendMessage"
+  | "ChangePassword"
+  | "ResetPassword"
+  | "CreateTask"
+  | "CreateEvent";
 
 /*const FilterResource = z.object({
   id: z.string().optional(),
@@ -243,7 +241,7 @@ const rules = {
   //UpdateUserProfile,
   FilterResource: z.any(),
   SendFriendRequest,
-  SendMessage
+  SendMessage,
 };
 
 export default rules;

@@ -238,7 +238,7 @@ export default function Form({
                     onChange(v);
                   }}
                   defaultValue={selectValue}
-                  placeholder="Select frameworks"
+                  placeholder={field.placeholder}
                   variant="inverted"
                   animation={2}
                   maxCount={3}

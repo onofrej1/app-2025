@@ -13,7 +13,7 @@ export default function Conversations() {
     refetchOnWindowFocus: false,
   });
   if (isFetching) return null;
-  console.log(conversations);
+  //console.log(conversations);
 
   return (
     <div>

@@ -12,11 +12,12 @@ export async function sendFriendRequest(email: string) {
   if (!user) {
     return { message: "User with this email not found" };
   }
-  const result = await prisma.friendRequest.create({
+  const result = await prisma.userFriend.create({
     data: {
-      sender: { connect: { id: session.userId } },
-      receiver: { connect: { id: user.id } },
-      //receiver: fromUser,
+      user1: { connect: { id: session.userId } },
+      user2: { connect: { id: user.id } },
+      actionUser: { connect: { id: user.id } },
+      status: 'PENDING'
     },
   });
   return result;
@@ -27,19 +28,21 @@ export async function approveFriendRequest(id: number) {
   if (!session) {
     throw new Error("Unauthorized");
   }
-  const friendRequest = await prisma.friendRequest.findUniqueOrThrow({
+  const userFriend = await prisma.userFriend.findUniqueOrThrow({
     where: {
       id,
-      receiver: {
+      user2: {
         id: session.userId,
       },
+      status: 'PENDING'
     },
     select: {
-      receiver: true,
-      sender: true,
+      id: true,
+      user1: true,
+      user2: true,
     },
   });
-  if (!friendRequest) {
+  if (!userFriend) {
     throw new Error("Unauthorized action");
   }
   const conversation = await prisma.conversation.create({
@@ -50,29 +53,29 @@ export async function approveFriendRequest(id: number) {
       id: true,
     },
   });
-  await prisma.contact.create({
+  await prisma.userFriend.update({
+    where: {
+        id: userFriend.id
+    },
     data: {
-      user1: { connect: { id: friendRequest.sender.id } },
-      user2: { connect: { id: friendRequest.receiver.id } },
+      status: 'APPROVED',
+      actionUserId: session.userId,
+    },
+  });
+
+  await prisma.conversationMember.create({
+    data: {
+      user: { connect: { id: userFriend.user1.id } },
       conversation: { connect: { id: conversation.id } },
     },
   });
 
   await prisma.conversationMember.create({
     data: {
-      user: { connect: { id: friendRequest.sender.id } },
+      user: { connect: { id: userFriend.user2.id } },
       conversation: { connect: { id: conversation.id } },
     },
   });
-
-  await prisma.conversationMember.create({
-    data: {
-      user: { connect: { id: friendRequest.receiver.id } },
-      conversation: { connect: { id: conversation.id } },
-    },
-  });
-
-  await prisma.friendRequest.delete({ where: { id } });
 }
 
 export async function getFriendRequests() {
@@ -81,14 +84,15 @@ export async function getFriendRequests() {
     return [];
     //throw new Error("Unauthorized");
   }
-  return prisma.friendRequest.findMany({
+  return prisma.userFriend.findMany({
     where: {
-      receiver: {
+      status: 'PENDING',
+      user2: {
         id: session.userId,
       },
     },
     include: {
-      sender: {
+      user1: {
         select: {
           email: true,
           id: true,
@@ -226,57 +230,21 @@ export async function getConversations() {
       },
     },
   });
-  /*return prisma.contact.findMany({
-    where: {
-      OR: [
-        {
-          user1: {
-            id: loggedUser.id,
-          },
-          user2: {
-            id: loggedUser.id,
-          },
-        },
-      ],
-    },
-    include: {
-      conversation: {
-        select: {
-          id: true,
-          name: true,
-          isGroup: true,
-          lastMessage: {
-            select: {
-              id: true,
-              content: true,
-              type: true,
-              sender: {
-                select: {
-                  name: true,
-                  email: true,
-                }
-              }
-            },
-          },
-        },
-      },
-    },
-  });*/
 }
 
-export async function getConversation() {
+/*export async function getConversation() {
   const session = await getSession();
   if (!session) {
     throw new Error("Unauthorized");
   }
-  /*const loggedUserConversations = await prisma.conversationMember.findMany({
+  const loggedUserConversations = await prisma.conversationMember.findMany({
     where: {
       userId: session.userId,
     },
     select: {
       conversationId: true,
     },
-  });*/
+  });
   return prisma.conversation.findFirstOrThrow({
     where: {
       id: 1,
@@ -324,4 +292,4 @@ export async function getConversation() {
       },
     },
   });
-}
+}*/

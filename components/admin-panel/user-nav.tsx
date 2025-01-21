@@ -66,12 +66,10 @@ export function UserNav() {
       <div>
         {friendRequests.map((request) => {
           return (
-            <div key={request.id}>
-              <div className="flex justify-between">
-                <div>{request.sender.name} - {request.sender.email}</div>
-                <span onClick={() => handleApproveFriendRequest(request.id)}>Approve</span>
+              <div key={request.id} className="flex justify-between pb-4">
+                <div>{request.user1.lastName} {request.user1.firstName}</div>
+                <Button onClick={() => handleApproveFriendRequest(request.id)}>Approve</Button>
               </div>
-            </div>
           );
         })}
       </div>

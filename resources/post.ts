@@ -29,20 +29,27 @@ const post: Resource = {
   form: [
     { name: 'title', type: 'text', label: 'Title' },
     { name: 'content', type: 'text', label: 'Content' },
-    { name: 'published', type: 'checkbox', label: 'Published' },
+    { name: 'status', type: 'text', label: 'Status' },
     {
       name: 'authorId', 
       type: 'fk',
       relation: 'author',
       label: 'Author',
       resource: 'user',
-      textField: 'name'
+      renderLabel: (row: any) => `${row.lastName} ${row.firstName}`,
     },
-    {
+    /*{
       name: 'categoryId', 
       type: 'fk',
       relation: 'category',
       label: 'Category',
+      resource: 'category',
+      textField: 'title'
+    },*/
+    {
+      name: 'categories', 
+      type: 'm2m',
+      label: 'Categories',
       resource: 'category',
       textField: 'title'
     },

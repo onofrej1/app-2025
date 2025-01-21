@@ -14,7 +14,7 @@ interface ChatProps {
 
 export default function Chat(props: ChatProps) {
   const { conversationId } = props;
-  const { isFetching: isSessionLoading, user, userId } = useSession();
+  const { isFetching: isSessionLoading, user } = useSession();
   const queryClient = useQueryClient();
   const { data: messages = [], isFetching } = useQuery({
     queryKey: ["messages", conversationId],
@@ -78,7 +78,7 @@ export default function Chat(props: ChatProps) {
               key={message.id}
               className={cn(
                 "flex",
-                message.sender.id === userId && "justify-end"
+                message.sender.id === user.userId && "justify-end"
               )}
             >
               {message.sender.lastName} {message.sender.firstName} - {message.content}
