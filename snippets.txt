@@ -247,3 +247,66 @@ export async function getUnreadMails() {
 
 //q = await prisma.event.findFirst({ where: { id: r.objectId }});
       //message = `${r.actor.firstName} ${r.actor.lastName} ${r.verb} ${q?.name} ${r.objectType}`;
+
+
+      /**
+ * model Contact {
+ * id             Int          @id @default(autoincrement())
+ * user1          User         @relation("user1", fields: [user1Id], references: [id])
+ * user1Id        String
+ * user2          User         @relation("user2", fields: [user2Id], references: [id])
+ * user2Id        String
+ * createdAt DateTime @default(now())
+ * //conversation   Conversation @relation(fields: [conversationId], references: [id])
+ * //conversationId Int
+ * }
+ * /**
+ * model Group {
+ * id          Int         @id @default(autoincrement())
+ * name        String
+ * description String
+ * users       User[]
+ * userGroup   UserGroup[]
+ * }
+ * model UserGroup {
+ * id          Int      @id @default(autoincrement())
+ * user        User     @relation(fields: [userId], references: [id])
+ * userId      String
+ * group       Group    @relation(fields: [groupId], references: [id])
+ * groupId     Int
+ * joinedAt    DateTime @default(now())
+ * leftGroupAt DateTime @default(now())
+ * role        String
+ * status      String
+ * }
+ * model GroupPost {
+ * id        Int      @id @default(autoincrement())
+ * content   String   @db.Text
+ * createdAt DateTime @default(now())
+ * mediaType String
+ * mediaUrl  String
+ * user      User     @relation(fields: [userId], references: [id])
+ * userId    String
+ * group     User     @relation(fields: [groupId], references: [id])
+ * groupId   String
+ * }
+ */
+
+/**
+ * model FriendRequest {
+ * id         Int    @id @default(autoincrement())
+ * sender     User   @relation("sender", fields: [senderId], references: [id])
+ * senderId   String
+ * receiver   User   @relation("receiver", fields: [receiverId], references: [id])
+ * receiverId String
+ * }
+ */
+
+ /**
+ * model Device {
+ * id     Int    @id @default(autoincrement())
+ * user   User   @relation(fields: [userId], references: [id])
+ * userId String
+ * name   String
+ * }
+ */

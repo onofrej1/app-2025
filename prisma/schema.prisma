@@ -29,6 +29,14 @@ model Profile {
   userId   String  @unique
 }
 
+/**
+ * model UserSettings {
+ * timezone String?
+ * distance String?
+ * dateFormat String?
+ * }
+ */
+
 model User {
   id            String     @id @default(cuid())
   firstName     String
@@ -43,45 +51,49 @@ model User {
   status        UserStatus
   sessions      Session[]
 
-  registeredAt           DateTime        @default(now())
-  updatedAt              DateTime        @updatedAt
-  canceledAt             DateTime? // soft delete
-  lastLogin              DateTime        @default(now())
-  posts                  Post[]
-  profile                Profile?
-  events                 Event[]
-  attendees              Attendee[]
-  //user1contacts          Contact[]            @relation("user1")
-  //user2contacts          Contact[]            @relation("user2")
-  //conversationMembers    ConversationMember[]
-  //messages               Message[]
-  friendRequestSenders   FriendRequest[] @relation("sender")
-  friendRequestReceivers FriendRequest[] @relation("receiver")
-  oauthTokens            OAuthToken[]
-  activities             Activity[]
-  activityFeeds          ActivityFeed[]
-  comments               Comment[]
-  registrations          Registration[]
-  runResults             RunResult[]
-  resetTokens            ResetToken[]
-  assignedTasks          Task[]          @relation("taskAssignee")
-  createdTasks           Task[]          @relation("taskCreatedBy")
-  taskAttachments        Attachment[]
-  projects               Project[]
-  taskComments           TaskComment[]
-  accounts               Account[]
-  address                Address?
-  groups                 Group[]
-  followerUsers          Follows[]       @relation("follower")
-  followedUsers          Follows[]       @relation("followed")
-  UserGroup              UserGroup[]
+  registeredAt        DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  deletedAt           DateTime? // soft delete
+  lastLogin           DateTime             @default(now())
+  profile             Profile?
+  events              Event[]
+  attendees           Attendee[]
+  oauthTokens         OAuthToken[]
+  activities          Activity[]
+  activityFeeds       ActivityFeed[]
+  registrations       Registration[]
+  runResults          RunResult[]
+  resetTokens         ResetToken[]
+  assignedTasks       Task[]               @relation("taskAssignee")
+  createdTasks        Task[]               @relation("taskCreatedBy")
+  taskAttachments     Attachment[]
+  projects            Project[]
+  taskComments        TaskComment[]
+  accounts            Account[]
+  address             Address?
+  followerUsers       Follows[]            @relation("follower")
+  followedUsers       Follows[]            @relation("followed")
+  posts               Post[]
+  comments            Comment[]
+  likes               Like[]
+  feedPosts           FeedPost[]
+  feedComments        FeedComment[]
+  feedLikes           FeedLike[]
+  conversationMembers ConversationMember[]
+  messages            Message[]
+  user1Friends        UserFriend[]         @relation("user1")
+  user2Friends        UserFriend[]         @relation("user2")
+  actionUsers         UserFriend[]         @relation("actionUser")
+  //groups          Group[]
+  //userGroups      UserGroup[]
 }
 
 model Address {
-  id      String @id @default(cuid())
+  id      Int    @id @default(autoincrement())
   street  String
   city    String
   state   String
+  zipCode String
   country String
   type    String
   user    User   @relation(fields: [userId], references: [id])
@@ -98,33 +110,33 @@ model OAuthToken {
 }
 
 model Post {
-  id          Int         @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   title       String
-  content     String      @db.Text
-  summary     String?     @db.Text
-  cover       String?     @db.Text
+  content     String     @db.Text
+  summary     String?    @db.Text
+  cover       String?    @db.Text
   slug        String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
   status      PostStatus
   //published       Boolean   @default(false)
   publishedAt DateTime?
   metaTitle   String?
   //metaDescription String?
-  author      User        @relation(fields: [authorId], references: [id])
+  author      User       @relation(fields: [authorId], references: [id])
   authorId    String
   categories  Category[]
   tags        Tag[]
   comments    Comment[]
-  postViews   PostViews[]
+  likes       Like[]
+  views       PostViews?
 }
 
 model PostViews {
   id     Int  @id @default(autoincrement())
   views  Int  @default(0)
-  likes  Int  @default(0)
   post   Post @relation(fields: [postId], references: [id])
-  postId Int
+  postId Int  @unique
 }
 
 enum PostStatus {
@@ -145,12 +157,24 @@ model Comment {
   parent      Comment?      @relation("parent", fields: [parentId], references: [id])
   parentId    Int?
   comments    Comment[]     @relation("parent")
+  likes       Like[]
 }
 
 enum CommentStatus {
   PENDING
   APPROVED
   SPAM
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    Int
+  comment   Comment  @relation(fields: [commentId], references: [id])
+  commentId Int
 }
 
 model Tag {
@@ -167,6 +191,45 @@ model Category {
   description String?
   slug        String?
   posts       Post[]
+}
+
+model FeedPost {
+  id        Int           @id @default(autoincrement())
+  content   String        @db.Text
+  createdAt DateTime      @default(now())
+  mediaType String
+  mediaUrl  String
+  user      User          @relation(fields: [userId], references: [id])
+  userId    String
+  comments  FeedComment[]
+  likes     FeedLike[]
+}
+
+model FeedComment {
+  id          Int           @id @default(autoincrement())
+  comment     String        @db.Text
+  status      CommentStatus @default(PENDING)
+  publishedAt DateTime      @default(now())
+  editedAt    DateTime?
+  user        User          @relation(fields: [userId], references: [id])
+  userId      String
+  post        FeedPost      @relation(fields: [postId], references: [id])
+  postId      Int
+  parent      FeedComment?  @relation("parent", fields: [parentId], references: [id])
+  parentId    Int?
+  comments    FeedComment[] @relation("parent")
+  likes       FeedLike[]
+}
+
+model FeedLike {
+  id        Int         @id @default(autoincrement())
+  createdAt DateTime    @default(now())
+  user      User        @relation(fields: [userId], references: [id])
+  userId    String
+  post      FeedPost    @relation(fields: [postId], references: [id])
+  postId    Int
+  comment   FeedComment @relation(fields: [commentId], references: [id])
+  commentId Int
 }
 
 model Project {
@@ -263,7 +326,7 @@ model Event {
 model EventType {
   id    Int     @id @default(autoincrement())
   type  String
-  Event Event[]
+  event Event[]
 }
 
 model Organizer {
@@ -285,7 +348,6 @@ model Attendee {
   event    Event   @relation(fields: [eventId], references: [id])
   eventId  Int
   status   String?
-  attended Boolean @default(false)
 }
 
 model EventSchedule {
@@ -383,29 +445,6 @@ model Account {
   @@index([userId])
 }
 
-/**
- * model Account {
- * id                       String  @id @default(cuid())
- * userId                   String  @unique
- * type                     String
- * provider                 String
- * providerAccountId        String
- * refresh_token            String? @db.Text
- * access_token             String? @db.Text
- * expires_at               Int?
- * token_type               String?
- * scope                    String?
- * id_token                 String? @db.Text
- * session_state            String?
- * refresh_token_expires_in Int?
- * user                     User?   @relation(fields: [userId], references: [id])
- * createdAt DateTime @default(now())
- * updatedAt DateTime @updatedAt
- * @@unique([provider, providerAccountId])
- * @@index([userId])
- * }
- */
-
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
@@ -462,67 +501,56 @@ enum Gender {
   FEMALE
 }
 
-/**
- * model Contact {
- * id             Int          @id @default(autoincrement())
- * user1          User         @relation("user1", fields: [user1Id], references: [id])
- * user1Id        String
- * user2          User         @relation("user2", fields: [user2Id], references: [id])
- * user2Id        String
- * conversation   Conversation @relation(fields: [conversationId], references: [id])
- * conversationId Int
- * }
- * model Conversation {
- * id                  Int                  @id @default(autoincrement())
- * name                String?
- * isGroup             Boolean
- * lastMessage         Message?             @relation("lastMessage", fields: [lastMessageId], references: [id])
- * lastMessageId       Int?
- * contacts            Contact[]
- * conversationMembers ConversationMember[]
- * messages            Message[]
- * }
- * model ConversationMember {
- * id                Int          @id @default(autoincrement())
- * user              User         @relation(fields: [userId], references: [id])
- * userId            String
- * conversation      Conversation @relation(fields: [conversationId], references: [id])
- * conversationId    Int
- * lastSeenMessage   Message?     @relation(fields: [lastSeenMessageId], references: [id])
- * lastSeenMessageId Int?
- * }
- * model Message {
- * id                  Int                  @id @default(autoincrement())
- * sender              User                 @relation(fields: [senderId], references: [id])
- * senderId            String
- * conversation        Conversation         @relation(fields: [conversationId], references: [id])
- * conversationId      Int
- * content             String               @db.Text
- * type                String
- * createdAt           DateTime             @default(now())
- * conversationMembers ConversationMember[]
- * lastConversations   Conversation[]       @relation("lastMessage")
- * }
- */
-
-model Group {
-  id          Int         @id @default(autoincrement())
-  name        String
-  description String
-  users       User[]
-  UserGroup   UserGroup[]
+enum FriendStatus {
+  PENDING
+  APPROVED
+  DECLINED
+  BLOCKED
 }
 
-model UserGroup {
-  id          Int      @id @default(autoincrement())
-  user        User     @relation(fields: [userId], references: [id])
-  userId      String
-  group       Group    @relation(fields: [groupId], references: [id])
-  groupId     Int
-  joinedAt    DateTime @default(now())
-  leftGroupAt DateTime @default(now())
-  role        String
-  status      String
+model UserFriend {
+  id           Int          @id @default(autoincrement())
+  user1        User         @relation("user1", fields: [userId1], references: [id])
+  userId1      String
+  user2        User         @relation("user2", fields: [userId2], references: [id])
+  userId2      String
+  actionUser   User         @relation("actionUser", fields: [actionUserId], references: [id])
+  actionUserId String // id of the user who made last status update
+  status       FriendStatus
+  createdAt    DateTime     @default(now())
+}
+
+model Conversation {
+  id                  Int                  @id @default(autoincrement())
+  name                String?
+  isGroup             Boolean
+  lastMessage         Message?             @relation("lastMessage", fields: [lastMessageId], references: [id])
+  lastMessageId       Int?
+  conversationMembers ConversationMember[]
+  messages            Message[]
+}
+
+model ConversationMember {
+  id                Int          @id @default(autoincrement())
+  user              User         @relation(fields: [userId], references: [id])
+  userId            String
+  conversation      Conversation @relation(fields: [conversationId], references: [id])
+  conversationId    Int
+  lastSeenMessage   Message?     @relation(fields: [lastSeenMessageId], references: [id])
+  lastSeenMessageId Int?
+}
+
+model Message {
+  id                  Int                  @id @default(autoincrement())
+  sender              User                 @relation(fields: [senderId], references: [id])
+  senderId            String
+  conversation        Conversation         @relation(fields: [conversationId], references: [id])
+  conversationId      Int
+  content             String               @db.Text
+  type                String
+  createdAt           DateTime             @default(now())
+  conversationMembers ConversationMember[]
+  lastConversations   Conversation[]       @relation("lastMessage")
 }
 
 model Follows {
@@ -532,14 +560,6 @@ model Follows {
   followed   User     @relation("followed", fields: [followedId], references: [id])
   followedId String
   followedAt DateTime @default(now())
-}
-
-model FriendRequest {
-  id         Int    @id @default(autoincrement())
-  sender     User   @relation("sender", fields: [senderId], references: [id])
-  senderId   String
-  receiver   User   @relation("receiver", fields: [receiverId], references: [id])
-  receiverId String
 }
 
 model Activity {
@@ -558,15 +578,6 @@ model Activity {
   calories     Int?
   activityData ActivityData[]
 }
-
-/**
- * model Device {
- * id     Int    @id @default(autoincrement())
- * user   User   @relation(fields: [userId], references: [id])
- * userId String
- * name   String
- * }
- */
 
 model ActivityData {
   id         Int      @id @default(autoincrement())
