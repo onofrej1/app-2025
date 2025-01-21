@@ -22,6 +22,12 @@ import {
   Organizer,
   Venue,
   EventType,
+  FeedPost,
+  FeedComment,
+  FeedLike,
+  Like,
+  Profile,
+  Address,
 } from "@prisma/client";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
@@ -43,7 +49,7 @@ export async function GET(request: Request) {
     Number(process.env.BCRYPT_SALT!)
   );
 
-  const user = await prisma.user.create({
+  await prisma.user.create({
     data: {
       email: process.env.EMAIL_USER!,
       firstName: "John",
@@ -75,7 +81,7 @@ export async function GET(request: Request) {
     });
 
     organizers.push({
-      title: faker.lorem.word(),
+      name: faker.lorem.word(),
     });
 
     venues.push({
@@ -89,18 +95,29 @@ export async function GET(request: Request) {
   await prisma.venue.createMany({ data: venues as Venue[] });
 
   const users: Partial<User>[] = [];
+  const profiles: Partial<Profile>[] = [];
+  const addresses: Partial<Address>[] = [];
+
   const posts: Partial<Post>[] = [];
   const comments: Partial<Comment>[] = [];
+  const likes: Partial<Like>[] = [];
+  const feedPosts: Partial<FeedPost>[] = [];
+  const feedComments: Partial<FeedComment>[] = [];
+  const feedLikes: Partial<FeedLike>[] = [];
+
   const projects: Partial<Project>[] = [];
   const tasks: Partial<Task>[] = [];
   const taskComments: Partial<TaskComment>[] = [];
+
   const events: Partial<Event>[] = [];
   const eventTypes: Partial<EventType>[] = [];
   const eventSchedules: Partial<EventSchedule>[] = [];
   const attendees: Partial<Attendee>[] = [];
+
   const runs: Partial<Run>[] = [];
   const registrations: Partial<Registration>[] = [];
   const runResults: Partial<RunResult>[] = [];
+
   const conversations: Partial<Conversation>[] = [];
   const userFriends: Partial<UserFriend>[] = [];
   const conversationMembers: Partial<ConversationMember>[] = [];
@@ -132,8 +149,30 @@ export async function GET(request: Request) {
     }
   );
 
-  for (const [index, element] of count.entries()) {
+  userIds.slice(0, 3).map((userId) => {
+    profiles.push({
+      gender: random(["MALE", "FEMALE"]),
+      userId,
+      country: "SK",
+      language: "SK",
+      phone: "+421908123456",
+      bio: faker.lorem.sentences(3),
+      intro: faker.lorem.sentence(),
+    });
+
+    addresses.push({
+      city: faker.location.city(),
+      country: faker.location.country(),
+      state: faker.location.state(),
+      zipCode: faker.location.zipCode(),
+      street: faker.location.street(),
+      userId,
+    });
+  });
+
+  for (const [index] of count.entries()) {
     const i = index + 1;
+
     posts.push({
       title: faker.lorem.word(),
       summary: faker.lorem.paragraph(),
@@ -149,6 +188,29 @@ export async function GET(request: Request) {
       userId: random(userIds),
       postId: i,
       status: "APPROVED",
+    });
+
+    likes.push({
+      userId: random(userIds),
+      postId: i,
+    });
+
+    feedPosts.push({
+      content: faker.lorem.sentences({ min: 1, max: 3 }),
+      userId: random(userIds),
+      contentType: "text",
+    });
+
+    feedComments.push({
+      comment: faker.lorem.paragraphs({ min: 3, max: 5 }),
+      userId: random(userIds),
+      postId: i,
+      status: "APPROVED",
+    });
+
+    feedLikes.push({
+      userId: random(userIds),
+      commentId: i,
     });
 
     projects.push({
@@ -237,7 +299,7 @@ export async function GET(request: Request) {
     userFriends.push({
       userId1: userIds[0],
       userId2: userIds[i],
-      status: 'APPROVED',
+      status: "APPROVED",
       actionUserId: userIds[i],
     });
 
@@ -261,7 +323,7 @@ export async function GET(request: Request) {
     userFriends.push({
       userId1: userIds[4],
       userId2: userIds[i - 4],
-      status: 'APPROVED',
+      status: "APPROVED",
       actionUserId: userIds[i - 4],
     });
 
@@ -349,6 +411,12 @@ export async function GET(request: Request) {
   await prisma.comment.createMany({
     data: comments as Comment[],
   });
+  await prisma.like.createMany({ data: likes as Like[] });
+  await prisma.feedPost.createMany({ data: feedPosts as FeedPost[] });
+  await prisma.feedComment.createMany({
+    data: feedComments as FeedComment[],
+  });
+  await prisma.feedLike.createMany({ data: feedLikes as FeedLike[] });
   await prisma.project.createMany({
     data: projects as Project[],
   });
@@ -356,6 +424,7 @@ export async function GET(request: Request) {
   await prisma.taskComment.createMany({
     data: taskComments as TaskComment[],
   });
+  await prisma.eventType.createMany({ data: eventTypes as EventType[] });
   await prisma.event.createMany({ data: events as Event[] });
   await prisma.eventSchedule.createMany({
     data: eventSchedules as EventSchedule[],

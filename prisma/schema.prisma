@@ -15,7 +15,6 @@ datasource db {
 
 model Profile {
   id       Int     @id @default(autoincrement())
-  //isPublic Boolean @default(false)
   phone    String?
   intro    String?
   bio      String?
@@ -27,6 +26,7 @@ model Profile {
   gender   Gender
   user     User    @relation(fields: [userId], references: [id])
   userId   String  @unique
+  //isPublic Boolean @default(false)
 }
 
 /**
@@ -194,15 +194,15 @@ model Category {
 }
 
 model FeedPost {
-  id        Int           @id @default(autoincrement())
-  content   String        @db.Text
-  createdAt DateTime      @default(now())
-  mediaType String
-  mediaUrl  String
-  user      User          @relation(fields: [userId], references: [id])
-  userId    String
-  comments  FeedComment[]
-  likes     FeedLike[]
+  id          Int           @id @default(autoincrement())
+  content     String        @db.Text
+  contentType String        @default("text")
+  createdAt   DateTime      @default(now())
+  mediaUrl    String
+  user        User          @relation(fields: [userId], references: [id])
+  userId      String
+  comments    FeedComment[]
+  likes       FeedLike[]
 }
 
 model FeedComment {
@@ -331,7 +331,7 @@ model EventType {
 
 model Organizer {
   id     Int     @id @default(autoincrement())
-  title  String
+  name   String
   events Event[]
 }
 
@@ -342,12 +342,12 @@ model Venue {
 }
 
 model Attendee {
-  id       Int     @id @default(autoincrement())
-  user     User    @relation(fields: [userId], references: [id])
-  userId   String
-  event    Event   @relation(fields: [eventId], references: [id])
-  eventId  Int
-  status   String?
+  id      Int     @id @default(autoincrement())
+  user    User    @relation(fields: [userId], references: [id])
+  userId  String
+  event   Event   @relation(fields: [eventId], references: [id])
+  eventId Int
+  status  String?
 }
 
 model EventSchedule {
