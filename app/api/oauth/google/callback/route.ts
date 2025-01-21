@@ -73,23 +73,30 @@ export async function GET(request: Request) {
         lastName: profile.family_name,
         email: profile.email,
         role: "USER",
-        status: 'ACTIVE',
+        status: "ACTIVE",
         password: hash, // temporary, change to optional
         image: profile.picture,
       },
     });
   } else {
-    /*await prisma.user.update({
-      where: {
-        id: user.id,
-      },
-      data: {
-        firstName: profile.given_name,
-        lastName: profile.family_name,
-        email: profile.email,
-        image: profile.picture,
-      },
-    });*/
+    if (
+      user.email !== profile.email ||
+      user.firstName !== profile.given_name ||
+      user.lastName !== profile.family_name ||
+      user.image !== profile.picture
+    ) {
+      await prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          firstName: profile.given_name,
+          lastName: profile.family_name,
+          email: profile.email,
+          image: profile.picture,
+        },
+      });
+    }
   }
 
   let account = await prisma.account.findFirst({
@@ -147,5 +154,5 @@ export async function GET(request: Request) {
   session.token = token;
   await session.save();
 
-  redirect('/');
+  redirect("/");
 }

@@ -16,7 +16,7 @@ interface GithubProfile {
 }
 
 export async function GET(request: Request) {
-  //const userInfoEndpoint = "https://www.googleapis.com/oauth2/v2/userinfo";
+  const userInfoEndpoint = "https://api.github.com/user";
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
 
@@ -43,7 +43,7 @@ export async function GET(request: Request) {
   const data = await response.json();
   console.log(data);
 
-  const profileResponse = await fetch("https://api.github.com/user", {
+  const profileResponse = await fetch(userInfoEndpoint, {
     headers: {
       Authorization: `Bearer ${data.access_token}`,
     },
@@ -139,7 +139,7 @@ export async function GET(request: Request) {
     sessionOptions
   );
 
-  session.user = user.email!;
+  session.user = user.email! || session.userName!;
   session.userId = user.id;
   session.role = user.role;
   session.token = token;

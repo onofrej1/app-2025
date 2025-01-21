@@ -15,11 +15,17 @@ import {
   Registration,
   RunResult,
   Conversation,
-  Contact,
+  UserFriend,
   ConversationMember,
+  Tag,
+  Category,
+  Organizer,
+  Venue,
+  EventType,
 } from "@prisma/client";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { slugify } from "@/utils";
 
 function random(list: any[]) {
   return list[Math.floor(Math.random() * list.length)];
@@ -27,10 +33,10 @@ function random(list: any[]) {
 
 export async function GET(request: Request) {
   const count = Array.from({ length: 5 });
-  const categories = [];
-  const tags = [];
-  const organizers = [];
-  const venues = [];
+  const categories: Partial<Category>[] = [];
+  const tags: Partial<Tag>[] = [];
+  const organizers: Partial<Organizer>[] = [];
+  const venues: Partial<Venue>[] = [];
 
   const hashedPassword = await bcrypt.hash(
     process.env.TEST_USER_PASSWORD!,
@@ -54,24 +60,33 @@ export async function GET(request: Request) {
   const user = existingUsers[0];*/
 
   for (const i of count) {
+    let title = faker.lorem.word();
     categories.push({
-      title: faker.lorem.word(),
+      title,
+      description: faker.lorem.sentence(),
+      slug: slugify(title),
     });
+
+    title = faker.lorem.word();
     tags.push({
+      title,
+      description: faker.lorem.sentence(),
+      slug: slugify(title),
+    });
+
+    organizers.push({
       title: faker.lorem.word(),
     });
-    organizers.push({
-      name: faker.lorem.word(),
-    });
+
     venues.push({
       location: faker.lorem.word(),
     });
   }
 
-  await prisma.category.createMany({ data: categories });
-  await prisma.tag.createMany({ data: tags });
-  await prisma.organizer.createMany({ data: organizers });
-  await prisma.venue.createMany({ data: venues });
+  await prisma.category.createMany({ data: categories as Category[] });
+  await prisma.tag.createMany({ data: tags as Tag[] });
+  await prisma.organizer.createMany({ data: organizers as Organizer[] });
+  await prisma.venue.createMany({ data: venues as Venue[] });
 
   const users: Partial<User>[] = [];
   const posts: Partial<Post>[] = [];
@@ -80,13 +95,14 @@ export async function GET(request: Request) {
   const tasks: Partial<Task>[] = [];
   const taskComments: Partial<TaskComment>[] = [];
   const events: Partial<Event>[] = [];
+  const eventTypes: Partial<EventType>[] = [];
   const eventSchedules: Partial<EventSchedule>[] = [];
   const attendees: Partial<Attendee>[] = [];
   const runs: Partial<Run>[] = [];
   const registrations: Partial<Registration>[] = [];
   const runResults: Partial<RunResult>[] = [];
   const conversations: Partial<Conversation>[] = [];
-  const contacts: Partial<Contact>[] = [];
+  const userFriends: Partial<UserFriend>[] = [];
   const conversationMembers: Partial<ConversationMember>[] = [];
 
   for (const [index, element] of count.entries()) {
@@ -107,6 +123,15 @@ export async function GET(request: Request) {
   const ids = await prisma.user.findMany({ select: { id: true } });
   const userIds = ids.map((i) => i.id);
 
+  eventTypes.push(
+    {
+      type: "Race",
+    },
+    {
+      type: "Workout",
+    }
+  );
+
   for (const [index, element] of count.entries()) {
     const i = index + 1;
     posts.push({
@@ -115,13 +140,15 @@ export async function GET(request: Request) {
       content: faker.lorem.paragraphs({ min: 3, max: 5 }),
       slug: faker.lorem.slug(),
       authorId: random(userIds),
-      categoryId: random([1, 2, 3]),
+      status: "DRAFT",
+      metaTitle: faker.lorem.word(),
     });
 
     comments.push({
       comment: faker.lorem.paragraphs({ min: 3, max: 5 }),
       userId: random(userIds),
       postId: i,
+      status: "APPROVED",
     });
 
     projects.push({
@@ -131,6 +158,7 @@ export async function GET(request: Request) {
       startDate: faker.date.future(),
       endDate: faker.date.future(),
       managerId: random(userIds),
+      cost: faker.number.int({ min: 300, max: 3000 }),
     });
 
     tasks.push({
@@ -142,6 +170,7 @@ export async function GET(request: Request) {
       assigneeId: random(userIds),
       createdById: random(userIds),
       projectId: 1,
+      priority: random(["HIGH", "LOWER"]),
     });
 
     taskComments.push({
@@ -166,6 +195,7 @@ export async function GET(request: Request) {
       organizerId: i % 2 === 0 ? i : null,
       venueId: i % 2 === 0 ? i : null,
       status: "Created",
+      eventTypeId: random([1, 2]),
     });
 
     const startTime = new Date(startDate);
@@ -182,8 +212,7 @@ export async function GET(request: Request) {
     });
 
     attendees.push({
-      attended: false,
-      status: random(["YES", "MAYBE", "NO"]),
+      status: random(["PENDING", "YES", "MAYBE", "NO", "ATTENDED"]),
       eventId: random([1, 2, 3]),
       userId: random(userIds),
     });
@@ -205,10 +234,11 @@ export async function GET(request: Request) {
       isGroup: false,
     });
 
-    contacts.push({
-      conversationId: i,
-      user1Id: userIds[0],
-      user2Id: userIds[i],
+    userFriends.push({
+      userId1: userIds[0],
+      userId2: userIds[i],
+      status: 'APPROVED',
+      actionUserId: userIds[i],
     });
 
     conversationMembers.push({
@@ -228,10 +258,11 @@ export async function GET(request: Request) {
       isGroup: false,
     });
 
-    contacts.push({
-      conversationId: i,
-      user1Id: userIds[4],
-      user2Id: userIds[i - 4],
+    userFriends.push({
+      userId1: userIds[4],
+      userId2: userIds[i - 4],
+      status: 'APPROVED',
+      actionUserId: userIds[i - 4],
     });
 
     conversationMembers.push({
@@ -314,7 +345,7 @@ export async function GET(request: Request) {
   ];
 
   await prisma.post.createMany({ data: posts as Post[] });
-  
+
   await prisma.comment.createMany({
     data: comments as Comment[],
   });
@@ -345,8 +376,8 @@ export async function GET(request: Request) {
   await prisma.conversation.createMany({
     data: conversations as Conversation[],
   });
-  await prisma.contact.createMany({
-    data: contacts as Contact[],
+  await prisma.userFriend.createMany({
+    data: userFriends as UserFriend[],
   });
   await prisma.conversationMember.createMany({
     data: conversationMembers as ConversationMember[],
