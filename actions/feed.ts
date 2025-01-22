@@ -9,20 +9,20 @@ export async function getFeed() {
   if (!session) {
     throw new Error("Unauthorized");
   }
-  const contacts = await prisma.contact.findMany({
+  const contacts = await prisma.userFriend.findMany({
     where: {
       OR: [
         {
-          user1Id: session.userId,
+          userId1: session.userId,
         },
         {
-          user2Id: session.userId,
+          userId2: session.userId,
         },
       ],
     },
   });
   const userContacts = contacts.map((c) => {
-    return c.user1Id === session.userId ? c.user2Id : c.user1Id;
+    return c.userId1 === session.userId ? c.userId2 : c.userId1;
   });
 
   const data = await prisma.activityFeed.findMany({

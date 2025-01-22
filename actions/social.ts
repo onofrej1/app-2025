@@ -3,6 +3,64 @@
 import { prisma } from "@/db/prisma";
 import { getSession } from "./auth";
 
+export async function createFeedPost(content: string) {
+  const session = await getSession();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+  
+  const result = await prisma.feedPost.create({
+    data: {
+      content,
+      userId: session.userId,
+      contentType: 'text',
+    },
+  });
+  return result;
+}
+
+export async function getFeedPosts(userId: string) {
+  const session = await getSession();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+  const userIds = await prisma.userFriend.findMany({ where: 
+    {
+      OR: [
+        { userId1: session.userId },
+        { userId2: session.userId }
+      ]
+    },
+    select: {
+      userId1: true,
+      userId2: true,
+    }
+  });
+  const ids = userIds.map(u => u.userId1 === session.userId ? u.userId2 : u.userId1 );
+  
+  const result = await prisma.feedPost.findMany({
+    where: {
+      userId: {
+        in: [session.userId, ...ids]
+      }
+    },
+    select: {
+      id: true,
+      user: {
+        select: {
+          firstName: true,
+          lastName: true,
+        }
+      },
+      content: true,
+      contentType: true,
+      comments: true,
+      createdAt: true,
+    }
+  });
+  return result;
+}
+
 export async function sendFriendRequest(email: string) {
   const session = await getSession();
   if (!session) {

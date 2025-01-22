@@ -187,6 +187,10 @@ const ChangePassword = z.object({
   confirmPassword: z.string().min(3),
 });
 
+const CreatePost = z.object({
+  content: z.string().min(3),
+});
+
 export type FormSchema =
   | "LoginUser"
   | "RegisterUser"
@@ -211,11 +215,8 @@ export type FormSchema =
   | "ChangePassword"
   | "ResetPassword"
   | "CreateTask"
-  | "CreateEvent";
-
-/*const FilterResource = z.object({
-  id: z.string().optional(),
-});*/
+  | "CreateEvent"
+  | "CreatePost";
 
 const rules = {
   RegisterUser,
@@ -242,6 +243,7 @@ const rules = {
   FilterResource: z.any(),
   SendFriendRequest,
   SendMessage,
+  CreatePost,
 };
 
 export default rules;
