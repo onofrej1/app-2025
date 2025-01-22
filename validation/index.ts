@@ -191,6 +191,10 @@ const CreatePost = z.object({
   content: z.string().min(3),
 });
 
+const CommentFeedPost = z.object({
+  comment: z.string().min(3),
+});
+
 export type FormSchema =
   | "LoginUser"
   | "RegisterUser"
@@ -216,7 +220,8 @@ export type FormSchema =
   | "ResetPassword"
   | "CreateTask"
   | "CreateEvent"
-  | "CreatePost";
+  | "CreatePost"
+  | "CommentFeedPost";
 
 const rules = {
   RegisterUser,
@@ -244,6 +249,7 @@ const rules = {
   SendFriendRequest,
   SendMessage,
   CreatePost,
+  CommentFeedPost
 };
 
 export default rules;

@@ -71,6 +71,7 @@ export default function Form({
   children,
 }: FormProps) {
   const { replace } = useRouter();
+  //@ts-ignore
   const validationRules = rules[validation];
 
   const {
@@ -83,7 +84,7 @@ export default function Form({
     handleSubmit,
     getValues,
   } = useForm({
-    //mode: "onSubmit",
+    mode: "onSubmit",
     resolver: zodResolver(validationRules),
     defaultValues: data,
   });
@@ -117,8 +118,8 @@ export default function Form({
   };
 
   const renderField = (field: FormField) => {
-    const type = field.type || "text";
-    const label = field.label || capitalize(field.name);
+    const type = field.type; // || "text";
+    const label = field.label; // || capitalize(field.name);
     return (
       <>
         {["text", "number", "email", "hidden"].includes(type) && (
@@ -231,17 +232,16 @@ export default function Form({
                 <MultiSelect
                   name={name}
                   label={label}
+                  errors={errors}
+                  textField=""
                   options={
                     (field as MultiSelectType).options! as MultiSelectOption[]
                   }
-                  onValueChange={(v) => {
+                  onChange={(v) => {
                     onChange(v);
                   }}
-                  defaultValue={selectValue}
-                  placeholder={field.placeholder}
-                  variant="inverted"
-                  animation={2}
-                  maxCount={3}
+                  value={selectValue}
+                  //placeholder={field.placeholder}                                  
                 />
               );
             }}

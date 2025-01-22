@@ -8,12 +8,44 @@ export async function createFeedPost(content: string) {
   if (!session) {
     throw new Error("Unauthorized");
   }
-  
+
   const result = await prisma.feedPost.create({
     data: {
       content,
       userId: session.userId,
-      contentType: 'text',
+      contentType: "text",
+    },
+  });
+  return result;
+}
+
+export async function commentPost(postId: number, comment: string) {
+  const session = await getSession();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+
+  const result = await prisma.feedComment.create({
+    data: {
+      comment,
+      userId: session.userId,
+      postId,
+    },
+  });
+  return result;
+}
+
+export async function replyToComment(commentId: number, comment: string) {
+  const session = await getSession();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+
+  const result = await prisma.feedComment.create({
+    data: {
+      comment,
+      userId: session.userId,
+      parentId: commentId,
     },
   });
   return result;
@@ -24,25 +56,24 @@ export async function getFeedPosts(userId: string) {
   if (!session) {
     throw new Error("Unauthorized");
   }
-  const userIds = await prisma.userFriend.findMany({ where: 
-    {
-      OR: [
-        { userId1: session.userId },
-        { userId2: session.userId }
-      ]
+  const userIds = await prisma.userFriend.findMany({
+    where: {
+      OR: [{ userId1: session.userId }, { userId2: session.userId }],
     },
     select: {
       userId1: true,
       userId2: true,
-    }
+    },
   });
-  const ids = userIds.map(u => u.userId1 === session.userId ? u.userId2 : u.userId1 );
-  
+  const ids = userIds.map((u) =>
+    u.userId1 === session.userId ? u.userId2 : u.userId1
+  );
+
   const result = await prisma.feedPost.findMany({
     where: {
       userId: {
-        in: [session.userId, ...ids]
-      }
+        in: [session.userId, ...ids],
+      },
     },
     select: {
       id: true,
@@ -50,13 +81,55 @@ export async function getFeedPosts(userId: string) {
         select: {
           firstName: true,
           lastName: true,
-        }
+        },
       },
       content: true,
       contentType: true,
-      comments: true,
+      comments: {
+        select: {
+          comment: true,
+          id: true,
+          user: true,
+          publishedAt: true,
+          _count: {
+            select: {
+              comments: true,
+            },
+          },
+        },
+      },
       createdAt: true,
-    }
+    },
+  });
+  return result;
+}
+
+export async function getComments(parentId: number) {
+  const session = await getSession();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+
+  const result = await prisma.feedComment.findMany({
+    where: {
+      parentId,
+    },
+    select: {
+      id: true,
+      user: {
+        select: {
+          firstName: true,
+          lastName: true,
+        },
+      },
+      comment: true,
+      publishedAt: true,
+      _count: {
+        select: {
+          comments: true,
+        },
+      },
+    },
   });
   return result;
 }
@@ -75,7 +148,7 @@ export async function sendFriendRequest(email: string) {
       user1: { connect: { id: session.userId } },
       user2: { connect: { id: user.id } },
       actionUser: { connect: { id: user.id } },
-      status: 'PENDING'
+      status: "PENDING",
     },
   });
   return result;
@@ -92,7 +165,7 @@ export async function approveFriendRequest(id: number) {
       user2: {
         id: session.userId,
       },
-      status: 'PENDING'
+      status: "PENDING",
     },
     select: {
       id: true,
@@ -113,10 +186,10 @@ export async function approveFriendRequest(id: number) {
   });
   await prisma.userFriend.update({
     where: {
-        id: userFriend.id
+      id: userFriend.id,
     },
     data: {
-      status: 'APPROVED',
+      status: "APPROVED",
       actionUserId: session.userId,
     },
   });
@@ -144,7 +217,7 @@ export async function getFriendRequests() {
   }
   return prisma.userFriend.findMany({
     where: {
-      status: 'PENDING',
+      status: "PENDING",
       user2: {
         id: session.userId,
       },
