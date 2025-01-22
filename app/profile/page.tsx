@@ -13,8 +13,11 @@ import { Button } from "@/components/ui/button";
 import { useSession } from "@/hooks/use-session";
 import { formatDate } from "@/lib/utils";
 import { FormField } from "@/resources/resources.types";
+import { FeedComment } from "@prisma/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
+import { useState } from "react";
+import { CommentBox } from "./components/comment";
 
 export default function Home() {
   const queryClient = useQueryClient();
@@ -38,29 +41,18 @@ export default function Home() {
 
   const sendForm = async (data: { content: string }) => {
     console.log(data);
-    createFeedPost(data.content);
+    await createFeedPost(data.content);
     refreshData();
   };
 
-  const comment = (postId: number, data: { comment: string }) => {
+  const comment = async (postId: number, data: { comment: string }) => {
     console.log(data);
-    commentPost(postId, data.comment);
-    refreshData();
-  };
-
-  const commentReply = (commentId: number, data: { comment: string }) => {
-    console.log(data);
-    replyToComment(commentId, data.comment);
+    await commentPost(postId, data.comment);
     refreshData();
   };
 
   const refreshData = () => {
     queryClient.invalidateQueries({ queryKey: ["posts", user.userId] });
-  };
-
-  const loadComments = async (parentId: number) => {
-    const comments = await getComments(parentId);
-    console.log(comments);
   };
 
   return (
@@ -78,22 +70,15 @@ export default function Home() {
             key={post.id}
             className="flex flex-col gap-3 border border-b-1 p-2 border-gray-900"
           >
-            {post.user.lastName} {post.user.firstName} /{" "}
-            {formatDate(post.createdAt)}
+            <div>
+              <span className="font-bold">
+                {post.user.lastName} {post.user.firstName}
+              </span>{" "}
+              {formatDate(post.createdAt, "LLL. d, yyyy")}
+            </div>
             <div className="bg-slate-200">{post.content}</div>
             {post.comments.map((comment) => {
-              return (
-                <div className="pl-8" key={comment.id}>
-                  {comment.comment}
-                  {comment._count.comments > 0 && (
-                    <div>
-                      <Button onClick={() => loadComments(comment.id)}>
-                        Load comments
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              );
+              return <CommentBox key={comment.id} comment={comment as any} />;
             })}
             <Form
               fields={commentFields}
@@ -101,11 +86,9 @@ export default function Home() {
               action={comment.bind(null, post.id)}
             >
               {({ fields }) => (
-                <div>
-                  <div className="flex flex-col gap-3 pb-4">
-                    {fields.comment}
-                    <Button type="submit">Comment</Button>
-                  </div>
+                <div className="pl-8 flex flex-col gap-3 pb-4">
+                  {fields.comment}
+                  <Button type="submit">Comment</Button>
                 </div>
               )}
             </Form>

@@ -1,11 +1,15 @@
 import { clsx, type ClassValue } from "clsx";
+import { format } from "date-fns";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatDate(date: string | Date) {
+export function formatDate(date: string | Date, dateFormat?: string) {
+  if (dateFormat) {
+    return format(date instanceof Date ? date : new Date(date), dateFormat);
+  }
   if (date instanceof Date) {
     return date.toLocaleDateString();
   }
