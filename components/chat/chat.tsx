@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/utils";
 import { socket } from "@/socket";
 import { useSession } from "@/hooks/use-session";
+import { FormField } from "@/resources/resources.types";
 
 interface ChatProps {
   conversationId: number;
@@ -67,7 +68,7 @@ export default function Chat(props: ChatProps) {
     );
   };
 
-  const fields = [{ name: "message", type: "text", label: "" }];  
+  const fields: FormField[] = [{ name: "message", type: "text", label: "" }];  
 
   return (
     <div className="flex flex-col h-full">

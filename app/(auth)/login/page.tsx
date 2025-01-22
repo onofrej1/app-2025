@@ -3,11 +3,12 @@ import Form, { FormState } from "@/components/form/form";
 import { Button } from "@/components/ui/button";
 import { login } from "@/actions/auth";
 import { redirect } from "next/navigation";
+import { FormField } from "@/resources/resources.types";
 
 export default function LoginPage() {
   //const { data: session, status } = useSession();
   
-  const fields = [
+  const fields: FormField[] = [
     { name: 'email', type: 'text', label: 'Email' },
     { name: 'password', type: 'text', label: 'Password' },
     //{ name: 'confirm', type: 'checkbox', label: 'Remember me' }

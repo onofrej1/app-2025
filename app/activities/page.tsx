@@ -9,6 +9,7 @@ import React, { useState } from "react";
 import type { FeatureCollection } from "geojson";
 import Form, { FormRender } from "@/components/form/form";
 import { analyzeGpxData } from "@/utils/gpx";
+import { FormField } from "@/resources/resources.types";
 
 var togeojson = require("@mapbox/togeojson");
 
@@ -34,9 +35,9 @@ export default function Activities() {
     setGpxData(parsedData);
   };
 
-  const fields = [
-    { name: "name" },
-    { name: "type" },
+  const fields: FormField[] = [
+    { name: "name", type: "text" },
+    { name: "type", type: "text" },
     { name: "distance", type: "hidden" },
     { name: "duration", type: "hidden" },
   ];

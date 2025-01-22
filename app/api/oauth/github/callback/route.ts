@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import { getIronSession } from "iron-session";
 import { SessionData, sessionOptions } from "@/utils/session";
 import { cookies } from "next/headers";
-import { githubOAuth } from "../login/route";
+import { githubOAuth } from "@/utils/oauth";
 const crypto = require("crypto");
 
 interface GithubProfile {
@@ -56,7 +56,7 @@ export async function GET(request: Request) {
   const profile: GithubProfile = await profileResponse.json();
   console.log(profile);  
 
-  let user = await prisma.user.findUnique({
+  let user = await prisma.user.findFirst({
     where: {
       userName: profile.login,
     },
@@ -139,7 +139,7 @@ export async function GET(request: Request) {
     sessionOptions
   );
 
-  session.user = user.email! || session.userName!;
+  session.user = user.email! || session.user;
   session.userId = user.id;
   session.role = user.role;
   session.token = token;

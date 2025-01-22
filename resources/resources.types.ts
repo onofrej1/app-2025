@@ -22,7 +22,7 @@ interface BaseFormType {
 }
 
 export interface InputType extends BaseFormType {
-  type: "text" | "textarea" | "number" | "email" | "color";
+  type: "text" | "textarea" | "number" | "email" | "color" | "hidden" | "password";
   color?: string;
   min?: number;
   max?: number;
@@ -44,12 +44,14 @@ export interface ForeignKeyType extends BaseFormType {
   relation: string;
   textField?: string;
   renderLabel?: any;
+  options?: SelectOption[] | MultiSelectOption[];
 }
 
 export interface MultiSelectType extends BaseFormType {
   type: "m2m";
   options?: SelectOption[] | MultiSelectOption[];
   resource: PrismaModel;
+  renderLabel?: any;
   textField: string;
 }
 
@@ -70,14 +72,14 @@ type FormField =
   | DatePickerType
   | MultiSelectType;
 
-interface DataFilter {
+/*interface DataFilter {
   name: string;
   type: "select";
   label: string;
   options?: SelectOption[];
   onChange?: any;
   className?: any;
-}
+}*/
 
 type Resource = {
   group?: string;
@@ -91,7 +93,7 @@ type Resource = {
   form: FormField[];
   renderForm?: FormRender;
   list: TableHeader[];
-  filter: DataFilter[];
+  filter: FormField[]; // DataFilter[];
   canAddItem?: boolean;
   canEditItem?: boolean;
   //renderForm: keyof typeof renderForm;

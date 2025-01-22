@@ -2,12 +2,13 @@
 import { ResetPassword } from "@/actions/auth";
 import Form from "@/components/form/form";
 import { Button } from "@/components/ui/button";
+import { FormField } from "@/resources/resources.types";
 import { useSearchParams } from "next/navigation";
 import React from "react";
 
 export default function ResetPasswordPage() {
-  const fields = [
-    { name: "password", type: "text" },
+  const fields: FormField[] = [
+    { name: "password", type: "text", label: "Password" },
     //{ name: "confirmPassword", type: "text" },
   ];
   const searchParams = useSearchParams();

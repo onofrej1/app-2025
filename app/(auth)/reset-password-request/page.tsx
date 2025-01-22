@@ -2,10 +2,11 @@
 import { resetPasswordRequest } from "@/actions/auth";
 import Form from "@/components/form/form";
 import { Button } from "@/components/ui/button";
+import { FormField } from "@/resources/resources.types";
 import React from "react";
 
 export default function ResetPassword() {
-  const fields = [{ name: "email", type: "email" }];
+  const fields: FormField[] = [{ name: "email", type: "email" }];
 
   const sendForm = async (data: { email: string }) => {
     await resetPasswordRequest(data.email);

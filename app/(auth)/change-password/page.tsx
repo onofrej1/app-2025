@@ -2,10 +2,11 @@
 import { ChangePassword } from "@/actions/auth";
 import Form from "@/components/form/form";
 import { Button } from "@/components/ui/button";
+import { FormField } from "@/resources/resources.types";
 import React from "react";
 
 export default function ChangePasswordPage() {
-  const fields = [
+  const fields: FormField[] = [
     { name: "password", type: "password" },
     { name: "confirmPassword", type: "password" },
   ];

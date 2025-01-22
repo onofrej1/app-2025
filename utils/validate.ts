@@ -1,4 +1,4 @@
-import { FormField } from "@/resources/resources.types";
+/*import { FormField } from "@/resources/resources.types";
 import rules, { FormSchema } from "@/validation";
 import { ZodError } from "zod";
 
@@ -53,4 +53,4 @@ export function validateForm(
       message: "Something went wrong. Please try again.",
     };
   }
-}
+}*/

@@ -12,6 +12,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FormField } from "@/resources/resources.types";
 import {
   DndContext,
+  DragEndEvent,
   DragOverEvent,
   DragOverlay,
   DragStartEvent,
@@ -82,8 +83,8 @@ export default function Tasks() {
 
   const manageTaskForm = (data?: Task) => {
     let fields: FormField[] = [
-      { name: "title", label: "Title" },
-      { name: "description", label: "Description" },
+      { name: "title", label: "Title", type: "text" },
+      { name: "description", label: "Description", type: "text" },
       { name: "dueDate", type: "datepicker", label: "Due date" },
       {
         name: "assigneeId",
@@ -92,7 +93,6 @@ export default function Tasks() {
         label: "Assignee",
         resource: "user",
         textField: "lastName",
-        options: users,
       },
     ];
     if (data?.id) {
@@ -177,12 +177,12 @@ export default function Tasks() {
     }
   }
 
-  function handleDragEnd(event: any) {
+  function handleDragEnd(event: DragEndEvent) {
     setActiveItem(null);
     const { active, over } = event;
-    if (active.id !== over.id) {
+    if (active.id !== over?.id) {
       const oldIndex = items.findIndex((i) => i.id === active.id);
-      const newIndex = items.findIndex((i) => i.id === over.id);
+      const newIndex = items.findIndex((i) => i.id === over?.id);
 
       const arr = arrayMove(items, oldIndex, newIndex);
       setItems(arr);

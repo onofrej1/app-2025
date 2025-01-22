@@ -2,6 +2,7 @@
 import { createRegistration } from "@/actions/runs";
 import Form from "@/components/form/form";
 import { Button } from "@/components/ui/button";
+import { FormField } from "@/resources/resources.types";
 import { Registration } from "@prisma/client";
 import { useParams } from "next/navigation";
 import React from "react";
@@ -9,10 +10,10 @@ import React from "react";
 export default function Register() {
   const params = useParams();
 
-  const fields = [
+  const fields: FormField[] = [
     { name: "runId", type: "hidden" },
-    { name: "firstName", label: "First name" },
-    { name: "lastName", label: "Last name" },
+    { name: "firstName", label: "First name", type: "text" },
+    { name: "lastName", label: "Last name", type: "text" },
     {
       name: "gender",
       type: "select",
@@ -23,12 +24,12 @@ export default function Register() {
       ],
     },
     { name: "dateOfBirth", type: "datepicker", label: "Date of birth" },
-    { name: "email" },
+    { name: "email", type: "text" },
 
-    { name: "nation" },
-    { name: "club" },
-    { name: "city" },
-    { name: "phone" },
+    { name: "nation", type: "text" },
+    { name: "club", type: "text" },
+    { name: "city", type: "text" },
+    { name: "phone", type: "text" },
     { name: "confirm", type: "checkbox", label: "Confirm submit" },
   ];
 

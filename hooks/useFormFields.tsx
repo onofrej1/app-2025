@@ -1,21 +1,23 @@
 "use client";
 import { prismaAction } from "@/actions";
-import { FormField } from "@/resources/resources.types";
+import { ForeignKeyType, FormField, MultiSelectType } from "@/resources/resources.types";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
-const getLabel = (field: FormField, value: any) => {
+type RelationFormType = ForeignKeyType | MultiSelectType;
+
+const getLabel = (field: RelationFormType, value: Record<string, any>) => {
   return field.renderLabel ? field.renderLabel(value) : value[field.textField!];
 };
 
 export function useFormFields(form: FormField[], hasId: boolean) {
-  const idField = { name: 'id', type: 'hidden'};
+  const idField: FormField = { name: 'id', type: 'hidden'};
   const [formFields, setFormFields] = useState<FormField[]>([]);
   const queryClient = useQueryClient();
 
   useEffect(() => {
     async function getFields() {
-      for (const field of form.filter((f) => ["fk", "m2m"].includes(f.type!))) {
+      for (const field of form.filter((f) => ["fk", "m2m"].includes(f.type!)) as RelationFormType[]) {
         const options = await queryClient.fetchQuery({
           queryKey: [field.resource],
           queryFn: () => prismaAction(field.resource!, "findMany", null),

@@ -1,4 +1,4 @@
-"use server";
+/*"use server";
 
 import { prisma } from "@/db/prisma";
 import { getSession } from "./auth";
@@ -226,7 +226,7 @@ export async function getConversations() {
       },
     },
   });
-  /*return prisma.contact.findMany({
+  return prisma.contact.findMany({
     where: {
       OR: [
         {
@@ -261,7 +261,7 @@ export async function getConversations() {
         },
       },
     },
-  });*/
+  });
 }
 
 export async function getConversation() {
@@ -269,14 +269,14 @@ export async function getConversation() {
   if (!session) {
     throw new Error("Unauthorized");
   }
-  /*const loggedUserConversations = await prisma.conversationMember.findMany({
+  const loggedUserConversations = await prisma.conversationMember.findMany({
     where: {
       userId: session.userId,
     },
     select: {
       conversationId: true,
     },
-  });*/
+  });
   return prisma.conversation.findFirstOrThrow({
     where: {
       id: 1,
@@ -324,4 +324,4 @@ export async function getConversation() {
       },
     },
   });
-}
+}*/

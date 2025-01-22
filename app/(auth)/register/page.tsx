@@ -2,9 +2,10 @@
 import { register } from "@/actions/auth";
 import Form, { FormState } from "@/components/form/form";
 import { Button } from "@/components/ui/button";
+import { FormField } from "@/resources/resources.types";
 
 export default function RegisterPage() {
-  const fields = [
+  const fields: FormField[] = [
     { name: 'firstName', type: 'text', label: 'First name' },
     { name: 'lastName', type: 'text', label: 'Last name' },
     { name: 'email', type: 'text', label: 'Email' },

@@ -1,11 +1,11 @@
 import { prisma } from "@/db/prisma";
 import bcrypt from "bcryptjs";
-import { googleOAuth } from "../login/route";
 import { redirect } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import { getIronSession } from "iron-session";
 import { SessionData, sessionOptions } from "@/utils/session";
 import { cookies } from "next/headers";
+import { googleOAuth } from "@/utils/oauth";
 const crypto = require("crypto");
 
 interface GoogleProfile {

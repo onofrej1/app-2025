@@ -141,7 +141,7 @@ const CreateRunResult = z.array(
     bib: z.coerce.number(),
     rank: z.coerce.number(),
     time: z.coerce.number(),
-    gender: z.enum(["MAN", "WOMAN"]),
+    gender: z.enum(["MALE", "FEMALE"]),
     yearOfBirth: z.coerce.number(),
     runId: z.coerce.number(),
   })
