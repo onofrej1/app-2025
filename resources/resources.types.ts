@@ -28,6 +28,10 @@ export interface InputType extends BaseFormType {
   max?: number;
 }
 
+export interface RichtextType extends BaseFormType {
+  type: "richtext";  
+}
+
 export interface TextAreaType extends BaseFormType {
   type: "textarea";
   rows?: number;
@@ -70,7 +74,8 @@ type FormField =
   | ForeignKeyType
   | CheckboxType
   | DatePickerType
-  | MultiSelectType;
+  | MultiSelectType
+  | RichtextType;
 
 /*interface DataFilter {
   name: string;

@@ -2,13 +2,14 @@
 import { getComments, replyToComment } from "@/actions/social";
 import Form from "@/components/form/form";
 import { Button } from "@/components/ui/button";
+import { formatDate } from "@/lib/utils";
 import { FormField } from "@/resources/resources.types";
-import { FeedComment } from "@prisma/client";
+import { FeedComment, User } from "@prisma/client";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
 
 interface CommentBoxProps {
-  comment: FeedComment & { _count: { comments: number } };
+  comment: FeedComment & { user: User; _count: { comments: number } };
 }
 
 export function CommentBox(props: CommentBoxProps) {
@@ -16,7 +17,8 @@ export function CommentBox(props: CommentBoxProps) {
   //const queryClient = useQueryClient();
 
   const [data, setData] = useState<FeedComment[]>();
-  const [replyId, setReplyId] = useState<number>();
+  //const [replyId, setReplyId] = useState<number>();
+  const [reply, setReply] = useState(false);
 
   const loadComments = async (parentId: number) => {
     const comments = await getComments(parentId);
@@ -34,8 +36,14 @@ export function CommentBox(props: CommentBoxProps) {
 
   return (
     <div className="pl-8" key={comment.id}>
+      <div>
+        <span className="font-bold">
+          {comment.user.lastName} {comment.user.firstName}
+        </span>{" "}
+        {formatDate(comment.publishedAt, "LLL. d, yyyy")}
+      </div>
       {comment.comment}
-      {comment._count.comments > 0 && (
+      {comment._count.comments > 0 ? (
         <>
           {data && data.length > 0 ? (
             <div>
@@ -57,11 +65,37 @@ export function CommentBox(props: CommentBoxProps) {
               </Form>
             </div>
           ) : (
-            <Button onClick={() => loadComments(comment.id)}>
-              Load comments
+            <Button size={'sm'} className="ml-2" onClick={() => loadComments(comment.id)}>
+              Show replies
             </Button>
           )}
         </>
+      ) : (
+        <div>
+          {reply ? (
+            <div>
+                <Form
+                key={comment.id + "-reply_form"}
+                fields={commentFields}
+                validation={"CommentFeedPost"}
+                action={commentReply.bind(null, comment.id)}
+              >
+                {({ fields }) => (
+                  <div className="pl-8 flex flex-col gap-3 pb-4">
+                    {fields.comment}
+                    <Button type="submit">Commentt</Button>
+                  </div>
+                )}
+              </Form>
+            </div>
+          ) : (
+            <div>
+              <Button size={"sm"} onClick={() => setReply(true)}>
+                Reply
+              </Button>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

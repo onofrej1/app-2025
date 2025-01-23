@@ -24,7 +24,7 @@ import { MultiSelectOption, SelectOption } from "@/resources/resources.types";
 import { Label } from "../ui/label";
 
 interface MultiSelectProps {
-  label: string;
+  label?: string;
   name: string;
   errors: FieldErrors<DefaultFormData>;
   options: MultiSelectOption[];
@@ -64,7 +64,7 @@ export function MultiSelect(props: MultiSelectProps) {
 
   return (
     <>
-      <Label>{label}</Label>
+      {label && <Label>{label}</Label>}
       <div>
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>

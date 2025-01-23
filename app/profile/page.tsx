@@ -85,9 +85,9 @@ export default function Home() {
               validation={"CommentFeedPost"}
               action={comment.bind(null, post.id)}
             >
-              {({ fields }) => (
+              {({ fields: { comment } }) => (
                 <div className="pl-8 flex flex-col gap-3 pb-4">
-                  {fields.comment}
+                  {comment}
                   <Button type="submit">Comment</Button>
                 </div>
               )}

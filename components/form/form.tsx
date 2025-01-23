@@ -22,6 +22,7 @@ import { DatePicker } from "./datepicker";
 import { Button } from "../ui/button";
 import { capitalize } from "@/lib/utils";
 import Textarea from "./textarea";
+import RichEditor from "./richeditor";
 
 export interface DefaultFormData {
   [key: string]: any;
@@ -93,7 +94,7 @@ export default function Form({
 
   const submitForm = async (formData: unknown) => {
     if (!action) return;
-    
+
     try {
       const data: actionResult = await action(formData);
       if (!data) {
@@ -241,10 +242,20 @@ export default function Form({
                     onChange(v);
                   }}
                   value={selectValue}
-                  //placeholder={field.placeholder}                                  
+                  //placeholder={field.placeholder}
                 />
               );
             }}
+          />
+        )}
+
+        {["richtext"].includes(type) && (
+          <Controller
+            control={control}
+            name={field.name}
+            render={({ field: { onChange, value, name } }) => (
+              <RichEditor name={name} onChange={onChange} value={value} label={label} />
+            )}
           />
         )}
       </>

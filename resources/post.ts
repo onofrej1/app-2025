@@ -28,7 +28,7 @@ const post: Resource = {
   ],
   form: [
     { name: 'title', type: 'text', label: 'Title' },
-    { name: 'content', type: 'text', label: 'Content' },
+    { name: 'content', type: 'richtext', label: 'Content' },
     { name: 'status', type: 'text', label: 'Status' },
     {
       name: 'authorId', 
@@ -64,10 +64,10 @@ const post: Resource = {
   list: [
     { name: 'id', header: 'Id'},
     { name: 'title', header: 'Title' },
-    { 
+    /*{ 
       name: 'content', 
       header: 'Content', 
-    },
+    },*/
   ],
 };
 export { post };
