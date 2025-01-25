@@ -61,3 +61,17 @@ export function slugify(str: string) {
     .replace(/-+/g, "-"); // remove consecutive hyphens
   return str;
 }
+
+export function htmlToJson(div: Element) {
+  var tag: Record<string, any> = {};
+  tag["tagName"] = div.tagName;
+  tag["children"] = [];
+  for (var i = 0; i < div.children.length; i++) {
+    tag["children"].push(htmlToJson(div.children[i]));
+  }
+  for (var i = 0; i < div.attributes.length; i++) {
+    var attr = div.attributes[i];
+    tag["@" + attr.name] = attr.value;
+  }
+  return tag;
+}

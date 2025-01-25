@@ -40,33 +40,39 @@ export default function FormSelect({
   className,
   onChange,
 }: SelectProps) {
+  const SelectElement = (
+    <Select
+      name={name}
+      onValueChange={onChange}
+      defaultValue={value?.toString()}
+      value={value?.toString()}
+    >
+      <SelectTrigger
+        className={className}
+        value={value?.toString()}
+        onReset={() => setValue(name, "")}
+      >
+        <SelectValue placeholder={label} />
+      </SelectTrigger>
+      <SelectContent>
+        {options &&
+          options?.map((option) => (
+            <SelectItem key={option.value} value={option.value?.toString()}>
+              {option.label}
+            </SelectItem>
+          ))}
+      </SelectContent>
+    </Select>
+  );
+
+  if (!label) {
+    return SelectElement;
+  }
+
   return (
     <div>
-      {label && <Label>{label}</Label>}
-      <div className="pt-1">
-        <Select
-          name={name}
-          onValueChange={onChange}
-          defaultValue={value?.toString()}
-          value={value?.toString()}
-        >
-          <SelectTrigger
-            className={className}
-            value={value?.toString()}
-            onReset={() => setValue(name, "")}
-          >
-            <SelectValue placeholder={label} />
-          </SelectTrigger>
-          <SelectContent>
-            {options &&
-              options?.map((option) => (
-                <SelectItem key={option.value} value={option.value?.toString()}>
-                  {option.label}
-                </SelectItem>
-              ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <Label>{label}</Label>
+      <div className="pt-1">{SelectElement}</div>
       {errors && (
         <ErrorMessage errors={errors} name={name} render={renderError} />
       )}

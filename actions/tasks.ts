@@ -9,6 +9,13 @@ export async function getTasks(projectId: number) {
   return prisma.task.findMany({ where: { projectId } });
 }
 
+export async function getCategories(offset: number, numRows: number) {
+  return prisma.category.findMany({
+    skip: offset,
+    take: numRows,
+  });
+}
+
 export async function updateTasks(tasks: Task[]) {
   //return prisma.task.findMany({ where: { projectId } });
 }

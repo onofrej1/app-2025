@@ -62,7 +62,7 @@ export async function GET(request: Request) {
     },
   });
 
-  for (const i of count) {
+  for (const i of Array.from({ length: 100 })) {
     let title = faker.lorem.word();
     categories.push({
       title,

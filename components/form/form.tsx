@@ -1,5 +1,5 @@
 "use client";
-import { Controller, useForm, UseFormTrigger } from "react-hook-form";
+import { Controller, FormState, useForm, UseFormGetValues, UseFormSetValue, UseFormTrigger } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { JSX } from "react";
 import {
@@ -28,16 +28,6 @@ export interface DefaultFormData {
   [key: string]: any;
 }
 
-export interface FormValues {
-  email: string;
-  name: string;
-}
-
-export interface FormState {
-  isValid: boolean;
-  pending: boolean;
-}
-
 export type actionResult = {
   redirect?: string;
   message?: string;
@@ -46,7 +36,9 @@ export type actionResult = {
 
 export type FormRenderProps = {
   fields: Record<string, JSX.Element>;
-  formState: FormState;
+  formState: FormState<DefaultFormData>;
+  getValues: UseFormGetValues<DefaultFormData>;
+  setValue: UseFormSetValue<DefaultFormData>;
   trigger: UseFormTrigger<DefaultFormData>;
 };
 
@@ -57,7 +49,7 @@ interface FormProps {
   validation: FormSchema;
   data?: DefaultFormData;
   action?: (...args: any[]) => any;
-  buttons?: ((props: FormState) => JSX.Element)[];
+  buttons?: ((props: Partial<FormState<DefaultFormData>>) => JSX.Element)[];
   render?: FormRender;
   children?: FormRender;
 }
@@ -77,7 +69,7 @@ export default function Form({
 
   const {
     register,
-    formState: { isValid, errors, isLoading },
+    formState,
     setError,
     control,
     trigger,
@@ -89,6 +81,7 @@ export default function Form({
     resolver: zodResolver(validationRules),
     defaultValues: data,
   });
+  const { isValid, errors, isLoading } = formState;
   console.log(getValues());
   console.log(errors);
 
@@ -129,6 +122,7 @@ export default function Form({
               label={label}
               name={field.name}
               errors={errors}
+              className={field.className}
               type={type}
               register={register}
               onChange={field.onChange}
@@ -156,7 +150,7 @@ export default function Form({
               name={field.name}
               render={({ field: { onChange, value, name } }) => (
                 <FormCheckbox
-                  label={label}
+                  label={label || name}
                   name={name}
                   errors={errors}
                   checked={!!value}
@@ -272,7 +266,9 @@ export default function Form({
       <form onSubmit={handleSubmit(submitForm)}>
         {children({
           fields: fieldsToRender,
-          formState: { isValid, pending: isLoading },
+          formState,
+          setValue,
+          getValues,
           trigger,
         })}
       </form>
@@ -282,7 +278,9 @@ export default function Form({
   if (render) {
     const renderContent = render({
       fields: fieldsToRender,
-      formState: { isValid, pending: isLoading },
+      formState,
+      setValue,
+      getValues,
       trigger,
     });
     return (
@@ -315,7 +313,7 @@ export default function Form({
         {buttons?.length ? (
           <div className="flex space-x-2">
             {buttons.map((Button, index) => (
-              <Button key={index} isValid={isValid} pending={isLoading} />
+              <Button key={index} isValid={isValid} isLoading={isLoading} />
             ))}
           </div>
         ) : (

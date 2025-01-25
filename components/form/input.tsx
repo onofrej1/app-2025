@@ -12,6 +12,7 @@ interface InputProps {
   label?: string;
   type: string;
   name: string;
+  className?: string;
   placeholder?: string;
   onChange?: ChangeEventHandler<HTMLInputElement>;
   errors: FieldErrors<DefaultFormData>;
@@ -19,29 +20,44 @@ interface InputProps {
 }
 
 export default function FormInput(props: InputProps) {
-  const { label, name, type, placeholder, onChange, errors, register } =
-    props;
+  const {
+    label,
+    name,
+    type,
+    placeholder,
+    onChange,
+    className,
+    errors,
+    register,
+  } = props;
   if (type === "hidden") {
     return <Input type="hidden" {...register(name)} placeholder={label} />;
   }
 
   const registerOptions: RegisterOptions = {};
   if (onChange) {
-    registerOptions["onChange"] = (e: ChangeEvent<HTMLInputElement>) => onChange(e);
+    registerOptions["onChange"] = (e: ChangeEvent<HTMLInputElement>) =>
+      onChange(e);
+  }
+
+  const InputElement = (
+    <Input
+      className={className}
+      key={name}
+      type={type || "text"}
+      {...register(name, registerOptions)}
+      placeholder={placeholder || label}
+    />
+  );
+
+  if (!label) {
+    return InputElement;
   }
 
   return (
     <div>
-      {label && <Label>{label}</Label>}
-      <div className="pt-1">
-        <Input
-          key={name}
-          type={type || "text"}
-          {...register(name, registerOptions)}
-          placeholder={placeholder || label}
-        />
-      </div>
-
+      <Label>{label}</Label>
+      <div className="pt-1">{InputElement}</div>
       <ErrorMessage errors={errors} name={name} render={renderError} />
     </div>
   );

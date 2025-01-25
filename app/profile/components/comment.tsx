@@ -42,7 +42,7 @@ export function CommentBox(props: CommentBoxProps) {
         </span>{" "}
         {formatDate(comment.publishedAt, "LLL. d, yyyy")}
       </div>
-      {comment.comment}
+      <div dangerouslySetInnerHTML={{ __html: comment.comment }}></div>      
       {comment._count.comments > 0 ? (
         <>
           {data && data.length > 0 ? (
@@ -81,9 +81,9 @@ export function CommentBox(props: CommentBoxProps) {
                 action={commentReply.bind(null, comment.id)}
               >
                 {({ fields }) => (
-                  <div className="pl-8 flex flex-col gap-3 pb-4">
+                  <div className="pl-8 flex gap-3 pb-4 items-center">
                     {fields.comment}
-                    <Button type="submit">Commentt</Button>
+                    <Button type="submit">Comment</Button>
                   </div>
                 )}
               </Form>
