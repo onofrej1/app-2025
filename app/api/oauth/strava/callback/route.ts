@@ -77,6 +77,5 @@ export async function GET(request: Request) {
   }
 
   const activities = await data_response.json();  
-  console.log(activities);
   return activities;
 }*/

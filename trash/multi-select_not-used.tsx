@@ -35,7 +35,6 @@ export default function FormMultiSelect({
 }: InputProps) {
 
   const selectValue = value && value.length > 0 ? value.map((v: any) => ({ value: Number(v.value || v.id), label: v.label || v[textField!] })) : null;
-  //console.log(selectValue);
 
   return (
     <>

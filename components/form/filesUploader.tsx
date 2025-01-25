@@ -3,22 +3,47 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/flowbite/button";
 import { XIcon } from "lucide-react";
 
-const MAX_COUNT = 5;
+interface FilesUploaderProps {
+  onFilesSelect: (file: File[]) => void;
+  allowedTypes?: string[];
+  maxSize?: number;
+  maxFiles?: number,
+  uploadText?: string;
+}
 
-export default function FilesUploader() {
+export default function FilesUploader(props: FilesUploaderProps) {
+  const allowedFileTypes = ["image/png", "image/jpeg", "image/jpg"];
+  const {
+    onFilesSelect,
+    allowedTypes = allowedFileTypes,
+    maxSize = 1024 * 1024,
+    maxFiles = 5,
+    uploadText = "Upload files",
+  } = props;
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [fileLimit, setFileLimit] = useState(false);
-  const [files, setFiles] = useState<{ src: string; name: string; path: string }[]>([]);
+  const [files, setFiles] = useState<
+    { src: string; name: string; path: string }[]
+  >([]);
 
   const handleUploadFiles = (files: File[]) => {
     const uploaded = [...uploadedFiles];
     let limitExceeded = false;
     files.some((file) => {
+      if (!allowedTypes.includes(file.type)) {
+        alert("This file type is not supported !");
+        return;
+      }
+
+      if (file.size > maxSize) {
+        alert("Uploaded file is too big !");
+        return;
+      }
       if (uploaded.findIndex((f) => f.name === file.name) === -1) {
         uploaded.push(file);
-        if (uploaded.length === MAX_COUNT) setFileLimit(true);
-        if (uploaded.length > MAX_COUNT) {
-          alert(`You can only add a maximum of ${MAX_COUNT} files`);
+        if (uploaded.length === maxFiles) setFileLimit(true);
+        if (uploaded.length > maxFiles) {
+          alert(`You can only add a maximum of ${maxFiles} files`);
           setFileLimit(false);
           limitExceeded = true;
           return true;
@@ -44,21 +69,13 @@ export default function FilesUploader() {
   };
 
   const onFileUpload = async () => {
-    const formData = new FormData();
-    formData.append("count", uploadedFiles.length.toString());
-    uploadedFiles.forEach((file, index) => {
-      console.log(index);
-      formData.append("file-" + index, file, file.name);
-    });
-    await uploadFiles(formData);
+    //onFilesSelect(uploadedFiles);
+    await uploadFiles(uploadedFiles);
     await fetchFiles();
   };
 
   const handleDrop = (event: any) => {
-    //console.log('drop');
     event.preventDefault();
-    //console.log(event);
-    //console.log(event.originalEvent.dataTransfer.files);
     const droppedFiles = event.dataTransfer.files as File[];
     console.log(droppedFiles);
     if (droppedFiles.length > 0) {
@@ -95,22 +112,25 @@ export default function FilesUploader() {
             ))}
           </div>
 
-          <Button onClick={onFileUpload}>Upload files!</Button>
+          <Button onClick={onFileUpload}>{uploadText}</Button>
         </div>
       ) : (
         ""
       )}
       <>
         Choose a file...
-        <div className="flex items-center justify-center w-full"  onDrop={handleDrop}
-        onDragOver={(event) => event.preventDefault()}>
+        <div
+          className="flex items-center justify-center w-full"
+          onDrop={handleDrop}
+          onDragOver={(event) => event.preventDefault()}
+        >
           <label
             htmlFor="dropzone-file"
-            className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
+            className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50"
           >
             <div className="flex flex-col items-center justify-center pt-5 pb-6">
               <svg
-                className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
+                className="w-8 h-8 mb-4 text-gray-500"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -124,11 +144,11 @@ export default function FilesUploader() {
                   d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
                 />
               </svg>
-              <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+              <p className="mb-2 text-sm text-gray-500">
                 <span className="font-semibold">Click to upload</span> or drag
                 and drop
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-xs text-gray-500">
                 SVG, PNG, JPG or GIF (MAX. 800x400px)
               </p>
             </div>
@@ -155,7 +175,6 @@ export default function FilesUploader() {
             </div>
           ))}
         </div>
-        {/*<input type="file" onChange={handleFileChange} />*/}
       </>
     </div>
   );

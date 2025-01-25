@@ -1,25 +1,18 @@
 "use client";
 //import { getFeed } from "@/actions/feed";
 //import { getFeedData } from "@/utils/feed";
-import {
-  commentPost,
-  createFeedPost,
-  getComments,
-  getFeedPosts,
-  replyToComment,
-} from "@/actions/social";
+import { commentPost, createFeedPost, getFeedPosts } from "@/actions/social";
 import Form from "@/components/form/form";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/hooks/use-session";
 import { formatDate } from "@/lib/utils";
 import { FormField } from "@/resources/resources.types";
-import { FeedComment } from "@prisma/client";
+import { FeedPost } from "@prisma/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
 import { CommentBox } from "./components/comment";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
-import { useDialog } from "@/state";
 import {
   Popover,
   PopoverContent,
@@ -28,14 +21,12 @@ import {
 import { Smile } from "lucide-react";
 import { ErrorMessage } from "@hookform/error-message";
 import { renderError } from "@/components/form/utils";
-import FileUploader from "@/components/form/fileUpload";
+import FileUploader from "@/components/form/fileUploader";
 
 export default function Home() {
   const queryClient = useQueryClient();
-  //const { open, setTitle, setContent, onClose } = useDialog();
-  const [data, setData] = useState<{ content: string }>();
   const [replyToPost, setReplyToPost] = useState<number>();
-
+  const [fileUploaderOpen, setFileUploaderOpen] = useState(false);
   const { user } = useSession();
   /*const feed = await getFeed();
   console.log(feed);
@@ -51,35 +42,22 @@ export default function Home() {
   const commentFields: FormField[] = [
     { type: "text", name: "comment", className: "flex-1" },
   ];
-  const fields: FormField[] = [{ type: "text", name: "content", label: "", className: "flex-1" }];
+  const fields: FormField[] = [
+    { type: "text", name: "content", label: "", className: "flex-1" },
+  ];
 
-  const sendForm = async (data: { content: string }) => {
-    console.log(data);
-    await createFeedPost(data.content);
+  const sendForm = async (data: FeedPost) => {
+    await createFeedPost(data);
     refreshData();
   };
 
   const comment = async (postId: number, data: { comment: string }) => {
-    console.log(data);
     await commentPost(postId, data.comment);
     refreshData();
   };
 
   const refreshData = () => {
     queryClient.invalidateQueries({ queryKey: ["posts", user.userId] });
-  };
-
-  const fileUpload = (formData: FormData) => {
-    const formObject = Object.fromEntries(formData.entries());
-    const reader = new FileReader();
-
-    reader.onload = function (e: any) {
-      const content = e.target.result;
-      console.log('content', content);
-      /*const csvData = parseCsv(content, requiredHeaders);
-      setUploadData(csvData);   */
-    };
-    reader.readAsText(formObject['myFile'] as Blob);
   };
 
   return (
@@ -97,13 +75,25 @@ export default function Home() {
             key={post.id}
             className="flex flex-col gap-3 border border-b-1 p-2 border-gray-900"
           >
-            <div>
+            {post.contentType === "text" && (
+              <div className="bg-slate-200 ml-auto">{post.content}</div>
+            )}
+            {post.contentType === "image" && (
+              <a className="ml-auto" href={`/assets/${post.mediaUrl}`}>
+                <img
+                  src={`/assets/${post.mediaUrl}`}
+                  width={120}
+                  height={120}
+                  className="border border-gray-400 cover"
+                />
+              </a>
+            )}
+            <div className="ml-auto">
               <span className="font-bold">
                 {post.user.lastName} {post.user.firstName}
               </span>{" "}
               {formatDate(post.createdAt, "LLL. d, yyyy")}
             </div>
-            <div className="bg-slate-200">{post.content}</div>
             {post.comments.map((comment) => {
               return <CommentBox key={comment.id} comment={comment as any} />;
             })}
@@ -136,7 +126,11 @@ export default function Home() {
                 )}
               </Form>
             ) : (
-              <Button variant={"link"} onClick={() => setReplyToPost(post.id)}>
+              <Button
+                variant={"link"}
+                className="ml-auto"
+                onClick={() => setReplyToPost(post.id)}
+              >
                 Reply
               </Button>
             )}
@@ -144,12 +138,7 @@ export default function Home() {
         );
       })}
 
-      <Form
-        fields={fields}
-        data={data}
-        validation={"CreatePost"}
-        action={sendForm}
-      >
+      <Form fields={fields} validation={"CreatePost"} action={sendForm}>
         {({ fields, setValue, getValues, formState: { errors } }) => (
           <div>
             <div className="flex gap-2 pb-4 items-center">
@@ -168,14 +157,32 @@ export default function Home() {
               </Popover>
               <div className="flex-1">
                 {fields.content}
-                <ErrorMessage errors={errors} name={'content'} render={renderError} />
+                <ErrorMessage
+                  errors={errors}
+                  name={"content"}
+                  render={renderError}
+                />
               </div>
-              <Popover>
+              <Popover
+                open={fileUploaderOpen}
+                onOpenChange={setFileUploaderOpen}
+              >
                 <PopoverTrigger asChild>
                   <Smile />
                 </PopoverTrigger>
                 <PopoverContent className="w-80">
-                  <FileUploader onUploadFile={fileUpload} />
+                  <FileUploader
+                    uploadText="Send"
+                    onFileSelect={async (file) => {
+                      await createFeedPost({
+                        contentType: "image",
+                        file,
+                        mediaUrl: file.name,
+                      });
+                      setFileUploaderOpen(false);
+                      refreshData();
+                    }}
+                  />
                 </PopoverContent>
               </Popover>
               <Button type="submit">Send</Button>

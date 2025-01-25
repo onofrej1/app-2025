@@ -1,7 +1,7 @@
 "use client";
 
 import { createActivity, getActivities, GpxRecord } from "@/actions/activities";
-import FileUploader from "@/components/form/fileUpload";
+import FileUploader from "@/components/form/fileUploader";
 import Map from "@/components/map/map";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";

@@ -1,6 +1,6 @@
 "use client";
 import { getRunById } from "@/actions/runs";
-import FileUploader from "@/components/form/fileUpload";
+import FileUploader from "@/components/form/fileUploader";
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
@@ -49,7 +49,6 @@ export default function Run() {
   }
 
   const sortData = (sortBy: string, sortDir: string) => {
-    console.log('sort', sortBy);
     if (!uploadData) return;
     let data = uploadData;
     if (sortBy === 'name') {

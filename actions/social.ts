@@ -2,8 +2,10 @@
 
 import { prisma } from "@/db/prisma";
 import { getSession } from "./auth";
+import { FeedPost } from "@prisma/client";
+import { uploadFile } from "./files";
 
-export async function createFeedPost(content: string) {
+export async function createMediaPost(data: FeedPost) {
   const session = await getSession();
   if (!session) {
     throw new Error("Unauthorized");
@@ -11,12 +13,42 @@ export async function createFeedPost(content: string) {
 
   const result = await prisma.feedPost.create({
     data: {
-      content,
+      content: data.content,
       userId: session.userId,
-      contentType: "text",
+      contentType: data.contentType || "text",
+      mediaUrl: data.mediaUrl,
     },
   });
   return result;
+}
+
+export async function createFeedPost(data: Partial<FeedPost> & { file?: File }) {
+  const session = await getSession();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+
+  if (data.file) {
+    await uploadFile(data.file);
+    await prisma.feedPost.create({
+      data: {
+        content: data.content || '',
+        userId: session.userId,
+        contentType: data.contentType,
+        mediaUrl: data.mediaUrl,
+      },
+    });
+  } else {
+    await prisma.feedPost.create({
+      data: {
+        content: data.content || '',
+        userId: session.userId,
+        contentType: "text",        
+      },
+    });
+  }
+  
+  return { success: true };
 }
 
 export async function commentPost(postId: number, comment: string) {
@@ -85,6 +117,7 @@ export async function getFeedPosts(userId: string) {
       },
       content: true,
       contentType: true,
+      mediaUrl: true,
       comments: {
         select: {
           comment: true,
