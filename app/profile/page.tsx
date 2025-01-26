@@ -21,47 +21,31 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Smile } from "lucide-react";
+import { MehIcon, Smile } from "lucide-react";
 import { ErrorMessage } from "@hookform/error-message";
 import { renderError } from "@/components/form/utils";
 import FileUploader from "@/components/form/fileUploader";
 import { useUploadForm } from "@/hooks/useUploadForm";
 import { Progress } from "@/components/ui/progress";
-import Videojs from "@/components/video/videojs";
+import Videojs, { videoJsOptions } from "@/components/video/videojs";
 import { urlToFile } from "@/utils";
+import ReactCrop, { Crop } from "react-image-crop";
+import "react-image-crop/dist/ReactCrop.css";
 
 export default function Home() {
   const queryClient = useQueryClient();
   const [replyToPost, setReplyToPost] = useState<number>();
   const [fileUploaderOpen, setFileUploaderOpen] = useState(false);
+  const [src, setSrc] = useState<string>();
+  //@ts-ignore
+  const [crop, setCrop] = useState<Crop>({ aspect: 16 / 9 });
+  const [image, setImage] = useState<HTMLImageElement>();
+  const [output, setOutput] = useState("");
+
   const { user } = useSession();
   const { uploadForm, progress } = useUploadForm(
     "http://localhost:3000/api/upload-files"
   );
-
-  const videoJsOptions = {
-    autoplay: false,
-    controls: true,
-    responsive: true,
-    fluid: true,
-    experimentalSvgIcons: true,
-    playbackRates: [0.5, 1, 1.5, 2],
-    sources: [
-      {
-        src: "http://localhost:3000/uploaded_files/v5.mp4",
-        type: "video/mp4",
-      },
-    ],
-    tracks: [
-      {
-        src: "http://localhost:3000/test.vtt",
-        kind: "captions",
-        srclang: "en",
-        label: "English",
-        default: true,
-      },
-    ],
-  };  
 
   const { data: posts = [], isFetching } = useQuery({
     queryKey: ["posts", user.userId],
@@ -92,6 +76,23 @@ export default function Home() {
     queryClient.invalidateQueries({ queryKey: ["posts", user.userId] });
   };
 
+  const getVideoOptions = (mediaUrl: string) => {
+    const dotLastIndex = mediaUrl.lastIndexOf(".");
+    const finalName = mediaUrl.substring(0, dotLastIndex);
+    const sources = [
+      {
+        src: `http://localhost:3000/uploaded_files/${mediaUrl}`,
+        type: "video/mp4",
+      },
+    ];
+    const options = {
+      ...videoJsOptions,
+      sources,
+      poster: `http://localhost:3000/uploaded_files/${finalName}_thumb.png`,
+    };
+    return options;
+  };
+
   return (
     <div className="">
       <Link href="/home">Home page</Link>
@@ -118,7 +119,7 @@ export default function Home() {
 
             {post.contentType === "video" && (
               <div className="w-[200px] ml-auto">
-                <Videojs options={videoJsOptions} />
+                <Videojs options={getVideoOptions(post.mediaUrl!)} />
               </div>
             )}
             <div className="ml-auto">
@@ -208,6 +209,10 @@ export default function Home() {
                   <FileUploader
                     uploadText="Send"
                     allowedTypes={["image/png", "image/jpeg", "video/mp4"]}
+                    /*onFileChange={(file) => {
+                      console.log(file);
+                      setSrc(URL.createObjectURL(file));
+                    }}*/
                     onFileSelect={async (data) => {
                       const { file } = data;
                       const formData = new FormData();
@@ -216,13 +221,18 @@ export default function Home() {
                         ? "image"
                         : "video";
                       if (type === "video") {
-                        const thumbNail = await urlToFile(data.thumbNail, file.name+'_thumb.png', 'image/png');                        
+                        const fileName = file.name.split(".")[0];
+                        const thumbNail = await urlToFile(
+                          data.thumbNail,
+                          fileName + "_thumb.png",
+                          "image/png"
+                        );
                         formData.append("file-1", thumbNail);
                       }
                       const mediaUploadResponse = await uploadForm(formData);
                       if (mediaUploadResponse.status === 200) {
                         await createMediaFeedPost({
-                          mediaUrl: file.name,                          
+                          mediaUrl: file.name,
                           contentType: type,
                         });
                         setFileUploaderOpen(false);
@@ -232,6 +242,21 @@ export default function Home() {
                   />
                 </PopoverContent>
               </Popover>
+
+              {/*<Popover>
+                <PopoverTrigger asChild><Smile /></PopoverTrigger>
+                <PopoverContent className="w-80">
+                  <ReactCrop
+                    crop={crop}
+                    onChange={setCrop}
+                  >
+                    <img src={src} />
+                  </ReactCrop>
+                  <br />
+                  <button onClick={cropImageNow}>Crop</button>
+                </PopoverContent>
+              </Popover>*/}
+
               <Button type="submit">Send</Button>
             </div>
           </div>

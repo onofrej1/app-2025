@@ -4,6 +4,24 @@ import "video.js/dist/video-js.css";
 //import SpeedControl from "./speedcontrol";
 import Player from "video.js/dist/types/player";
 
+export const videoJsOptions = {
+  autoplay: false,
+  controls: true,
+  responsive: true,
+  fluid: true,
+  experimentalSvgIcons: true,
+  playbackRates: [0.5, 1, 1.5, 2],    
+  /*tracks: [
+    {
+      src: "http://localhost:3000/test.vtt",
+      kind: "captions",
+      srclang: "en",
+      label: "English",
+      default: true,
+    },
+  ],*/
+};  
+
 type VideoPlayerProps = { options: any; onReady?: (player: Player) => void };
 
 export const VideoPlayer = (props: PropsWithChildren<VideoPlayerProps>) => {
