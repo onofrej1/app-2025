@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
+import { generateVideoThumbnail } from "@/utils";
 
 interface FileUploaderProps {
-  onFileSelect: (file: File) => void;
+  onFileSelect: (data: { file: File, thumbNail: string }) => void;
   allowedTypes?: string[];
   maxSize?: number;
   uploadText?: string;
@@ -18,31 +19,44 @@ export default function FileUploader(props: FileUploaderProps) {
     uploadText,
   } = props;
   const [file, setFile] = useState<File>();
+  const imageRef = useRef<HTMLImageElement>(null);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const uploadedFile = event.target.files ? event.target.files[0] : null;
     if (!uploadedFile) return;
 
     if (!allowedTypes.includes(uploadedFile.type)) {
-      alert("This file type is not supported !");
-      return;
+      //alert("This file type is not supported !");
+      //return;
     }
 
     if (uploadedFile.size > maxSize) {
-      alert("Uploaded file is too big !");
-      return;
-    }
+      //alert("Uploaded file is too big !");
+      //return;
+    }    
     setFile(uploadedFile);
+    if (uploadedFile.type.startsWith("video")) {
+      const thumbnail = await generateVideoThumbnail(uploadedFile);
+      if (imageRef && imageRef.current) {
+        imageRef.current.src = thumbnail;
+      }
+    }
   };
 
   const selectFile = () => {
     if (file) {
-      onFileSelect(file); 
-    }    
+      onFileSelect({ file, thumbNail: imageRef.current!.src });
+    }
   };
 
   const isImageFile = (type: string) => {
     return ["image/jpeg", "image/png"].includes(type);
+  };
+
+  const isVideoFile = (type: string) => {
+    return ["video/mp4", "video/avi"].includes(type);
   };
 
   return (
@@ -51,11 +65,25 @@ export default function FileUploader(props: FileUploaderProps) {
         <div className="flex flex-col justify-center">
           {isImageFile(file.type) && (
             <div className="grid grid-cols-1 mb-2">
-              <img src={URL.createObjectURL(file)} width={"100%"} />
+              <img
+                src={URL.createObjectURL(file)}
+                width={"100%"}
+              />
             </div>
           )}
+
+          {isVideoFile(file.type) && (
+            <div className="grid grid-cols-1 mb-2">
+              <img
+                ref={imageRef}
+                src='/assets/images/upload.png'
+                width={"100%"}
+              />
+            </div>
+          )}
+
           <div className="text-center">
-            <Button size={'sm'} onClick={selectFile}>
+            <Button size={"sm"} onClick={selectFile}>
               <Upload />
               {uploadText || "Upload file"}
             </Button>
@@ -101,7 +129,6 @@ export default function FileUploader(props: FileUploaderProps) {
               />
             </label>
           </div>
-          {/*<input type="file" onChange={handleFileChange} />*/}
         </>
       )}
     </div>

@@ -13,16 +13,15 @@ import { FormSchema } from "@/validation";
 import rules from "@/validation";
 import FormInput from "@/components/form/input";
 import FormSelect from "@/components/form/select";
-//import FormMultiSelect from '@/components/form/multi-select';
 import { MultiSelect } from "@/components/form/multi-select";
 import FormCheckbox from "@/components/form/checkbox";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { DatePicker } from "./datepicker";
 import { Button } from "../ui/button";
-import { capitalize } from "@/lib/utils";
 import Textarea from "./textarea";
 import RichEditor from "./richeditor";
+import { z } from "zod";
 
 export interface DefaultFormData {
   [key: string]: any;
@@ -46,7 +45,7 @@ export type FormRender = (props: FormRenderProps) => JSX.Element;
 
 interface FormProps {
   fields: FormField[];
-  validation: FormSchema;
+  validation?: FormSchema;
   data?: DefaultFormData;
   action?: (...args: any[]) => any;
   buttons?: ((props: Partial<FormState<DefaultFormData>>) => JSX.Element)[];
@@ -65,7 +64,7 @@ export default function Form({
 }: FormProps) {
   const { replace } = useRouter();
   //@ts-ignore
-  const validationRules = rules[validation];
+  const validationRules = rules[validation] || z.any();
 
   const {
     register,

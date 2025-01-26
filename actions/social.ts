@@ -3,51 +3,43 @@
 import { prisma } from "@/db/prisma";
 import { getSession } from "./auth";
 import { FeedPost } from "@prisma/client";
-import { uploadFile } from "./files";
 
-export async function createMediaPost(data: FeedPost) {
+export async function createMediaFeedPost({
+  mediaUrl,
+  contentType,
+}: {
+  mediaUrl: string;
+  contentType: string;
+}) {
   const session = await getSession();
   if (!session) {
     throw new Error("Unauthorized");
   }
 
-  const result = await prisma.feedPost.create({
+  await prisma.feedPost.create({
+    data: {
+      userId: session.userId,
+      contentType,
+      mediaUrl,
+    },
+  });
+  return { success: true };
+}
+
+export async function createFeedPost(data: Partial<FeedPost>) {
+  const session = await getSession();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+
+  await prisma.feedPost.create({
     data: {
       content: data.content,
       userId: session.userId,
-      contentType: data.contentType || "text",
-      mediaUrl: data.mediaUrl,
+      contentType: "text",
     },
   });
-  return result;
-}
 
-export async function createFeedPost(data: Partial<FeedPost> & { file?: File }) {
-  const session = await getSession();
-  if (!session) {
-    throw new Error("Unauthorized");
-  }
-
-  if (data.file) {
-    await uploadFile(data.file);
-    await prisma.feedPost.create({
-      data: {
-        content: data.content || '',
-        userId: session.userId,
-        contentType: data.contentType,
-        mediaUrl: data.mediaUrl,
-      },
-    });
-  } else {
-    await prisma.feedPost.create({
-      data: {
-        content: data.content || '',
-        userId: session.userId,
-        contentType: "text",        
-      },
-    });
-  }
-  
   return { success: true };
 }
 

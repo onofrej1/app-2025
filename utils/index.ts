@@ -52,6 +52,29 @@ export function renderSelectOptions(data: any[], render: any) {
   }));
 }
 
+export function generateVideoThumbnail(file: File): Promise<string> {
+  return new Promise((resolve) => {
+    const canvas = document.createElement("canvas");
+    const video = document.createElement("video");
+
+    // this is important
+    video.autoplay = true;
+    video.muted = true;
+    video.src = URL.createObjectURL(file);
+
+    video.onloadeddata = () => {
+      let ctx = canvas.getContext("2d");
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      ctx?.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+      video.pause();
+      return resolve(canvas.toDataURL("image/png"));
+    };
+  });
+}
+
 export function slugify(str: string) {
   str = str.replace(/^\s+|\s+$/g, ""); // trim leading/trailing white space
   str = str.toLowerCase(); // convert string to lowercase
@@ -60,6 +83,23 @@ export function slugify(str: string) {
     .replace(/\s+/g, "-") // replace spaces with hyphens
     .replace(/-+/g, "-"); // remove consecutive hyphens
   return str;
+}
+
+export async function urlToFile(
+  url: string,
+  filename: string,
+  mimeType: "image/png"
+) {
+  const response = await fetch(url);
+  const buffer = await response.arrayBuffer();
+  return new File([buffer], filename, { type: mimeType });
+  /*return fetch(url)
+    .then(function (res) {
+      return res.arrayBuffer();
+    })
+    .then(function (buf) {
+      return new File([buf], filename, { type: mimeType });
+    });*/
 }
 
 export function htmlToJson(div: Element) {

@@ -1,7 +1,10 @@
 "use client";
-//import { getFeed } from "@/actions/feed";
-//import { getFeedData } from "@/utils/feed";
-import { commentPost, createFeedPost, getFeedPosts } from "@/actions/social";
+import {
+  commentPost,
+  createFeedPost,
+  createMediaFeedPost,
+  getFeedPosts,
+} from "@/actions/social";
 import Form from "@/components/form/form";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/hooks/use-session";
@@ -22,15 +25,44 @@ import { Smile } from "lucide-react";
 import { ErrorMessage } from "@hookform/error-message";
 import { renderError } from "@/components/form/utils";
 import FileUploader from "@/components/form/fileUploader";
+import { useUploadForm } from "@/hooks/useUploadForm";
+import { Progress } from "@/components/ui/progress";
+import Videojs from "@/components/video/videojs";
+import { urlToFile } from "@/utils";
 
 export default function Home() {
   const queryClient = useQueryClient();
   const [replyToPost, setReplyToPost] = useState<number>();
   const [fileUploaderOpen, setFileUploaderOpen] = useState(false);
   const { user } = useSession();
-  /*const feed = await getFeed();
-  console.log(feed);
-  const data = getFeedData(feed);*/
+  const { uploadForm, progress } = useUploadForm(
+    "http://localhost:3000/api/upload-files"
+  );
+
+  const videoJsOptions = {
+    autoplay: false,
+    controls: true,
+    responsive: true,
+    fluid: true,
+    experimentalSvgIcons: true,
+    playbackRates: [0.5, 1, 1.5, 2],
+    sources: [
+      {
+        src: "http://localhost:3000/uploaded_files/v5.mp4",
+        type: "video/mp4",
+      },
+    ],
+    tracks: [
+      {
+        src: "http://localhost:3000/test.vtt",
+        kind: "captions",
+        srclang: "en",
+        label: "English",
+        default: true,
+      },
+    ],
+  };  
+
   const { data: posts = [], isFetching } = useQuery({
     queryKey: ["posts", user.userId],
     queryFn: () => getFeedPosts(user.userId),
@@ -43,7 +75,7 @@ export default function Home() {
     { type: "text", name: "comment", className: "flex-1" },
   ];
   const fields: FormField[] = [
-    { type: "text", name: "content", label: "", className: "flex-1" },
+    { type: "text", name: "content", className: "flex-1" },
   ];
 
   const sendForm = async (data: FeedPost) => {
@@ -63,11 +95,6 @@ export default function Home() {
   return (
     <div className="">
       <Link href="/home">Home page</Link>
-      {/*data.map((message, index) => {
-        return (
-          <div dangerouslySetInnerHTML={{ __html: message }} key={index}></div>
-        );
-      })*/}
 
       {posts.map((post) => {
         return (
@@ -79,14 +106,20 @@ export default function Home() {
               <div className="bg-slate-200 ml-auto">{post.content}</div>
             )}
             {post.contentType === "image" && (
-              <a className="ml-auto" href={`/assets/${post.mediaUrl}`}>
+              <a className="ml-auto" href={`/uploaded_files/${post.mediaUrl}`}>
                 <img
-                  src={`/assets/${post.mediaUrl}`}
+                  src={`/uploaded_files/${post.mediaUrl}`}
                   width={120}
                   height={120}
                   className="border border-gray-400 cover"
                 />
               </a>
+            )}
+
+            {post.contentType === "video" && (
+              <div className="w-[200px] ml-auto">
+                <Videojs options={videoJsOptions} />
+              </div>
             )}
             <div className="ml-auto">
               <span className="font-bold">
@@ -171,16 +204,30 @@ export default function Home() {
                   <Smile />
                 </PopoverTrigger>
                 <PopoverContent className="w-80">
+                  <Progress value={progress} />
                   <FileUploader
                     uploadText="Send"
-                    onFileSelect={async (file) => {
-                      await createFeedPost({
-                        contentType: "image",
-                        file,
-                        mediaUrl: file.name,
-                      });
-                      setFileUploaderOpen(false);
-                      refreshData();
+                    allowedTypes={["image/png", "image/jpeg", "video/mp4"]}
+                    onFileSelect={async (data) => {
+                      const { file } = data;
+                      const formData = new FormData();
+                      formData.append("file-0", file, file.name);
+                      const type = file.type.startsWith("image")
+                        ? "image"
+                        : "video";
+                      if (type === "video") {
+                        const thumbNail = await urlToFile(data.thumbNail, file.name+'_thumb.png', 'image/png');                        
+                        formData.append("file-1", thumbNail);
+                      }
+                      const mediaUploadResponse = await uploadForm(formData);
+                      if (mediaUploadResponse.status === 200) {
+                        await createMediaFeedPost({
+                          mediaUrl: file.name,                          
+                          contentType: type,
+                        });
+                        setFileUploaderOpen(false);
+                        refreshData();
+                      }
                     }}
                   />
                 </PopoverContent>

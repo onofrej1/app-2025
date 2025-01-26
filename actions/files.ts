@@ -6,29 +6,42 @@ import path from "node:path";
 const fs = require("fs").promises;
 const defaultUploadDir = "public/uploaded_files/"
 
-export async function uploadFile(file: File, uploadDir = null) {
+export async function uploadFile(formData: FormData, uploadDir = null) {
   const dir = uploadDir ?? defaultUploadDir;
+
+  const file = formData.get("file") as File;
+  if (!file) {
+    throw new Error("An error occured");
+  }
+
   const buffer = Buffer.from(await file.arrayBuffer());
   const filename = file.name.replaceAll(" ", "_");
 
   try {
     await writeFile(path.join(process.cwd(), dir + filename), buffer);
   } catch (error) {
+    console.log("Error occured ", error);
     throw error;
   }
 }
 
-export async function uploadFiles(files: File[], uploadDir = null) {
+export async function uploadFiles(formData: FormData, uploadDir = null) {
+  const count = formData.get("count");
   const dir = uploadDir ?? defaultUploadDir;
 
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
+  for (let i = 0; i < Number(count); i++) {
+    const file = formData.get("file-" + i) as File;
+    if (!file) {
+      throw new Error("An error occured");
+    }
+
     const buffer = Buffer.from(await file.arrayBuffer());
     const filename = file.name.replaceAll(" ", "_");
 
     try {
       await writeFile(path.join(process.cwd(), dir + filename), buffer);
     } catch (error) {
+      console.log("Error occured ", error);
       throw error;
     }
   }

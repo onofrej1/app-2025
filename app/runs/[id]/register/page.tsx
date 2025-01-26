@@ -19,17 +19,17 @@ export default function Register() {
       type: "select",
       label: "Gender",
       options: [
-        { label: "Man", value: "MAN" },
-        { label: "Woman", value: "WOMAN" },
+        { label: "Man", value: "MALE" },
+        { label: "Woman", value: "FEMALE" },
       ],
     },
     { name: "dateOfBirth", type: "datepicker", label: "Date of birth" },
-    { name: "email", type: "text" },
+    { name: "email", type: "text", label: 'Email' },
 
-    { name: "nation", type: "text" },
-    { name: "club", type: "text" },
-    { name: "city", type: "text" },
-    { name: "phone", type: "text" },
+    { name: "nation", type: "text", label: 'Nation' },
+    { name: "club", type: "text", label: 'Club' },
+    { name: "city", type: "text", label: 'City' },
+    { name: "phone", type: "text", label: 'Phone' },
     { name: "confirm", type: "checkbox", label: "Confirm submit" },
   ];
 
@@ -61,7 +61,7 @@ export default function Register() {
                 <div className="flex-1">{fields.city}</div>
               </div>
               {fields.phone}
-              <Button type="submit">Finish registration</Button>
+              <Button type="submit">Send registration</Button>
             </div>
           </div>
         )}

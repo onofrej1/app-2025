@@ -1,6 +1,17 @@
 https://stackoverflow.com/questions/34546272/cannot-find-module-bcrypt
 
+//import { getFeed } from "@/actions/feed";
+//import { getFeedData } from "@/utils/feed";
 
+/*const feed = await getFeed();
+  console.log(feed);
+  const data = getFeedData(feed);*/
+{/*data.map((message, index) => {
+        return (
+          <div dangerouslySetInnerHTML={{ __html: message }} key={index}></div>
+        );
+      })*/}
+      
 {/*<FormMultiSelect
               label={field.label}
               name={name}
