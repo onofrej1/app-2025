@@ -82,7 +82,7 @@ export async function getFeedPosts(userId: string) {
   }
   const userIds = await prisma.userFriend.findMany({
     where: {
-      OR: [{ userId1: session.userId }, { userId2: session.userId }],
+      OR: [{ userId1: userId }, { userId2: userId }],
     },
     select: {
       userId1: true,
@@ -90,13 +90,13 @@ export async function getFeedPosts(userId: string) {
     },
   });
   const ids = userIds.map((u) =>
-    u.userId1 === session.userId ? u.userId2 : u.userId1
+    u.userId1 === userId ? u.userId2 : u.userId1
   );
 
   const result = await prisma.feedPost.findMany({
     where: {
       userId: {
-        in: [session.userId, ...ids],
+        in: [userId, ...ids],
       },
     },
     select: {

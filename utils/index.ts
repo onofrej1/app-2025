@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+const sizeOf = require("image-size");
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -93,13 +94,6 @@ export async function urlToFile(
   const response = await fetch(url);
   const buffer = await response.arrayBuffer();
   return new File([buffer], filename, { type: mimeType });
-  /*return fetch(url)
-    .then(function (res) {
-      return res.arrayBuffer();
-    })
-    .then(function (buf) {
-      return new File([buf], filename, { type: mimeType });
-    });*/
 }
 
 export function htmlToJson(div: Element) {
@@ -114,4 +108,22 @@ export function htmlToJson(div: Element) {
     tag["@" + attr.name] = attr.value;
   }
   return tag;
+}
+
+export function checkImageOrientation(imagePath: string) {
+  const dir = process.cwd() + "/public";
+  try {
+    const dimensions = sizeOf(dir + imagePath);
+    const { width, height } = dimensions;
+    if (width > height) {
+      return "horizontal";
+    } else if (height > width) {
+      return "vertical";
+    } else {
+      return "square";
+    }
+  } catch (err) {
+    console.error("Error reading image dimensions:", err);
+    return null;
+  }
 }

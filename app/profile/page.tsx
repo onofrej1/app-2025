@@ -50,9 +50,6 @@ export default function Home() {
   const { data: posts = [], isFetching } = useQuery({
     queryKey: ["posts", user.userId],
     queryFn: () => getFeedPosts(user.userId),
-    select: (data) => {
-      return data;
-    },
   });
 
   const commentFields: FormField[] = [

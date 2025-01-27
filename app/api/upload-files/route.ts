@@ -12,10 +12,8 @@ export const config = {
 
 export async function POST(req: Request) {
   const formData = await req.formData();
-  console.log(formData);
 
   const count = Array.from(formData.keys()).length; //formData.get("count");
-  console.log(count);
 
   for (let i = 0; i < Number(count); i++) {
     const file = formData.get("file-" + i) as File;

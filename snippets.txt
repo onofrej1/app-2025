@@ -12,6 +12,16 @@ https://stackoverflow.com/questions/34546272/cannot-find-module-bcrypt
         );
       })*/}
       
+      {/*<button onClick={() => cropImageNow(file)}>Crop</button>*/}
+              {/*<img
+                src={URL.createObjectURL(file)}
+                width={"100%"}
+              />*/}
+
+              {/*<ReactCrop crop={crop} onChange={setCrop}>
+                <img src={URL.createObjectURL(file)} />
+              </ReactCrop>*/}
+              
 {/*<FormMultiSelect
               label={field.label}
               name={name}

@@ -41,3 +41,5 @@ yarn-error.log*
 next-env.d.ts
 
 public/assets
+public/photos*
+public/uploaded_files

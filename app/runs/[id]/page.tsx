@@ -62,7 +62,7 @@ export default function Run() {
   return (
     <div>
       Run {run.title} {run.distance} km Upload results
-      <FileUploader onUploadFile={fileUpload} />
+      <FileUploader onFileSelect={fileUpload} />
 
       {uploadData && uploadData.length > 0 && <Table
         headers={headers}

@@ -28,6 +28,10 @@ import {
   Like,
   Profile,
   Address,
+  MediaCategory,
+  MediaType,
+  Gallery,
+  Media,
 } from "@prisma/client";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
@@ -43,6 +47,8 @@ export async function GET(request: Request) {
   const tags: Partial<Tag>[] = [];
   const organizers: Partial<Organizer>[] = [];
   const venues: Partial<Venue>[] = [];
+  const mediaCategories: Partial<MediaCategory>[] = [];
+  const mediaTypes: Partial<MediaType>[] = [];
 
   const hashedPassword = await bcrypt.hash(
     process.env.TEST_USER_PASSWORD!,
@@ -62,12 +68,33 @@ export async function GET(request: Request) {
     },
   });
 
+  mediaTypes.push(
+    {
+      name: "image",
+      slug: "image",
+    },
+    {
+      name: "video",
+      slug: "video",
+    }
+  );
+
   for (const i of Array.from({ length: 100 })) {
     let title = faker.lorem.word();
     categories.push({
       title,
       description: faker.lorem.sentence(),
       slug: slugify(title),
+    });
+
+    mediaCategories.push({
+      name: faker.lorem.word(),
+      details: faker.lorem.sentence(),
+    });
+
+    mediaCategories.push({
+      name: faker.lorem.word(),
+      details: faker.lorem.sentence(),
     });
 
     title = faker.lorem.word();
@@ -90,6 +117,10 @@ export async function GET(request: Request) {
   await prisma.tag.createMany({ data: tags as Tag[] });
   await prisma.organizer.createMany({ data: organizers as Organizer[] });
   await prisma.venue.createMany({ data: venues as Venue[] });
+  await prisma.mediaCategory.createMany({
+    data: mediaCategories as MediaCategory[],
+  });
+  await prisma.mediaType.createMany({ data: mediaTypes as MediaType[] });
 
   const users: Partial<User>[] = [];
   const profiles: Partial<Profile>[] = [];
@@ -110,6 +141,7 @@ export async function GET(request: Request) {
   const eventTypes: Partial<EventType>[] = [];
   const eventSchedules: Partial<EventSchedule>[] = [];
   const attendees: Partial<Attendee>[] = [];
+  const galleries: Partial<Gallery>[] = [];
 
   const runs: Partial<Run>[] = [];
   const registrations: Partial<Registration>[] = [];
@@ -284,6 +316,13 @@ export async function GET(request: Request) {
       eventId: i,
       tshirt: i % 2 === 0 ? true : false,
     });
+
+    galleries.push({
+      name: faker.lorem.word(),
+      userId: userIds[0],
+      description: faker.lorem.sentence(),
+      eventId: i,
+    });
   }
 
   for (let j = 0; j < 4; j++) {
@@ -402,6 +441,21 @@ export async function GET(request: Request) {
     },
   ];
 
+  const media: Partial<Media>[] = [];
+
+  for (const [i] of Array.from({ length: 80 }).entries()) {
+    media.push({
+      name: faker.lorem.words({ min: 1, max: 2 }).replace(" ", "_"),
+      file: "/photos_new/photo-" + i + ".jpeg",
+      categoryId: random([1, 2, 3, 4]),
+      description: faker.lorem.sentence(),
+      galleryId: random([1, 2, 3, 4, 5]),
+      userId: userIds[0],
+      size: faker.number.int({ min: 100, max: 500 }),
+      mediaTypeId: 1,
+    });
+  }
+
   await prisma.post.createMany({ data: posts as Post[] });
 
   await prisma.comment.createMany({
@@ -432,6 +486,11 @@ export async function GET(request: Request) {
   await prisma.runCategory.createMany({
     data: runCategories as RunCategory[],
   });
+  await prisma.gallery.createMany({
+    data: galleries as Gallery[],
+  });
+  await prisma.media.createMany({ data: media as Media[] });
+
   await prisma.registration.createMany({
     data: registrations as Registration[],
   });

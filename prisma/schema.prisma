@@ -88,6 +88,9 @@ model User {
   //userGroups      UserGroup[]
   eventAttachments    EventAttachment[]
   activityAttachments ActivityAttachment[]
+  media               Media[]
+  mediaComments       MediaComment[]
+  galleries           Gallery[]
 }
 
 model Address {
@@ -257,6 +260,66 @@ model TaskComment {
   taskId    Int
 }
 
+model Media {
+  id          Int            @id @default(autoincrement())
+  name        String
+  description String         @db.Text
+  file        String         @db.Text
+  size        Int
+  likes       Int            @default(0)
+  views       Int            @default(0)
+  downloads   Int            @default(0)
+  createdAt   DateTime       @default(now())
+  user        User           @relation(fields: [userId], references: [id])
+  userId      String
+  category    MediaCategory  @relation(fields: [categoryId], references: [id])
+  categoryId  Int
+  mediaType   MediaType      @relation(fields: [mediaTypeId], references: [id])
+  mediaTypeId Int
+  gallery     Gallery        @relation(fields: [galleryId], references: [id])
+  galleryId   Int
+  comments    MediaComment[]
+}
+
+model Gallery {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String   @db.Text
+  views       Int      @default(0)
+  downloads   Int      @default(0)
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  event       Event?   @relation(fields: [eventId], references: [id])
+  eventId     Int?
+  media       Media[]
+}
+
+model MediaComment {
+  id          Int           @id @default(autoincrement())
+  comment     String        @db.Text
+  status      CommentStatus @default(PENDING)
+  publishedAt DateTime      @default(now())
+  user        User          @relation(fields: [userId], references: [id])
+  userId      String
+  media       Media?        @relation(fields: [mediaId], references: [id])
+  mediaId     Int?
+}
+
+model MediaType {
+  id    Int     @id @default(autoincrement())
+  name  String
+  slug  String
+  media Media[]
+}
+
+model MediaCategory {
+  id      Int     @id @default(autoincrement())
+  name    String
+  details String? @db.Text
+  media   Media[]
+}
+
 model Task {
   id           Int              @id @default(autoincrement())
   title        String
@@ -322,6 +385,7 @@ model Event {
   eventTypeId    Int
   runs           Run[]
   attachments    EventAttachment[]
+  galleries      Gallery[]
 }
 
 model EventType {
