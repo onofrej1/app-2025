@@ -266,6 +266,7 @@ model Media {
   description String         @db.Text
   file        String         @db.Text
   size        Int
+  orientation Orientation?
   likes       Int            @default(0)
   views       Int            @default(0)
   downloads   Int            @default(0)
@@ -551,6 +552,12 @@ model ResetToken {
  * @@unique([identifier, token])
  * }
  */
+
+enum Orientation {
+  VERTICAL
+  HORIZONTAL
+  SQUARE
+}
 
 enum TaskStatus {
   TODO

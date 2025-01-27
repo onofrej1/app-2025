@@ -1,10 +1,9 @@
 import download from "@/utils/download";
-import { faker } from "@faker-js/faker";
 import axios from "axios";
 import { NextResponse as NextServerResponse } from "next/server";
 
 export async function GET(req: Request) {
-  return;
+  //return;
   const url = "https://api.pexels.com/v1/curated?per_page=100";
   const response = await axios.get(url, {
     headers: {

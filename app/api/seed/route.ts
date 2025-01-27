@@ -31,7 +31,6 @@ import {
   MediaCategory,
   MediaType,
   Gallery,
-  Media,
 } from "@prisma/client";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
@@ -85,11 +84,6 @@ export async function GET(request: Request) {
       title,
       description: faker.lorem.sentence(),
       slug: slugify(title),
-    });
-
-    mediaCategories.push({
-      name: faker.lorem.word(),
-      details: faker.lorem.sentence(),
     });
 
     mediaCategories.push({
@@ -441,21 +435,6 @@ export async function GET(request: Request) {
     },
   ];
 
-  const media: Partial<Media>[] = [];
-
-  for (const [i] of Array.from({ length: 80 }).entries()) {
-    media.push({
-      name: faker.lorem.words({ min: 1, max: 2 }).replace(" ", "_"),
-      file: "/photos_new/photo-" + i + ".jpeg",
-      categoryId: random([1, 2, 3, 4]),
-      description: faker.lorem.sentence(),
-      galleryId: random([1, 2, 3, 4, 5]),
-      userId: userIds[0],
-      size: faker.number.int({ min: 100, max: 500 }),
-      mediaTypeId: 1,
-    });
-  }
-
   await prisma.post.createMany({ data: posts as Post[] });
 
   await prisma.comment.createMany({
@@ -489,7 +468,6 @@ export async function GET(request: Request) {
   await prisma.gallery.createMany({
     data: galleries as Gallery[],
   });
-  await prisma.media.createMany({ data: media as Media[] });
 
   await prisma.registration.createMany({
     data: registrations as Registration[],

@@ -110,20 +110,21 @@ export function htmlToJson(div: Element) {
   return tag;
 }
 
-export function checkImageOrientation(imagePath: string) {
+export function getImageOrientation(imagePath: string) {
   const dir = process.cwd() + "/public";
   try {
     const dimensions = sizeOf(dir + imagePath);
     const { width, height } = dimensions;
     if (width > height) {
-      return "horizontal";
+      return "HORIZONTAL";
     } else if (height > width) {
-      return "vertical";
+      return "VERTICAL";
     } else {
-      return "square";
+      return "SQUARE";
     }
   } catch (err) {
     console.error("Error reading image dimensions:", err);
-    return null;
+    //return null;
+    return "SQUARE";
   }
 }
