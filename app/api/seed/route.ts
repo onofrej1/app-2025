@@ -31,6 +31,10 @@ import {
   MediaCategory,
   MediaType,
   Gallery,
+  CustomField,
+  CustomFieldOption,
+  CustomFieldValue,
+  CustomFieldEntity,
 } from "@prisma/client";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
@@ -144,6 +148,85 @@ export async function GET(request: Request) {
   const conversations: Partial<Conversation>[] = [];
   const userFriends: Partial<UserFriend>[] = [];
   const conversationMembers: Partial<ConversationMember>[] = [];
+  const customFields: Partial<CustomField>[] = [];
+  const customFieldEntity: Partial<CustomFieldEntity>[] = [];
+  const customFieldOptions: Partial<CustomFieldOption>[] = [];
+  const customFieldValues: Partial<CustomFieldValue>[] = [];
+
+  customFields.push(
+    {
+      title: "Timezone",
+      dataType: "STRING",
+      constrained: false,
+    },
+    {
+      title: "Date format",
+      dataType: "STRING",
+      constrained: true,
+    },
+    {
+      title: "Language",
+      dataType: "STRING",
+      constrained: true,
+    },
+    {
+      title: "Favorit brand",
+      dataType: "STRING",
+      constrained: false,
+    }
+  );
+
+  customFieldEntity.push(
+    {
+      customFieldId: 1,
+      entityType: "user",
+    },
+    {
+      customFieldId: 2,
+      entityType: "user",
+    },
+    {
+      customFieldId: 3,
+      entityType: "user",
+    },
+    {
+      customFieldId: 4,
+      entityType: "user",
+    }
+  );
+
+  customFieldOptions.push(
+    {
+      caption: "DD mmm YYYY",
+      value: "dd/mm/YYYY",
+      customFieldId: 2,
+    },
+    {
+      caption: "DD mmm YYYY",
+      value: "mm/dd/YYYY",
+      customFieldId: 2,
+    },
+    {
+      caption: "DD mmm YYYY",
+      value: "dd-mm-YYYY",
+      customFieldId: 2,
+    },
+    {
+      caption: "English UK",
+      value: "en-UK",
+      customFieldId: 3,
+    },
+    {
+      caption: "English US",
+      value: "en-US",
+      customFieldId: 3,
+    },
+    {
+      caption: "Slovak",
+      value: "sk",
+      customFieldId: 3,
+    }
+  );
 
   for (const [index] of count.entries()) {
     const i = index + 1;
@@ -162,6 +245,36 @@ export async function GET(request: Request) {
   await prisma.user.createMany({ data: users as User[] });
   const ids = await prisma.user.findMany({ select: { id: true } });
   const userIds = ids.map((i) => i.id);
+
+  customFieldValues.push({
+    customFieldId: 1,
+    entityType: "user",
+    entityStrId: userIds[0],
+    stringValue: "Europe/Bratislava",
+  });
+
+  customFieldValues.push({
+    customFieldId: 4,
+    entityType: "user",
+    entityStrId: userIds[0],
+    stringValue: "nike",
+  });
+
+  customFieldValues.push({
+    customFieldId: 2,
+    entityType: "user",
+    entityStrId: userIds[0],
+    stringValue: "mm/dd/YYYY",
+  });
+
+  await prisma.customField.createMany({ data: customFields as CustomField[] });
+  await prisma.customFieldEntity.createMany({ data: customFieldEntity as CustomFieldEntity[] });
+  await prisma.customFieldOption.createMany({
+    data: customFieldOptions as CustomFieldOption[],
+  });
+  await prisma.customFieldValue.createMany({
+    data: customFieldValues as CustomFieldValue[],
+  });
 
   eventTypes.push(
     {

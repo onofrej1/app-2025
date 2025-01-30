@@ -93,6 +93,57 @@ model User {
   galleries           Gallery[]
 }
 
+model CustomField {
+  id                Int                 @id @default(autoincrement())
+  title             String
+  description       String?
+  constrained       Boolean             @default(false)
+  formInput         String              @default("text")
+  dataType          DataType
+  minValue          Int?
+  maxValue          Int?
+  options           CustomFieldOption[]
+  values            CustomFieldValue[]
+  entities          CustomFieldEntity[]
+}
+
+model CustomFieldEntity {
+  id            Int         @id @default(autoincrement())
+  customField   CustomField @relation(fields: [customFieldId], references: [id])
+  customFieldId Int
+  entityType    String
+}
+
+enum DataType {
+  STRING
+  NUMBER
+  TEXT
+  BOOLEAN
+  DATE
+}
+
+model CustomFieldOption {
+  id            Int         @id @default(autoincrement())
+  value         String
+  caption       String
+  customField   CustomField @relation(fields: [customFieldId], references: [id])
+  customFieldId Int
+}
+
+model CustomFieldValue {
+  id            Int         @id @default(autoincrement())
+  stringValue   String?
+  textValue     String?     @db.Text
+  numberValue   Int?
+  dateValue     DateTime?
+  booleanValue  Boolean?
+  entityType    String
+  entityId      Int?
+  entityStrId   String?
+  customField   CustomField @relation(fields: [customFieldId], references: [id])
+  customFieldId Int
+}
+
 model Address {
   id      Int    @id @default(autoincrement())
   street  String
