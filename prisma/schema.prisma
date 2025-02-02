@@ -94,17 +94,17 @@ model User {
 }
 
 model CustomField {
-  id                Int                 @id @default(autoincrement())
-  title             String
-  description       String?
-  constrained       Boolean             @default(false)
-  formInput         String              @default("text")
-  dataType          DataType
-  minValue          Int?
-  maxValue          Int?
-  options           CustomFieldOption[]
-  values            CustomFieldValue[]
-  entities          CustomFieldEntity[]
+  id          Int                 @id @default(autoincrement())
+  title       String
+  description String?
+  constrained Boolean             @default(false)
+  formInput   String              @default("text")
+  dataType    DataType
+  minValue    Int?
+  maxValue    Int?
+  options     CustomFieldOption[]
+  values      CustomFieldValue[]
+  entities    CustomFieldEntity[]
 }
 
 model CustomFieldEntity {
@@ -186,6 +186,7 @@ model Post {
   comments    Comment[]
   likes       Like[]
   views       PostViews?
+  galleries   Gallery[]
 }
 
 model PostViews {
@@ -344,6 +345,8 @@ model Gallery {
   userId      String
   event       Event?   @relation(fields: [eventId], references: [id])
   eventId     Int?
+  post        Post?    @relation(fields: [postId], references: [id])
+  postId      Int?
   media       Media[]
 }
 

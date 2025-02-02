@@ -36,6 +36,7 @@ const CreateOrEditPost = z.object({
   authorId: z.string().min(1, "Author field is required"),
   categories: z.array(z.coerce.number()).optional().default([]),
   tags: z.array(z.coerce.number()).optional().default([]),
+  cover: z.any().optional(),
   //.transform((val) => val ? val : []),
 });
 
@@ -192,7 +193,7 @@ const CreatePost = z.object({
 });
 
 const CommentFeedPost = z.object({
-  comment: z.string().min(3),
+  comment: z.string().min(1),
 });
 
 export type FormSchema =

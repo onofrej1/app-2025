@@ -75,11 +75,12 @@ export async function replyToComment(commentId: number, comment: string) {
   return result;
 }
 
-export async function getFeedPosts(userId: string) {
+export async function getFeedPosts() {
   const session = await getSession();
   if (!session) {
     throw new Error("Unauthorized");
   }
+  const userId = session.userId;
   const userIds = await prisma.userFriend.findMany({
     where: {
       OR: [{ userId1: userId }, { userId2: userId }],
@@ -92,7 +93,8 @@ export async function getFeedPosts(userId: string) {
   const ids = userIds.map((u) =>
     u.userId1 === userId ? u.userId2 : u.userId1
   );
-
+  console.log(userId);
+  console.log(ids);
   const result = await prisma.feedPost.findMany({
     where: {
       userId: {

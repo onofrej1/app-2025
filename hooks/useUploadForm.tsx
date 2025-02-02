@@ -1,14 +1,15 @@
 import { useState } from "react";
 import axios from "axios";
 
-const defaultUploadUrl = "http://localhost:3000/api/upload";
+const defaultUploadUrl = process.env.NEXT_PUBLIC_BASE_URL+ "/api/upload-files";
 
-export const useUploadForm = (url: string = defaultUploadUrl) => {
+export const useUploadForm = (/*url: string = defaultUploadUrl*/) => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [progress, setProgress] = useState(0);
 
   const uploadForm = async (formData: FormData) => {
-    const response = await axios.post(url, formData, {
+    console.log(defaultUploadUrl);
+    const response = await axios.post(defaultUploadUrl, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },

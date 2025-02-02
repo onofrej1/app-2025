@@ -1,12 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
-import { generateVideoThumbnail, urlToFile } from "@/utils";
+import { generateVideoThumbnail } from "@/utils";
+import { uploadFile } from "@/actions/files";
 
-interface FileUploaderProps {  
-  onChange?: any;
-  name?: string;
-  value?: string;
+interface FileUploaderProps {
   onFileSelect: (data: { file: File; thumbNail?: string }) => void;
   onFileChange?: (file: File) => void;
   allowedTypes?: string[];
@@ -17,9 +15,6 @@ interface FileUploaderProps {
 export default function FileUploader(props: FileUploaderProps) {
   const allowedFileTypes = ["image/png", "image/jpeg", "image/jpg"];
   const {
-    name,
-    value: defaultValue,
-    onChange,
     onFileSelect,
     onFileChange,
     allowedTypes = allowedFileTypes,
@@ -28,17 +23,6 @@ export default function FileUploader(props: FileUploaderProps) {
   } = props;
   const [file, setFile] = useState<File>();
   const imageRef = useRef<HTMLImageElement>(null);
-
-  useEffect(() => {
-    async function setValue() {
-      const url = process.env.NEXT_PUBLIC_BASE_URL + '/uploaded_files/'+defaultValue;
-      const fileObj = await urlToFile(url, defaultValue!, "image/png");
-      setFile(fileObj);
-    }
-    if (defaultValue) {
-      setValue();
-    }    
-  }, [defaultValue]);
 
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -64,10 +48,9 @@ export default function FileUploader(props: FileUploaderProps) {
         imageRef.current.src = thumbnail;
       }
     }
-    onChange(uploadedFile);
     if (onFileChange) {
-      onFileChange(uploadedFile);      
-    }    
+      onFileChange(uploadedFile);
+    }
   };
 
   const selectFile = () => {

@@ -1,5 +1,12 @@
 "use client";
-import { Controller, FormState, useForm, UseFormGetValues, UseFormSetValue, UseFormTrigger } from "react-hook-form";
+import {
+  Controller,
+  FormState,
+  useForm,
+  UseFormGetValues,
+  UseFormSetValue,
+  UseFormTrigger,
+} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { JSX } from "react";
 import {
@@ -22,6 +29,8 @@ import { Button } from "../ui/button";
 import Textarea from "./textarea";
 import RichEditor from "./richeditor";
 import { z } from "zod";
+import FileUploader from "./fileUploader";
+import { urlToFile } from "@/utils";
 
 export interface DefaultFormData {
   [key: string]: any;
@@ -81,27 +90,42 @@ export default function Form({
     defaultValues: data,
   });
   const { isValid, errors, isLoading } = formState;
-  console.log(getValues());
-  console.log(errors);
+  //console.log(getValues());
+  if (errors) {
+    console.log(errors);
+  }
 
-  const submitForm = async (formData: unknown) => {
+  const submitForm = async (data: any) => {
+    const formData = new FormData();
+    fields.forEach((field) => {
+      const value = data[field.name];
+      if (field.type === "fileUpload") {
+        formData.append(field.name, value, value.name);
+      } else {
+        if (Array.isArray(value)) {
+          formData.append(field.name, value.join(","));
+        } else {
+          formData.append(field.name, value);
+        }
+      }
+    });
     if (!action) return;
 
     try {
-      const data: actionResult = await action(formData);
-      if (!data) {
+      const response: actionResult = await action(formData);
+      if (!response) {
         return;
       }
-      if (data.message) {
-        toast(data.message);
+      if (response.message) {
+        toast(response.message);
       }
-      if (data.error) {
-        setError(data.error.path, {
-          message: data.error.message,
+      if (response.error) {
+        setError(response.error.path, {
+          message: response.error.message,
         });
       }
-      if (data.redirect) {
-        replace(data.redirect);
+      if (response.redirect) {
+        replace(response.redirect);
         return;
       }
     } catch (e) {
@@ -111,8 +135,8 @@ export default function Form({
   };
 
   const renderField = (field: FormField) => {
-    const type = field.type; // || "text";
-    const label = field.label; // || capitalize(field.name);
+    const type = field.type;
+    const label = field.label;
     return (
       <>
         {["text", "number", "email", "hidden"].includes(type) && (
@@ -247,8 +271,32 @@ export default function Form({
             control={control}
             name={field.name}
             render={({ field: { onChange, value, name } }) => (
-              <RichEditor name={name} onChange={onChange} value={value} label={label} />
+              <RichEditor
+                name={name}
+                onChange={onChange}
+                value={value}
+                label={label}
+              />
             )}
+          />
+        )}
+
+        {["fileUpload"].includes(type) && (
+          <Controller
+            control={control}
+            name={field.name}
+            render={ ({ field: { onChange, value, name } }) => {
+              return (
+                <FileUploader
+                  name={name}
+                  onChange={onChange}
+                  value={value}
+                  uploadText="Send"
+                  allowedTypes={["image/png", "image/jpeg", "video/mp4"]}
+                  onFileSelect={async (data) => {}}
+                />
+              );
+            }}
           />
         )}
       </>

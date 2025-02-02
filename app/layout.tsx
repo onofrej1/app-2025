@@ -9,6 +9,7 @@ import { ReactQueryProvider } from "./react-query-provider";
 import AdminPanelLayout from "@/components/admin-panel/admin-panel-layout";
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 import DialogModal from "@/components/common/dialog";
+import { Navbar } from "@/components/admin-panel/navbar";
 
 /*const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,23 +29,25 @@ export const metadata: Metadata = {
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <ReactQueryProvider>
-        <html lang="en">
-          <body>
-            {/*<SidebarProvider>
+      <html lang="en">
+        <body>
+          {/*<SidebarProvider>
               <AppSidebar />
               <main className="flex-1">
                 <SidebarTrigger />
                 <div className="p-6">{children}</div>
               </main>
             </SidebarProvider>*/}
-            <AdminPanelLayout>
-              <ContentLayout title="test">{children}</ContentLayout>
-            </AdminPanelLayout>
-            <Toaster />
-            <Alert />
-            <DialogModal />
-          </body>
-        </html>
+          <AdminPanelLayout>
+            <Navbar title={"test"} />
+            {children}
+            {/*<ContentLayout title="test">{children}</ContentLayout>*/}
+          </AdminPanelLayout>
+          <Toaster />
+          <Alert />
+          <DialogModal />
+        </body>
+      </html>
     </ReactQueryProvider>
   );
 }

@@ -67,6 +67,14 @@ export interface CheckboxType extends BaseFormType {
   type: "checkbox";
 }
 
+export interface FileUploadType extends BaseFormType {
+  type: "fileUpload";
+  allowedTypes?: string[];
+  maxSize?: number;
+  uploadText?: string;
+  onFileSelect?: (data: { file: File; thumbNail?: string }) => void;
+}
+
 type FormField =
   | InputType
   | TextAreaType
@@ -75,7 +83,8 @@ type FormField =
   | CheckboxType
   | DatePickerType
   | MultiSelectType
-  | RichtextType;
+  | RichtextType
+  | FileUploadType;
 
 /*interface DataFilter {
   name: string;

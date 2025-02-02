@@ -21,7 +21,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { MehIcon, Smile } from "lucide-react";
+import { Smile } from "lucide-react";
 import { ErrorMessage } from "@hookform/error-message";
 import { renderError } from "@/components/form/utils";
 import FileUploader from "@/components/form/fileUploader";
@@ -29,27 +29,20 @@ import { useUploadForm } from "@/hooks/useUploadForm";
 import { Progress } from "@/components/ui/progress";
 import Videojs, { videoJsOptions } from "@/components/video/videojs";
 import { urlToFile } from "@/utils";
-import ReactCrop, { Crop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 
 export default function Home() {
   const queryClient = useQueryClient();
   const [replyToPost, setReplyToPost] = useState<number>();
   const [fileUploaderOpen, setFileUploaderOpen] = useState(false);
-  const [src, setSrc] = useState<string>();
-  //@ts-ignore
-  const [crop, setCrop] = useState<Crop>({ aspect: 16 / 9 });
-  const [image, setImage] = useState<HTMLImageElement>();
-  const [output, setOutput] = useState("");
 
   const { user } = useSession();
-  const { uploadForm, progress } = useUploadForm(
-    "http://localhost:3000/api/upload-files"
-  );
+
+  const { uploadForm, progress } = useUploadForm();
 
   const { data: posts = [], isFetching } = useQuery({
-    queryKey: ["posts", user.userId],
-    queryFn: () => getFeedPosts(user.userId),
+    queryKey: ["posts"],
+    queryFn: () => getFeedPosts(),
   });
 
   const commentFields: FormField[] = [
@@ -78,16 +71,41 @@ export default function Home() {
     const finalName = mediaUrl.substring(0, dotLastIndex);
     const sources = [
       {
-        src: `http://localhost:3000/uploaded_files/${mediaUrl}`,
+        src: `${process.env.NEXT_PUBLIC_BASE_URL}/uploaded_files/${mediaUrl}`,
         type: "video/mp4",
       },
     ];
     const options = {
       ...videoJsOptions,
       sources,
-      poster: `http://localhost:3000/uploaded_files/${finalName}_thumb.png`,
+      poster: `${process.env.NEXT_PUBLIC_BASE_URL}/uploaded_files/${finalName}_thumb.png`,
     };
     return options;
+  };
+
+  const onFileSelect = async (data: { file: File; thumbNail?: string }) => {
+    const { file } = data;
+    const formData = new FormData();
+    formData.append("mediaUrl", file, file.name);
+    const type = file.type.startsWith("image") ? "image" : "video";
+    if (type === "video" && data.thumbNail) {
+      const fileName = file.name.split(".")[0];
+      const thumbNail = await urlToFile(
+        data.thumbNail,
+        fileName + "_thumb.png",
+        "image/png"
+      );
+      formData.append("mediaUrlThumb", thumbNail);
+    }
+    const mediaUploadResponse = await uploadForm(formData);
+    if (mediaUploadResponse.status === 200) {
+      await createMediaFeedPost({
+        mediaUrl: file.name,
+        contentType: type,
+      });
+      setFileUploaderOpen(false);
+      refreshData();
+    }
   };
 
   return (
@@ -206,36 +224,7 @@ export default function Home() {
                   <FileUploader
                     uploadText="Send"
                     allowedTypes={["image/png", "image/jpeg", "video/mp4"]}
-                    /*onFileChange={(file) => {
-                      console.log(file);
-                      setSrc(URL.createObjectURL(file));
-                    }}*/
-                    onFileSelect={async (data) => {
-                      const { file } = data;
-                      const formData = new FormData();
-                      formData.append("file-0", file, file.name);
-                      const type = file.type.startsWith("image")
-                        ? "image"
-                        : "video";
-                      if (type === "video") {
-                        const fileName = file.name.split(".")[0];
-                        const thumbNail = await urlToFile(
-                          data.thumbNail,
-                          fileName + "_thumb.png",
-                          "image/png"
-                        );
-                        formData.append("file-1", thumbNail);
-                      }
-                      const mediaUploadResponse = await uploadForm(formData);
-                      if (mediaUploadResponse.status === 200) {
-                        await createMediaFeedPost({
-                          mediaUrl: file.name,
-                          contentType: type,
-                        });
-                        setFileUploaderOpen(false);
-                        refreshData();
-                      }
-                    }}
+                    onFileSelect={onFileSelect}
                   />
                 </PopoverContent>
               </Popover>

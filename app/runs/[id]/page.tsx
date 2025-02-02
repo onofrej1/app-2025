@@ -18,7 +18,10 @@ export default function Run() {
   });
   if (isFetching || !run) return;
 
-  const fileUpload = (formData: FormData) => {
+  const fileUpload = (data: { file: File }) => {
+    const { file } = data;
+    const formData = new FormData();
+    formData.append("file", file, file.name); 
     const formObject = Object.fromEntries(formData.entries());
     const reader = new FileReader();
 
