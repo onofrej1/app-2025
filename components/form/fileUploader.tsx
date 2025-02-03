@@ -1,14 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Upload } from "lucide-react";
+import { Trash2, Upload } from "lucide-react";
 import { generateVideoThumbnail, urlToFile } from "@/utils";
 
-interface FileUploaderProps {  
-  onChange?: any;
-  name?: string;
-  value?: string;
-  onFileSelect: (data: { file: File; thumbNail?: string }) => void;
-  onFileChange?: (file: File) => void;
+interface FileUploaderProps {
+  name?: any;
+  onChange: (args?: { file: File | null, persistedFile?: string | null }) => void;
+  value?: { file: File | null, persistedFile: string | null };
+  //onFileSelect: (data: { file: File; thumbNail?: string }) => void;
   allowedTypes?: string[];
   maxSize?: number;
   uploadText?: string;
@@ -17,28 +16,26 @@ interface FileUploaderProps {
 export default function FileUploader(props: FileUploaderProps) {
   const allowedFileTypes = ["image/png", "image/jpeg", "image/jpg"];
   const {
-    name,
-    value: defaultValue,
+    value,
     onChange,
-    onFileSelect,
-    onFileChange,
+    //onFileSelect,
     allowedTypes = allowedFileTypes,
     maxSize = 1024 * 1024,
-    uploadText,
+    //uploadText,
   } = props;
-  const [file, setFile] = useState<File>();
+  const [file, setFile] = useState<File | null>();
+  //const [savedValue] = useState(value?.persistedFile);
   const imageRef = useRef<HTMLImageElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  console.log('value', value);
+  //console.log('saved', savedValue);
 
   useEffect(() => {
-    async function setValue() {
-      const url = process.env.NEXT_PUBLIC_BASE_URL + '/uploaded_files/'+defaultValue;
-      const fileObj = await urlToFile(url, defaultValue!, "image/png");
-      setFile(fileObj);
-    }
-    if (defaultValue) {
-      setValue();
+    if (value?.file) {
+      setFile(value.file);
     }    
-  }, [defaultValue]);
+  }, [value]);
 
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -55,7 +52,7 @@ export default function FileUploader(props: FileUploaderProps) {
       //alert("Uploaded file is too big !");
       //return;
     }
-    
+
     setFile(uploadedFile);
 
     if (uploadedFile.type.startsWith("video")) {
@@ -64,17 +61,19 @@ export default function FileUploader(props: FileUploaderProps) {
         imageRef.current.src = thumbnail;
       }
     }
-    onChange(uploadedFile);
-    if (onFileChange) {
-      onFileChange(uploadedFile);      
-    }    
+    onChange({ ...file, file: uploadedFile });
   };
 
-  const selectFile = () => {
+  const removeFile = async () => {
+    setFile(null);
+    onChange({ ...file, file: null });
+  }
+
+  /*const selectFile = () => {
     if (file) {
       onFileSelect({ file, thumbNail: imageRef.current?.src });
     }
-  };
+  };*/
 
   const isImageFile = (type: string) => {
     return ["image/jpeg", "image/png"].includes(type);
@@ -83,6 +82,7 @@ export default function FileUploader(props: FileUploaderProps) {
   const isVideoFile = (type: string) => {
     return ["video/mp4", "video/avi"].includes(type);
   };
+  console.log('render', file);
 
   return (
     <div>
@@ -90,10 +90,7 @@ export default function FileUploader(props: FileUploaderProps) {
         <div className="flex flex-col justify-center">
           {isImageFile(file.type) && (
             <div className="grid grid-cols-1 mb-2">
-              <img
-                  className="w-full"
-                  src={URL.createObjectURL(file)}
-                />
+              <img className="w-full" src={URL.createObjectURL(file)} />
             </div>
           )}
 
@@ -107,10 +104,21 @@ export default function FileUploader(props: FileUploaderProps) {
             </div>
           )}
 
-          <div className="text-center">
-            <Button size={"sm"} onClick={selectFile}>
-              <Upload />
-              {uploadText || "Upload file"}
+          <div className="flex justify-between gap-3 text-center">
+            <Button
+              type="button"
+              variant="secondary"
+              size={"sm"}
+              onClick={removeFile}
+            >
+              <Trash2 /> Remove file
+            </Button>
+            <Button
+              type="button"
+              size={"sm"}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Upload /> Change file
             </Button>
           </div>
         </div>
@@ -146,16 +154,17 @@ export default function FileUploader(props: FileUploaderProps) {
                   SVG, PNG, JPG or GIF (MAX. 800x400px)
                 </p>
               </div>
-              <input
-                id="dropzone-file"
-                type="file"
-                className="hidden"
-                onChange={handleFileChange}
-              />
             </label>
           </div>
         </>
       )}
+      <input
+        id="dropzone-file"
+        type="file"
+        ref={fileInputRef}
+        className="hidden"
+        onChange={handleFileChange}
+      />
     </div>
   );
 }

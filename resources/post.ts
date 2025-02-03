@@ -30,7 +30,7 @@ const post: Resource = {
     { name: 'title', type: 'text', label: 'Title' },
     { name: 'content', type: 'richtext', label: 'Content' },
     { name: 'status', type: 'text', label: 'Status' },
-    { name: 'cover', type: 'fileUpload' },
+    { name: 'cover', type: 'fileUpload', label: 'Cover'/*, uploadPath: 'posts'*/ },
     {
       name: 'authorId', 
       type: 'fk',

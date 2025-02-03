@@ -1,4 +1,4 @@
-import { uploadFiles } from "@/utils/index_server";
+import { uploadFiles } from "@/actions/files";
 import { NextResponse as NextServerResponse } from "next/server";
 
 export const config = {

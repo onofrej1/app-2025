@@ -1,5 +1,5 @@
 import { prisma } from "@/db/prisma";
-import { getImageOrientation } from "@/utils/index_server";
+import { getImageOrientation } from "@/utils/server";
 import { faker } from "@faker-js/faker";
 import { Media } from "@prisma/client";
 import { NextResponse } from "next/server";

@@ -8,7 +8,7 @@ import {
   UseFormTrigger,
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { JSX } from "react";
+import { JSX, useEffect } from "react";
 import {
   FormField,
   MultiSelectOption,
@@ -31,6 +31,7 @@ import RichEditor from "./richeditor";
 import { z } from "zod";
 import FileUploader from "./fileUploader";
 import { urlToFile } from "@/utils";
+import { useUploadFields } from "@/hooks/useUploadFields";
 
 export interface DefaultFormData {
   [key: string]: any;
@@ -74,6 +75,8 @@ export default function Form({
   const { replace } = useRouter();
   //@ts-ignore
   const validationRules = rules[validation] || z.any();
+  
+  const defaultData = useUploadFields(fields, data);
 
   const {
     register,
@@ -81,38 +84,32 @@ export default function Form({
     setError,
     control,
     trigger,
+    reset,
     setValue,
     handleSubmit,
     getValues,
   } = useForm({
     mode: "onSubmit",
     resolver: zodResolver(validationRules),
-    defaultValues: data,
+    defaultValues: defaultData,
   });
+
+  useEffect(() => {
+    console.log('reset', defaultData);
+    reset(defaultData);
+  }, [defaultData]);
+
   const { isValid, errors, isLoading } = formState;
-  //console.log(getValues());
-  if (errors) {
+
+  if (errors && Object.keys(errors).length > 0) {
     console.log(errors);
   }
 
   const submitForm = async (data: any) => {
-    const formData = new FormData();
-    fields.forEach((field) => {
-      const value = data[field.name];
-      if (field.type === "fileUpload") {
-        formData.append(field.name, value, value.name);
-      } else {
-        if (Array.isArray(value)) {
-          formData.append(field.name, value.join(","));
-        } else {
-          formData.append(field.name, value);
-        }
-      }
-    });
     if (!action) return;
-
+    
     try {
-      const response: actionResult = await action(formData);
+      const response: actionResult = await action(data);
       if (!response) {
         return;
       }
@@ -285,15 +282,20 @@ export default function Form({
           <Controller
             control={control}
             name={field.name}
-            render={ ({ field: { onChange, value, name } }) => {
+            render={ ({ field: { onChange, value, name } }) => {              
               return (
                 <FileUploader
                   name={name}
-                  onChange={onChange}
+                  onChange={(e) => {
+                    console.log('f', e);
+                    onChange(e);                    
+                    if (field.onChange) {
+                      field.onChange(e);
+                    }
+                  }}
                   value={value}
-                  uploadText="Send"
                   allowedTypes={["image/png", "image/jpeg", "video/mp4"]}
-                  onFileSelect={async (data) => {}}
+                  //onFileSelect={async (data) => {}}
                 />
               );
             }}
@@ -323,7 +325,7 @@ export default function Form({
   }
 
   if (render) {
-    const renderContent = render({
+    const Content = render({
       fields: fieldsToRender,
       formState,
       setValue,
@@ -332,13 +334,13 @@ export default function Form({
     });
     return (
       <>
-        <form onSubmit={handleSubmit(submitForm)}>{renderContent}</form>
+        <form onSubmit={handleSubmit(submitForm)}>{Content}</form>
       </>
     );
   }
 
   const fieldNames = fields.map((f) => f.name);
-  const restMessages = Object.keys(errors).filter(
+  const commonErrorMessages = Object.keys(errors).filter(
     (e) => !fieldNames.includes(e)
   );
 
@@ -351,7 +353,7 @@ export default function Form({
           </div>
         ))}
 
-        {restMessages.map((e) => (
+        {commonErrorMessages.map((e) => (
           <div className="my-4" key={e}>
             {errors[e]?.message?.toString()}
           </div>

@@ -2,28 +2,9 @@
 
 import { prismaQuery } from "@/db";
 import { Resource } from "@/resources/resources.types";
-import { uploadFiles } from "@/utils/index_server";
 import { revalidatePath } from "next/cache";
 
-export async function addResource(resource: Resource, formData: FormData) {
-  const data: any = Object.fromEntries(formData.entries());
-  const keys = Array.from(formData.keys());
-
-  const uploadFormData = new FormData();
-  for (let i = 0; i < Number(keys.length); i++) {
-    const fieldName = keys[i];
-    const value = formData.get(keys[i]);
-    if (value instanceof Object && value.type) {
-      data[fieldName] = value.name;
-      uploadFormData.append(fieldName, value, value.name);
-    }
-  }
-  try {
-    await uploadFiles(uploadFormData);
-  } catch (e) {
-    return { status: "error", message: "Error uploading file(s)." };
-  }
-
+export async function addResource(resource: Resource, data: any) {
   const form = resource.form;
   form.forEach((field) => {
     if (field.type === "fk") {
@@ -33,9 +14,8 @@ export async function addResource(resource: Resource, formData: FormData) {
 
     if (field.type === "m2m") {
       const values = data[field.name]
-        .split(',')
         .filter(Boolean)
-        .map((value: number) => ({ id: Number(value) }));
+        .map((value: number) => ({ id: value }));
       if (values) {
         data[field.name] = { connect: values };
       }
@@ -50,25 +30,7 @@ export async function addResource(resource: Resource, formData: FormData) {
   return { redirect: `/resource/${resource.resource}` };
 }
 
-export async function updateResource(resource: Resource, formData: FormData) {
-  const parsedData: any = Object.fromEntries(formData.entries());
-  const keys = Array.from(formData.keys());
-
-  const uploadFormData = new FormData();
-  for (let i = 0; i < Number(keys.length); i++) {
-    const fieldName = keys[i];
-    const value = formData.get(keys[i]);
-    if (value instanceof Object && value.type) {
-      parsedData[fieldName] = value.name;
-      uploadFormData.append(fieldName, value, value.name);
-    }
-  }
-  try {
-    await uploadFiles(uploadFormData);
-  } catch (e) {
-    return { status: "error", message: "Error uploading file(s)." };
-  }
-
+export async function updateResource(resource: Resource, parsedData: any) {
   const { id, ...data } = parsedData;
 
   const form = resource.form;
@@ -84,9 +46,8 @@ export async function updateResource(resource: Resource, formData: FormData) {
       };
       await prismaQuery(resource.model, "update", args);
       const values = data[field.name]
-        .split(',')
         .filter(Boolean)
-        .map((value: string) => ({ id: Number(value) }));
+        .map((value: number) => ({ id: value }));
       if (values) {
         data[field.name] = { connect: values };
       }

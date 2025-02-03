@@ -31,6 +31,8 @@ import Videojs, { videoJsOptions } from "@/components/video/videojs";
 import { urlToFile } from "@/utils";
 import "react-image-crop/dist/ReactCrop.css";
 
+const uploadDir = process.env.NEXT_PUBLIC_UPLOAD_DIR || '';
+
 export default function Home() {
   const queryClient = useQueryClient();
   const [replyToPost, setReplyToPost] = useState<number>();
@@ -71,14 +73,14 @@ export default function Home() {
     const finalName = mediaUrl.substring(0, dotLastIndex);
     const sources = [
       {
-        src: `${process.env.NEXT_PUBLIC_BASE_URL}/uploaded_files/${mediaUrl}`,
+        src: `${uploadDir}${mediaUrl}`,
         type: "video/mp4",
       },
     ];
     const options = {
       ...videoJsOptions,
       sources,
-      poster: `${process.env.NEXT_PUBLIC_BASE_URL}/uploaded_files/${finalName}_thumb.png`,
+      poster: `$${uploadDir}${finalName}_thumb.png`,
     };
     return options;
   };
@@ -122,7 +124,7 @@ export default function Home() {
               <div className="bg-slate-200 ml-auto">{post.content}</div>
             )}
             {post.contentType === "image" && (
-              <a className="ml-auto" href={`/uploaded_files/${post.mediaUrl}`}>
+              <a className="ml-auto" href={`${uploadDir}${post.mediaUrl}`}>
                 <img
                   src={`/uploaded_files/${post.mediaUrl}`}
                   width={120}
@@ -224,7 +226,7 @@ export default function Home() {
                   <FileUploader
                     uploadText="Send"
                     allowedTypes={["image/png", "image/jpeg", "video/mp4"]}
-                    onFileSelect={onFileSelect}
+                    //onFileSelect={onFileSelect}
                   />
                 </PopoverContent>
               </Popover>

@@ -36,7 +36,7 @@ const CreateOrEditPost = z.object({
   authorId: z.string().min(1, "Author field is required"),
   categories: z.array(z.coerce.number()).optional().default([]),
   tags: z.array(z.coerce.number()).optional().default([]),
-  cover: z.any().optional(),
+  cover: z.any().optional().nullable(),
   //.transform((val) => val ? val : []),
 });
 
