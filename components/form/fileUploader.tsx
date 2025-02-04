@@ -1,13 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Trash2, Upload } from "lucide-react";
-import { generateVideoThumbnail, urlToFile } from "@/utils";
+import { generateVideoThumbnail } from "@/utils";
 
 interface FileUploaderProps {
   name?: any;
-  onChange: (args?: { file: File | null, persistedFile?: string | null }) => void;
-  value?: { file: File | null, persistedFile: string | null };
-  //onFileSelect: (data: { file: File; thumbNail?: string }) => void;
+  onChange: (args?: {
+    file: File | null;
+    persistedFile?: File | null;
+    isDirty: boolean;
+  }) => void;
+  value?: { file: File | null; previousFile: File | null; isDirty: boolean };
   allowedTypes?: string[];
   maxSize?: number;
   uploadText?: string;
@@ -18,23 +21,18 @@ export default function FileUploader(props: FileUploaderProps) {
   const {
     value,
     onChange,
-    //onFileSelect,
     allowedTypes = allowedFileTypes,
     maxSize = 1024 * 1024,
     //uploadText,
   } = props;
   const [file, setFile] = useState<File | null>();
-  //const [savedValue] = useState(value?.persistedFile);
   const imageRef = useRef<HTMLImageElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  console.log('value', value);
-  //console.log('saved', savedValue);
 
   useEffect(() => {
     if (value?.file) {
       setFile(value.file);
-    }    
+    }
   }, [value]);
 
   const handleFileChange = async (
@@ -53,27 +51,20 @@ export default function FileUploader(props: FileUploaderProps) {
       //return;
     }
 
-    setFile(uploadedFile);
-
     if (uploadedFile.type.startsWith("video")) {
       const thumbnail = await generateVideoThumbnail(uploadedFile);
       if (imageRef && imageRef.current) {
         imageRef.current.src = thumbnail;
       }
     }
-    onChange({ ...file, file: uploadedFile });
+    setFile(uploadedFile);
+    onChange({ ...value, file: uploadedFile, isDirty: true });
   };
 
   const removeFile = async () => {
     setFile(null);
-    onChange({ ...file, file: null });
-  }
-
-  /*const selectFile = () => {
-    if (file) {
-      onFileSelect({ file, thumbNail: imageRef.current?.src });
-    }
-  };*/
+    onChange({ ...value, file: null, isDirty: true });
+  };
 
   const isImageFile = (type: string) => {
     return ["image/jpeg", "image/png"].includes(type);
@@ -82,7 +73,6 @@ export default function FileUploader(props: FileUploaderProps) {
   const isVideoFile = (type: string) => {
     return ["video/mp4", "video/avi"].includes(type);
   };
-  console.log('render', file);
 
   return (
     <div>

@@ -1,9 +1,5 @@
-"use client";
-import React, { memo, useEffect, useState } from "react";
+import React, { useState } from "react";
 import { XIcon } from "lucide-react";
-import { Progress } from "../ui/progress";
-import { useUploadForm } from "@/hooks/useUploadForm";
-import { useDialog } from "@/state";
 
 interface FileUploaderProps {
   name?: any;
@@ -12,47 +8,20 @@ interface FileUploaderProps {
   maxSize?: number;
   maxFiles?: number;
   uploadText?: string;
-  open: boolean;
-  onClose: () => void;
 }
 
-export default function FilesUploader(props: FileUploaderProps) {
-  const allowedFileTypes = ["image/png", "image/jpeg", "image/jpg"];
+export default function MediaUploader(props: FileUploaderProps) {
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [filesLimit, setFilesLimit] = useState(false);
 
+  const allowedFileTypes = ["image/png", "image/jpeg", "image/jpg"];
   const {
     onChange,
     allowedTypes = allowedFileTypes,
     maxSize = 1024 * 1024,
     maxFiles = 10,
     //uploadText,
-    open,
-    onClose,
   } = props;
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  //const [test, setTest] = useState('init');
-  const [filesLimit, setFilesLimit] = useState(false);
-  const { uploadForm, progress } = useUploadForm();
-  //const [fileUploaderOpen, setFileUploaderOpen] = useState(true);
-  const {
-    open: openDialog,
-    setTitle,
-    setAction,
-    setContent,
-    isOpen,
-  } = useDialog();
-
-  useEffect(() => {
-    if (open) {
-      setContent(<Content selectedFiles={selectedFiles} />);
-      openDialog();
-    }
-  }, [open]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      onClose();
-    }
-  }, [isOpen]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.prototype.slice.call(event.target.files);
@@ -65,8 +34,8 @@ export default function FilesUploader(props: FileUploaderProps) {
       }
 
       if (file.size > maxSize) {
-        alert("Uploaded file is too big !");
-        return;
+        //alert("Uploaded file is too big !");
+        //return;
       }
       if (uploaded.findIndex((f) => f.name === file.name) === -1) {
         uploaded.push(file);
@@ -82,7 +51,6 @@ export default function FilesUploader(props: FileUploaderProps) {
     if (!limitExceeded) {
       setSelectedFiles(uploaded);
       onChange(uploaded);
-      setContent(<Content selectedFiles={uploaded} />);
     }
   };
 
@@ -95,18 +63,17 @@ export default function FilesUploader(props: FileUploaderProps) {
     }
   };
 
-  const removeFile = (selectedFiles: File[], file: File) => {
+  const removeFile = (file: File) => {
     const files = selectedFiles.filter((f) => f.name !== file.name);
     setSelectedFiles(files);
     onChange(files);
-    setContent(<Content selectedFiles={files} />);
   };
 
   /*const onFileUpload = () => {
     onChange(selectedFiles);
   }*/
 
-  const Content = ({ selectedFiles }: { selectedFiles: File[] }) => (
+  return (
     <div className="border border-gray p-3">
       <div
         className="flex items-center justify-center w-full mb-3"
@@ -151,19 +118,22 @@ export default function FilesUploader(props: FileUploaderProps) {
         </label>
       </div>
       {selectedFiles && selectedFiles.length > 0 && (
-        <div className="flex flex-col gap-3">
-          {selectedFiles.map((file) => (
-            <div className="flex items-center justify-between" key={file.name}>
-              <div>{file.name}</div>
-              <div>
-                <XIcon onClick={() => removeFile(selectedFiles, file)} className="size-4" />
+        <div>
+          <div className="flex flex-wrap mb-2 gap-2">
+            {selectedFiles.map((file) => (
+              <div className="relative max-w-[150px]" key={file.name}>
+                <img
+                  className="object-cover w-full h-full"
+                  src={URL.createObjectURL(file)}
+                />
+                <div className="bg-white rounded-full w-6 h-6 absolute top-3 right-3 flex items-center justify-center">
+                  <XIcon onClick={() => removeFile(file)} className="size-4" />
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
     </div>
   );
-
-  return null;
 }

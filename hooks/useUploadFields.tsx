@@ -13,7 +13,7 @@ export function useUploadFields(form: FormField[], data: any) {
         const path = process.env.NEXT_PUBLIC_UPLOAD_DIR;
         if (value) {
           const file = await urlToFile(path + "/" + value, value, "image/png");
-          data[field.name] = { file, persistedFile: data[field.name] };
+          data[field.name] = { file, previousFile: file, isDirty: false };
         }
       }
       setNewData({ ...data });

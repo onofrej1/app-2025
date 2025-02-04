@@ -126,7 +126,7 @@ export default function Home() {
             {post.contentType === "image" && (
               <a className="ml-auto" href={`${uploadDir}${post.mediaUrl}`}>
                 <img
-                  src={`/uploaded_files/${post.mediaUrl}`}
+                  src={`${uploadDir}${post.mediaUrl}`}
                   width={120}
                   height={120}
                   className="border border-gray-400 cover"

@@ -30,8 +30,8 @@ import Textarea from "./textarea";
 import RichEditor from "./richeditor";
 import { z } from "zod";
 import FileUploader from "./fileUploader";
-import { urlToFile } from "@/utils";
 import { useUploadFields } from "@/hooks/useUploadFields";
+import MediaUploader from "./mediaUploader";
 
 export interface DefaultFormData {
   [key: string]: any;
@@ -75,7 +75,7 @@ export default function Form({
   const { replace } = useRouter();
   //@ts-ignore
   const validationRules = rules[validation] || z.any();
-  
+
   const defaultData = useUploadFields(fields, data);
 
   const {
@@ -95,7 +95,6 @@ export default function Form({
   });
 
   useEffect(() => {
-    console.log('reset', defaultData);
     reset(defaultData);
   }, [defaultData]);
 
@@ -107,7 +106,7 @@ export default function Form({
 
   const submitForm = async (data: any) => {
     if (!action) return;
-    
+
     try {
       const response: actionResult = await action(data);
       if (!response) {
@@ -198,7 +197,6 @@ export default function Form({
                   value={value}
                   errors={errors}
                   onChange={(value: Date | undefined) => {
-                    console.log(value);
                     onChange(value);
                     if (field.onChange) {
                       field.onChange(value);
@@ -282,13 +280,12 @@ export default function Form({
           <Controller
             control={control}
             name={field.name}
-            render={ ({ field: { onChange, value, name } }) => {              
+            render={({ field: { onChange, value, name } }) => {
               return (
                 <FileUploader
                   name={name}
                   onChange={(e) => {
-                    console.log('f', e);
-                    onChange(e);                    
+                    onChange(e);
                     if (field.onChange) {
                       field.onChange(e);
                     }
@@ -296,6 +293,27 @@ export default function Form({
                   value={value}
                   allowedTypes={["image/png", "image/jpeg", "video/mp4"]}
                   //onFileSelect={async (data) => {}}
+                />
+              );
+            }}
+          />
+        )}
+
+        {["mediaUploader"].includes(type) && (
+          <Controller
+            control={control}
+            name={field.name}
+            render={({ field: { onChange, name } }) => {
+              return (
+                <MediaUploader
+                  name={name}
+                  onChange={(e) => {
+                    onChange(e);
+                    if (field.onChange) {
+                      field.onChange(e);
+                    }
+                  }}
+                  allowedTypes={["image/png", "image/jpeg", "video/mp4"]}
                 />
               );
             }}

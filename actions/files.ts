@@ -3,6 +3,8 @@
 import path from "node:path";
 
 const fs = require("fs");
+const fsp = fs.promises;
+
 const defaultUploadDir = process.env.UPLOAD_DIR!;
 
 export async function uploadFiles(formData: FormData, uploadDir?: string) {
@@ -35,15 +37,15 @@ export async function uploadFiles(formData: FormData, uploadDir?: string) {
 
 export async function deleteFile(filePath: string) {
   const file = path.join(process.cwd(), defaultUploadDir, filePath);
-  const fileToDelete = await fs.readFile(file);
+  const fileToDelete = await fsp.readFile(file);
   if (fileToDelete) {
-    fs.unlink(file);
+    await fsp.unlink(file);
   }
   return { success: true };
 }
 
 export async function readDirectory(dir: string) {
-  const files = await fs.readdir(dir, { withFileTypes: true });
+  const files = await fsp.readdir(dir, { withFileTypes: true });
   const data = [];
   for (const file of files) {
     const filePath = path.join(file.path, file.name);

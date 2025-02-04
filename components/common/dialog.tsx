@@ -16,11 +16,11 @@ export default function DialogModal() {
   return (
     <Dialog open={isOpen} onOpenChange={onClose} defaultOpen={isOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {description && (<DialogDescription>
-            Make changes to your profile here. Click save when you're done.
+            {description}
           </DialogDescription>)}
         </DialogHeader>
         {content}

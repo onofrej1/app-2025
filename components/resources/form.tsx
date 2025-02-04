@@ -4,7 +4,7 @@ import Form from "@/components/form/form";
 import { addResource, updateResource } from "@/actions/resources";
 import { resources } from "@/resources";
 import { useFormFields } from "@/hooks/useFormFields";
-import { uploadFiles } from "@/actions/files";
+import { deleteFile, uploadFiles } from "@/actions/files";
 
 interface ResourceFormProps {
   resource: string;
@@ -24,13 +24,17 @@ export default function ResourceForm(props: ResourceFormProps) {
     const uploadData = new FormData();
     for(const field of fields) {
       if (field.type === 'fileUpload') {
-        const file = data[field.name].file as File;
+        const { file, previousFile, isDirty } = data[field.name];
+        if (!isDirty) return;
+        if (previousFile) {
+          await deleteFile(previousFile.name);
+        }
         if (file) {          
           uploadData.append(field.name, file, file.name);
           data[field.name] = file.name;
         } else {
           data[field.name] = null;
-        }        
+        }
       }
     }
 

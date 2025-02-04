@@ -22,14 +22,21 @@ interface BaseFormType {
 }
 
 export interface InputType extends BaseFormType {
-  type: "text" | "textarea" | "number" | "email" | "color" | "hidden" | "password";
+  type:
+    | "text"
+    | "textarea"
+    | "number"
+    | "email"
+    | "color"
+    | "hidden"
+    | "password";
   color?: string;
   min?: number;
   max?: number;
 }
 
 export interface RichtextType extends BaseFormType {
-  type: "richtext";  
+  type: "richtext";
 }
 
 export interface TextAreaType extends BaseFormType {
@@ -75,6 +82,15 @@ export interface FileUploadType extends BaseFormType {
   onFileSelect?: (data: { file: File; thumbNail?: string }) => void;
 }
 
+export interface MediaUploaderType extends BaseFormType {
+  type: "mediaUploader";
+  allowedTypes?: string[];
+  maxSize?: number;
+  maxFiles?: number;
+  uploadText?: string;
+  onFileSelect?: (data: { file: File; thumbNail?: string }) => void;
+}
+
 type FormField =
   | InputType
   | TextAreaType
@@ -84,7 +100,8 @@ type FormField =
   | DatePickerType
   | MultiSelectType
   | RichtextType
-  | FileUploadType;
+  | FileUploadType
+  | MediaUploaderType;
 
 /*interface DataFilter {
   name: string;
