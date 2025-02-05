@@ -1,18 +1,15 @@
 "use client";
 import { contactEmail } from "@/actions/emails";
-import FilesUploader from "@/components/form/filesUploader";
+import UploadDialog, { useUploadDialogState } from "@/components/common/uploadDialog";
 import Form from "@/components/form/form";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Progress } from "@/components/ui/progress";
 import { FormField } from "@/resources/resources.types";
 import { ContactForm } from "@/validation";
 import React, { useState } from "react";
 
 export default function Contact() {
   const [files, setFiles] = useState<File[]>();
-  const [open, setOpen] = useState(false);
-  const [fileUploaderOpen, setFileUploaderOpen] = useState(false);
+  const { isOpen, toggleModal } = useUploadDialogState();
 
   const fields: FormField[] = [
     { type: "text", name: "name", label: "Name" },
@@ -31,8 +28,6 @@ export default function Contact() {
     //await contactEmail(data.email, data.name, data.message);
   };
 
-  console.log("f", files);
-
   return (
     <div className="p-4">
       <Form fields={fields} validation={"ContactForm"} action={sendForm}>
@@ -49,8 +44,8 @@ export default function Contact() {
         )}
       </Form>
       {files?.map(f => <div key={f.name}>{f.name}</div>)}
-      <Button onClick={() => setOpen(true)}>Open dialog</Button>
-      <FilesUploader open={open} onClose={() => { console.log('ccc'); setOpen(false) }} onChange={setFiles} />
+      <Button onClick={() => toggleModal()}>Choose files</Button>
+      <UploadDialog isOpen={isOpen} toggleModal={toggleModal} onChange={setFiles} />
     </div>
   );
 }
