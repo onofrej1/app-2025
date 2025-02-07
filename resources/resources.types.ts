@@ -1,4 +1,5 @@
 import { FormRender } from "@/components/form/form";
+import { RepeaterRenderFunc } from "@/components/form/repeater";
 import { TableHeader } from "@/components/table/table";
 import { FormSchema } from "@/validation";
 
@@ -91,6 +92,12 @@ export interface MediaUploaderType extends BaseFormType {
   onFileSelect?: (data: { file: File; thumbNail?: string }) => void;
 }
 
+export interface RepeaterType extends BaseFormType {
+  type: "repeater";
+  fields: FormField[];
+  render?: RepeaterRenderFunc;
+}
+
 type FormField =
   | InputType
   | TextAreaType
@@ -101,7 +108,8 @@ type FormField =
   | MultiSelectType
   | RichtextType
   | FileUploadType
-  | MediaUploaderType;
+  | MediaUploaderType
+  | RepeaterType;
 
 /*interface DataFilter {
   name: string;

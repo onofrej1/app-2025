@@ -13,6 +13,7 @@ import {
   FormField,
   MultiSelectOption,
   MultiSelectType,
+  RepeaterType,
   SelectType,
   TextAreaType,
 } from "@/resources/resources.types";
@@ -32,6 +33,7 @@ import { z } from "zod";
 import FileUploader from "./fileUploader";
 import { useUploadFields } from "@/hooks/useUploadFields";
 import MediaUploader from "./mediaUploader";
+import RepeaterInput from "./repeater";
 
 export interface DefaultFormData {
   [key: string]: any;
@@ -80,6 +82,7 @@ export default function Form({
 
   const {
     register,
+    unregister,
     formState,
     setError,
     control,
@@ -317,6 +320,28 @@ export default function Form({
                 />
               );
             }}
+          />
+        )}
+
+        {["repeater"].includes(type) && (
+          <Controller
+            control={control}
+            name={field.name}
+            render={({ field: { onChange, value, name } }) => (
+              <RepeaterInput
+                type={field.type}
+                name={name}
+                onChange={onChange}
+                unregister={unregister}
+                value={value}
+                fields={(field as RepeaterType).fields}
+                label={label}
+                errors={errors}
+                render={(field as RepeaterType).render}
+                renderField={renderField}
+                control={control}
+              />
+            )}
           />
         )}
       </>
